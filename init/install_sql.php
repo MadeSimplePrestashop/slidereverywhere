@@ -1,4 +1,12 @@
 <?php
+/**
+ * Module Sliders Everywhere 
+ * 
+ * @author 	kuzmany.biz
+ * @copyright 	kuzmany.biz/prestashop
+ * @license 	kuzmany.biz/prestashop
+ * Reminder: You own a single production license. It would only be installed on one online store (or multistore)
+ */
 
 $sql = array();
 $sql[] = '
@@ -8,6 +16,14 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere` (
   `options` TEXT,
   PRIMARY KEY (`id_sliderseverywhere`)
 ) ENGINE = ' . _MYSQL_ENGINE_ . '  ';
+
+$sql[] = '
+CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_hook` (
+  `id_sliderseverywhere` int(11) NOT NULL ,
+  `hook` varchar(20),
+  PRIMARY KEY (`id_sliderseverywhere`)
+) ENGINE = ' . _MYSQL_ENGINE_ . '  ';
+
 
 $sql[] = ''
         . 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_shop` (
@@ -35,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_slides_lang` (
   `id_lang` int(3) NOT NULL,
   `caption` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL,
-  `video` varchar(255) NOT NULL,
+  `video` TEXT NOT NULL,
   PRIMARY KEY (`id_sliderseverywhere_slides`,id_lang)
 ) ENGINE = ' . _MYSQL_ENGINE_ . '  ';
 

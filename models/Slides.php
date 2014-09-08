@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Module Extended Order confirmation email 
  * 
@@ -136,8 +135,11 @@ class Slides extends ObjectModel {
         return (Db::getInstance()->getValue($sql));
     }
 
-    public static function get_image_path($id_dir) {
-        return dirname(__FILE__) . '/../img/' . $id_dir . '/';
+    public static function get_image_path($id_dir = null) {
+        if ($id_dir == null)
+            return dirname(__FILE__) . '/../img/';
+        else
+            return dirname(__FILE__) . '/../img/' . $id_dir . '/';
     }
 
     public function handle_image() {

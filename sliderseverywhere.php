@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Module Slider Everywhere 
+ * Module Sliders Everywhere 
  * 
  * @author 	kuzmany.biz
  * @copyright 	kuzmany.biz/prestashop
@@ -16,6 +16,10 @@ require_once(dirname(__FILE__) . '/models/Slides.php');
 
 class sliderseverywhere extends Module {
 
+    public $hooks = array('displayTop', 'displayHome', 'displayLeftColumn', 'displayLeftColumnProduct',
+        'displayRightColumn', 'displayRightColumnProduct', 'displayFooter', 'displayFooterProduct',
+        'displayTopColumn', 'displayHomeTabContent', 'displayProductTab', 'displayShoppingCartFooter', 'displayBanner');
+
     public function __construct() {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
@@ -28,16 +32,15 @@ class sliderseverywhere extends Module {
 
         $this->displayName = $this->l('Sliders Everywhere');
         $this->description = $this->l('Make sliders easy and put it whereever you want.');
-
-        //Shop::addTableAssociation(EOCEPayment::$definition['table'], array('type' => 'shop'));
-        //Shop::addTableAssociation(EOCEShipping::$definition['table'], array('type' => 'shop'));
     }
 
     public function install() {
 
-        if (!parent::install() || !$this->registerHook('displayHeader')
-        )
+        if (!parent::install() || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
             return false;
+
+        foreach ($this->hooks as $hook)
+            $this->registerHook($hook);
 
         include_once(dirname(__FILE__) . '/init/install_sql.php');
 
@@ -60,9 +63,12 @@ class sliderseverywhere extends Module {
     }
 
     public function uninstall() {
-        if (!parent::uninstall() || !$this->unregisterHook('displayHeader')
+        if (!parent::uninstall() || !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
         )
             return false;
+
+        foreach ($this->hooks as $hook)
+            $this->unregisterHook($hook);
 
         include_once(dirname(__FILE__) . '/init/uninstall_sql.php');
 
@@ -74,11 +80,6 @@ class sliderseverywhere extends Module {
 
     public function getContent() {
         Tools::redirectAdmin('index.php?controller=AdminSliders&token=' . Tools::getAdminTokenLite('AdminSliders'));
-    }
-
-    // set new carrier id
-    public function hookActionCarrierUpdate($params) {
-        
     }
 
     private function installAdminTab($name, $className, $parent) {
@@ -96,13 +97,45 @@ class sliderseverywhere extends Module {
         $tab->delete();
     }
 
+    public function hookDisplayBackOfficeHeader($params) {
+        $this->hookHeader($params);
+    }
+
     public function hookHeader($params) {
         $this->context->controller->addCSS($this->getPathUri() . 'views/css/jquery.bxslider.css');
         $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery.fitvids.js');
+        $this->context->controller->addJqueryPlugin(array('bxslider'));
         if (!isset($this->context->smarty->registered_plugins['function'][$this->name]))
-            $this->context->smarty->registerPlugin('function', $this->name, array('sliders', $this->name));
+            $this->context->smarty->registerPlugin('function', $this->name, array('sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
     }
 
+    private function load_hook_sliders($hook_func) {
+        $hook = lcfirst(str_replace('hook', '', $hook_func));
+        $ids = Sliders::get_ids_by_hook($hook);
+        if (!$ids)
+            return;
+        $html = '';
+        foreach ($ids as $slider)
+            $html .= Sliders::get_slider(array('id' => $slider[Sliders::$definition['primary']]));
+        
+        return $html;
+    }
+
+    public function hookDisplayTop($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayHome($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayLeftColumn($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    //'displayTop','displayHome','displayLeftColumn','displayLeftColumnProduct',
+    //  'displayRightColumn','displayRightColumnProduct','displayFooter','displayFooterProduct',
+    //'displayTopColumn','displayHomeTabContent','displayProductTab','displayShoppingCartFooter','displayBanner'
 }

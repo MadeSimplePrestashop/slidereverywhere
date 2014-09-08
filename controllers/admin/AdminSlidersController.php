@@ -59,7 +59,7 @@ class AdminSlidersController extends ModuleAdminController {
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
-                'title' => $this->l('Add new slider'),
+                'title' => $this->l('Slider'),
                 'icon' => 'icon-cogs'
             ),
             'input' => array(
@@ -407,9 +407,9 @@ class AdminSlidersController extends ModuleAdminController {
                 ),
                 array(
                     'type' => 'select',
-                    'label' => $this->l('Easing (useCSS disabled or video at slider)'),
+                    'label' => $this->l('Easing'),
                     'name' => 'easing_jquery',
-                    'desc' => $this->l('The type of "easing" to use during transitions. '),
+                    'desc' => $this->l('Only If useCSS is disabled or video is in slider'),
                     'options' => array(
                         'query' =>
                         $easing
@@ -423,7 +423,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'select',
                     'label' => $this->l('Easing (useCSS enabled)'),
                     'name' => 'easing_css',
-                    'desc' => $this->l('The type of "easing" to use during transitions. '),
+                    'desc' => $this->l('Only If useCSS is enabled.'),
                     'options' => array(
                         'query' => array(
                             array(
@@ -471,7 +471,29 @@ class AdminSlidersController extends ModuleAdminController {
                 'name' => 'submit',
             )
         );
-
+        $active_hooks = array();
+        if ($obj->id) {
+            $hooks = Sliders::get_hooks_by_id($obj->id);
+            foreach ($hooks as $hook)
+                $active_hooks[] = $hook['hook'];
+        }
+        $query = array();
+        foreach ($this->module->hooks as $hook)
+            $query[]['name'] = $hook;
+        $this->fields_form['input'][] = array(
+            'type' => 'select',
+            'multiple' => true,
+            'label' => $this->l('Hooks'),
+            'name' => 'hooks[]',
+            'class' => 'chosen',
+            'hint' => $this->l('It\'s optional. Choose position.'),
+            'options' => array(
+                'query' => $query,
+                'id' => 'name',
+                'name' => 'name'
+            )
+            , 'default_value' => $active_hooks
+        );
 
         if (Shop::isFeatureActive()) {
             $this->fields_form['input'][] = array(
@@ -482,15 +504,37 @@ class AdminSlidersController extends ModuleAdminController {
         }
 
         $this->page_header_toolbar_btn['save'] = array(
-            'href' => 'javascript:$("#' . $this->table . '_form").submit();',
+            'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();',
             'desc' => $this->l('Save')
         );
-        $this->page_header_toolbar_btn['save-and-preview'] = array(
-            'short' => 'SaveAndStay',
-            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitAddformAndPreview");$("#' . $this->table . '_form").submit();',
-            'desc' => $this->l('Save and preview'),
-            'force_desc' => true,
+        if ($obj->id) {
+            $this->page_header_toolbar_btn['save-and-preview'] = array(
+                'short' => 'SaveAndStay',
+                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
+                'desc' => $this->l('Save and preview'),
+                'force_desc' => true,
+            );
+        } else {
+            $this->page_header_toolbar_btn['save-and-preview'] = array(
+                'short' => 'SaveAndStay',
+                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
+                'desc' => $this->l('Save and add slides'),
+                'force_desc' => true,
+            );
+        }
+        $par = Sliders::$definition['primary'];
+        $this->page_header_toolbar_btn['new'] = array(
+            'href' => $this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par,
+            'desc' => $this->l('Go to slides'),
+            'icon' => 'process-icon-configure'
         );
+        $this->page_header_toolbar_btn['edit'] = array(
+            'href' => self::$currentIndex . '&token=' . $this->token,
+            'desc' => $this->l('Return to sliders list'),
+            'icon' => 'process-icon-cancel'
+        );
+
+        $this->tpl_list_vars['title'] = 'test';
 
         return parent::renderForm();
     }
@@ -519,12 +563,12 @@ class AdminSlidersController extends ModuleAdminController {
                 'callback' => 'getTag'
             ),
             'options' => array(
-                'title' => $this->l('Test'),
+                'title' => $this->l('Slides'),
                 'type' => 'text',
                 'orderby' =>
                 false,
                 'search' => false,
-                'callback' => 'getTest'
+                'callback' => 'getSlides'
             )
         );
 
@@ -538,76 +582,16 @@ class AdminSlidersController extends ModuleAdminController {
         return parent::renderList();
     }
 
-    public function renderPageHeaderToolbar() {
-        $id_form = (int) Tools::getValue('id_form');
-
-        if ($this->display == 'list') {
-            $this->page_header_toolbar_btn['new'] = array(
-                'href' => self::$currentIndex . '&add' . $this->table . '&token=' . $this->token,
-                'desc' => $this->l('Add new form'),
-                'icon' => 'process-icon-new'
-            );
-            if (FormClass::hasForms($this->context->shop->id))
-                $this->page_header_toolbar_btn['newField'] = array(
-                    'href' => self::$currentIndex . '&addform_field&id_form=' . (int) $id_form . '&token=' . $this->token,
-                    'desc' => $this->l('Add new Field'),
-                    'icon' => 'process-icon-edit'
-                );
-        } else if ($this->display == 'add') {
-            $this->page_header_toolbar_btn['save'] = array(
-                'href' => 'javascript:$("#' . $this->table . '_form").submit();',
-                'desc' => $this->l('Save')
-            );
-            $this->page_header_toolbar_btn['save-and-stay'] = array(
-                'short' => 'SaveAndStay',
-                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitAddformAndStay");$("#' . $this->table . '_form").submit();',
-                'desc' => $this->l('Save and stay'),
-                'force_desc' => true,
-            );
-        } else if ($this->display == 'edit') {
-            $this->page_header_toolbar_btn['duplicate'] = array(
-                'href' => self::$currentIndex . '&id_form=' . Tools::getValue('id_form') . '&duplicateform&token=' . $this->token,
-                'desc' => $this->l('Duplicate'),
-                'class' => 'toolbar-duplicate'
-            );
-            $this->page_header_toolbar_btn['save'] = array(
-                'href' => 'javascript:$("#' . $this->table . '_form").submit();',
-                'desc' => $this->l('Save')
-            );
-            $this->page_header_toolbar_btn ['save-and-stay'] = array(
-                'short' => 'SaveAndStay',
-                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitAddformAndStay");$("#' . $this->table . '_form").submit();', 'desc' => $this->l('Save and stay'),
-                'force_desc' => true,
-            );
-        }
-        $this->page_header_toolbar_title = implode(' ' . Configuration::get('PS_NAVIGATION_PIPE') . ' ', $this->toolbar_title);
-
-        if (is_array($this->page_header_toolbar_btn) && $this->page_header_toolbar_btn instanceof Traversable || trim($this->page_header_toolbar_title) != '')
-            $this->show_page_header_toolbar = true;
-
-        $template = $this->context->smarty->createTemplate(
-                $this->context->smarty->getTemplateDir(0) . DIRECTORY_SEPARATOR
-                . 'page_header_toolbar.tpl', $this->context->smarty);
-
-        $this->context->smarty->assign(array(
-            'show_page_header_toolbar' => $this->show_page_header_toolbar
-            ,
-            'title' => $this->page_header_toolbar_title,
-            'toolbar_btn' => $this->page_header_toolbar_btn,
-            'page_header_toolbar_btn' => $this->page_header_toolbar_btn,
-            'page_header_toolbar_title' => $this->toolbar_title,
-        ));
-
-        return $template->fetch();
+//render image at renderList
+    public function getSlides($echo, $row) {
+        $parms = array();
+        $parms[Sliders::$definition['primary']] = $row[Sliders::$definition['primary']];
+        $slides = Slides::getAll($parms);
+        return count($slides);
     }
 
-    //render image at renderList
-    public function getTest($echo, $row) {
-        return '{sliderseverywhere alias=\'' . $row['alias'] . '\'}';
-    }
-
-    public function getTag($echo, $row) {
-        return '{sliderseverywhere alias=\'' . $row['alias'] . '\'}';
+    public function getTag($echo) {
+        return '{sliderseverywhere alias=\'' . $echo . '\'}';
     }
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Module Sliders Everywhere
  * 
@@ -59,7 +58,7 @@ class AdminSlidesController extends ModuleAdminController {
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
-                'title' => $this->l('Add new slide'),
+                'title' => $this->l('Slide'),
                 'icon' => 'icon-cogs'
             ),
             'input' => array(
@@ -75,11 +74,11 @@ class AdminSlidesController extends ModuleAdminController {
                     'image' => $image ? ImageManager::thumbnail($image, 'thumb_detail_' . $obj->image, 200) : ''
                 ),
                 array(
-                    'type' => 'text',
-                    'label' => $this->l('Video'),
-                    'desc' => $this->l('Instead of image, you can add video'),
+                    'type' => 'textarea',
                     'lang' => true,
-                    'name' => 'video'
+                    'label' => $this->l('Embeded video'),
+                    'desc' => $this->l('Instead of image, you can add embeded video. Support for YouTube and Vimeo'),
+                    'name' => 'video',
                 ),
                 array(
                     'type' => 'text',
@@ -121,8 +120,7 @@ class AdminSlidesController extends ModuleAdminController {
                         ),
                         'id' => 'id',
                         'name' => 'name',
-                    ),
-                    'default_value' => isset($options->target) ? $options->target : ''
+                    )
                 ),
                 array(
                     'type' => 'switch',
@@ -198,25 +196,47 @@ class AdminSlidesController extends ModuleAdminController {
                 'search' => false
             )
         );
+        
         $this->_join = 'LEFT JOIN ' . _DB_PREFIX_ . Sliders::$definition['table'] . ' AS c ON a.`' . Sliders::$definition['primary'] . '` = c.`' . Sliders::$definition['primary'] . '`';
         $this->_where = 'AND a.`' . Sliders::$definition['primary'] . '` = ' . (int) Tools::getValue(Sliders::$definition['primary']);
         $this->_orderBy = 'position';
 
-        $this->toolbar_btn['back'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSliders', true),
-            'desc' => $this->l('Back to the sliders')
-        );
         $this->toolbar_btn['new'] = array(
             'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
             'desc' => $this->l('Add slide')
         );
 
         $this->page_header_toolbar_btn['new'] = array(
-            'href' => self::$currentIndex . '&add' . $this->table . '&token=' . $this->token,
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
             'desc' => $this->l('Add new slide'),
             'icon' => 'process-icon-new'
         );
+        $this->page_header_toolbar_btn['newField'] = array(
+            'href' => $this->context->link->getAdminLink('AdminSliders', true) . '&update' . Sliders::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
+            'icon' => 'process-icon-edit',
+            'desc' => $this->l('Edit slider'),
+        );
+        $this->page_header_toolbar_btn['edit'] = array(
+            'href' => 'javascript:$("#previewslider").toggle(); slidereverywhere.reloadSlider();',
+            'icon' => 'process-icon-preview',
+            'desc' => $this->l('Preview toggle'),
+        );
+        $this->page_header_toolbar_btn['save'] = array(
+            'href' => $this->context->link->getAdminLink('AdminSliders', true),
+            'icon' => 'process-icon-back',
+            'desc' => $this->l('Back to sliders list'),
+        );
 
+        $this->content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(Sliders::$definition['primary']))) . '</div>';
+        $this->content.= '<script>
+         $(document).ready(function(){
+         if(location.hash == "#preview")
+            $("#previewslider").show(); slidereverywhere.reloadSlider();
+        })
+                </script>';
+        // set new title
+        $slider = new Sliders(Tools::getValue(Sliders::$definition['primary']));
+        $this->tpl_list_vars['title'] = $this->l('Slides of ') . $slider->alias;
         return parent::renderList();
     }
 
@@ -230,7 +250,7 @@ class AdminSlidesController extends ModuleAdminController {
             if (is_array($positions)) {
                 foreach ($positions as $key => $value) {
                     $pos = explode('_', $value);
-                    if ((isset($pos[1]) && isset($pos[2])) && ($pos[2] == $id_to_move)) {
+                    if ((isset($pos [1]) && isset($pos[2])) && ($pos [2] == $id_to_move)) {
                         $position = $key;
                         break;
                     }
@@ -246,12 +266,12 @@ class AdminSlidesController extends ModuleAdminController {
         }
     }
 
-    //render image at renderList
+//render image at renderList
     public function getImage($echo, $row) {
         if (isset($row['image']) && $row['image'])
-            return ImageManager::thumbnail($this->get_image_path($row[Sliders::$definition['primary']]) . $row['image'], 'thumb_' . $row['image'], 50);
+            return ImageManager::thumbnail($this->get_image_path($row[Sliders::$definition['primary']]) . $echo, 'thumb_' . $echo, 50);
         elseif (isset($row['video']) && $row['video'])
-            return $row['video'];
+            return $this->l('video');
     }
 
 }
