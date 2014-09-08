@@ -78,24 +78,12 @@ class Sliders extends ObjectModel {
             }
         }
         $this->add_hooks($this->id, Tools::getValue('hooks'));
-
-        if (Tools::getIsset('submitPreview'))
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . self::$definition['primary'] . '=' . $this->id . '#preview');
-        else
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
     }
 
     public function add($autodate = true, $null_values = false) {
-        
         $this->options = $this->transform_options();
         parent::add($autodate, $null_values);
-
         $this->add_hooks($this->id, Tools::getValue('hooks'));
-
-        if (Tools::getIsset('submitPreview'))
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . self::$definition['primary'] . '=' . $this->id . '#preview');
-        else
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
     }
 
     public static function findIdByAlias($alias) {
@@ -158,7 +146,6 @@ class Sliders extends ObjectModel {
                 $slide_obj->delete();
             }
         }
-        Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
     }
 
 // smarty
@@ -199,6 +186,12 @@ class Sliders extends ObjectModel {
     /*
      * Hooks
      */
+
+    public static function load_all_hooks() {
+        $sql = 'SELECT *
+			FROM ' . _DB_PREFIX_ . self::$definition['table'] . '_hook';
+        return (Db::getInstance()->executeS($sql));
+    }
 
     public static function get_ids_by_hook($hook) {
         $sql = 'SELECT ' . self::$definition['primary'] . '

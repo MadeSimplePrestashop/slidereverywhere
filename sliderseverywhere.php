@@ -111,18 +111,49 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
     }
 
+    /**
+     * Function with cache mechanism, prevent to many sql request
+     * @param type $hook
+     * @return type
+     */
+    private function find_ids_from_hooks($hook) {
+        $hooks = Cache::retrieve(__CLASS__ . __FUNCTION__);
+        if ($hooks == -1)
+            return array();
+        if (!$hooks) {
+            $hooks = Sliders::load_all_hooks();
+            if ($hooks)
+                Cache::store(__CLASS__ . __FUNCTION__, $hooks);
+            else
+                Cache::store(__CLASS__ . __FUNCTION__, -1);
+        }
+        
+        $ids = array();
+        foreach ($hooks as $h)
+            if ($hook == $h['hook'])
+                $ids[] = $h[Sliders::$definition['primary']];
+
+        return $ids;
+    }
+
+    /**
+     * Universal function for loading sliders in hook
+     * @param type $hook_func
+     * @return type
+     */
     private function load_hook_sliders($hook_func) {
         $hook = lcfirst(str_replace('hook', '', $hook_func));
-        $ids = Sliders::get_ids_by_hook($hook);
+        $ids = $this->find_ids_from_hooks($hook);
         if (!$ids)
             return;
         $html = '';
         foreach ($ids as $slider)
-            $html .= Sliders::get_slider(array('id' => $slider[Sliders::$definition['primary']]));
-        
+            $html .= Sliders::get_slider(array('id' => $slider));
+
         return $html;
     }
 
+    // hooks
     public function hookDisplayTop($params) {
         return $this->load_hook_sliders(__FUNCTION__);
     }
@@ -135,7 +166,44 @@ class sliderseverywhere extends Module {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    //'displayTop','displayHome','displayLeftColumn','displayLeftColumnProduct',
-    //  'displayRightColumn','displayRightColumnProduct','displayFooter','displayFooterProduct',
-    //'displayTopColumn','displayHomeTabContent','displayProductTab','displayShoppingCartFooter','displayBanner'
+    public function hookDisplayLeftColumnProduct($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayRightColumn($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayRightColumnProduct($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayFooter($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayFooterProduct($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayTopColumn($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayHomeTabContent($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayProductTab($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayShoppingCartFooter($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function hookDisplayBanner($params) {
+        return $this->load_hook_sliders(__FUNCTION__);
+    }
+   
 }

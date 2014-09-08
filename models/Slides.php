@@ -63,18 +63,15 @@ class Slides extends ObjectModel {
     }
 
     public function update($null_values = false) {
-        $par = Sliders::$definition['primary'];
         $this->handle_image();
         parent::update();
-        Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $this->$par);
     }
 
     public function add($autodate = true, $null_values = false) {
         $par = Sliders::$definition['primary'];
-        $this->position = (self::getLastPosition($this->$par)) + 1;
+            $this->position = (self::getLastPosition($this->$par)) + 1;
         $this->handle_image();
         parent::add($autodate, $null_values);
-        Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $this->$par);
     }
 
     public function delete() {
@@ -146,7 +143,7 @@ class Slides extends ObjectModel {
         $par = Sliders::$definition['primary'];
         if (isset($_FILES['image']) && isset($_FILES['image']['tmp_name']) && !empty($_FILES['image']['tmp_name'])) {
             //dir 
-            $dir = self::get_image_path($this->$par);
+            $dir = self::get_image_path(Tools::getValue(Sliders::$definition['primary']));
             $file_name = $_FILES['image']['name'];
             //$ext = substr($_FILES['image']['name'], strrpos($_FILES['image']['name'], '.') + 1);
             //$file_name = md5($_FILES['image']['name']) . '.' . $ext;

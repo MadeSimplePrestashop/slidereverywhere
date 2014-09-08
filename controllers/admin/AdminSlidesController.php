@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Module Sliders Everywhere
  * 
@@ -42,7 +43,26 @@ class AdminSlidesController extends ModuleAdminController {
     }
 
     public function postProcess() {
+        $obj = $this->loadObject(true);
+//reload object is bulk action
+        if (Tools::getIsset('submitFilter' . $this->table) && Tools::getValue('submitFilter' . $this->table) == 0) {
+            $checked = Tools::getValue($this->table . 'Box');
+            if (isset($checked[0]))
+                $obj = new Slides($checked[0]);
+        }
+        $par = Sliders::$definition['primary'];
+
+
+
         parent::postProcess();
+        if (Tools::getIsset('submitFilter' . $this->table)) {
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+        } elseif (Tools::getIsset('status' . $this->table))
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+        elseif (Tools::getIsset('delete' . $this->table))
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+        elseif (Tools::isSubmit('submitAdd' . $this->table))
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']));
     }
 
     public function renderForm() {
@@ -106,6 +126,10 @@ class AdminSlidesController extends ModuleAdminController {
                                 'name' => $this->l('None')
                             ),
                             array(
+                                'id' => '_blank',
+                                'name' => $this->l('_blank')
+                            ),
+                            array(
                                 'id' => '_parent',
                                 'name' => $this->l('_parent')
                             ),
@@ -156,7 +180,7 @@ class AdminSlidesController extends ModuleAdminController {
             );
         }
 
-        //back button
+//back button
         $this->content.= '<script>
          $(document).ready(function(){
             $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back();})
@@ -196,7 +220,7 @@ class AdminSlidesController extends ModuleAdminController {
                 'search' => false
             )
         );
-        
+
         $this->_join = 'LEFT JOIN ' . _DB_PREFIX_ . Sliders::$definition['table'] . ' AS c ON a.`' . Sliders::$definition['primary'] . '` = c.`' . Sliders::$definition['primary'] . '`';
         $this->_where = 'AND a.`' . Sliders::$definition['primary'] . '` = ' . (int) Tools::getValue(Sliders::$definition['primary']);
         $this->_orderBy = 'position';
@@ -234,7 +258,7 @@ class AdminSlidesController extends ModuleAdminController {
             $("#previewslider").show(); slidereverywhere.reloadSlider();
         })
                 </script>';
-        // set new title
+// set new title
         $slider = new Sliders(Tools::getValue(Sliders::$definition['primary']));
         $this->tpl_list_vars['title'] = $this->l('Slides of ') . $slider->alias;
         return parent::renderList();

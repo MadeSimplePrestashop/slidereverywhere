@@ -39,6 +39,23 @@ class AdminSlidersController extends ModuleAdminController {
         parent::initContent();
     }
 
+    public function postProcess() {
+        $obj = $this->loadObject(true);
+        $par = Sliders::$definition['primary'];
+
+        parent::postProcess();
+
+        if (Tools::getIsset('delete' . $this->table))
+            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
+        elseif (Tools::isSubmit('submitAdd' . $this->table))
+            if (Tools::getIsset('submitPreview'))
+                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par . '#preview');
+            elseif (Tools::getIsset('submitStay'))
+                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par . '&update' . $this->table);
+            else
+                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
+    }
+
     public function renderForm() {
 
         $obj = $this->loadObject(true);
@@ -262,7 +279,7 @@ class AdminSlidersController extends ModuleAdminController {
                             'label' => $this->l('Disabled')
                         )
                     ),
-                    'default_value' => isset($options->pager) ? $options->pager : ''
+                    'default_value' => isset($options->pager) ? $options->pager : 1
                 ),
                 array(
                     'type' => 'select',
@@ -507,6 +524,12 @@ class AdminSlidersController extends ModuleAdminController {
             'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();',
             'desc' => $this->l('Save')
         );
+        $this->page_header_toolbar_btn['save-and-stay'] = array(
+            'short' => 'SaveAndStay',
+            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitStay");$("#' . $this->table . '_form button:submit").click();',
+            'desc' => $this->l('Save and stay'),
+            'force_desc' => true,
+        );
         if ($obj->id) {
             $this->page_header_toolbar_btn['save-and-preview'] = array(
                 'short' => 'SaveAndStay',
@@ -522,6 +545,8 @@ class AdminSlidersController extends ModuleAdminController {
                 'force_desc' => true,
             );
         }
+
+
         $par = Sliders::$definition['primary'];
         $this->page_header_toolbar_btn['new'] = array(
             'href' => $this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par,

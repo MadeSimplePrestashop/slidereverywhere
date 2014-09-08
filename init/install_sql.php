@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere` (
 $sql[] = '
 CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_hook` (
   `id_sliderseverywhere` int(11) NOT NULL ,
-  `hook` varchar(20),
-  PRIMARY KEY (`id_sliderseverywhere`)
+  `hook` varchar(40),
+  KEY (`id_sliderseverywhere`)
 ) ENGINE = ' . _MYSQL_ENGINE_ . '  ';
 
 
