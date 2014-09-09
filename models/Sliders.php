@@ -54,7 +54,7 @@ class Sliders extends ObjectModel {
     private function transform_options() {
         $parms = $_POST;
         unset($parms[self::$definition['primary']]);
-        foreach (self::$definition['fields'] as $key => $field)
+        foreach (array_keys(self::$definition['fields']) as $key)
             unset($parms[$key]);
         return Tools::jsonEncode($parms);
     }
@@ -73,7 +73,7 @@ class Sliders extends ObjectModel {
         $slides = Slides::getAll($parms);
         $source_path = Slides::get_image_path($this->id);
         if ($slides) {
-            foreach ($slides as $key => $slide) {
+            foreach ($slides as $slide) {
                 echo ImageManager::thumbnail($source_path . $slide['image'], '/pager_' . $slide['image'], Tools::getValue('thumbnailWidth'), 'jpg', true, true);
             }
         }

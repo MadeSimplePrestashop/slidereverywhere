@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Module Extended Order confirmation email 
  * 
@@ -18,8 +19,10 @@ class Slides extends ObjectModel {
     public $video;
     public $url;
     public $active;
+    private static $parent_definition;
 
     public function __construct($id = null, $id_lang = null, $id_shop = null) {
+        self::$parent_definition = Sliders::$definition; // prevent php 5.3 bug
         self::_init();
         parent::__construct($id, $id_lang, $id_shop);
     }
@@ -68,23 +71,24 @@ class Slides extends ObjectModel {
     }
 
     public function add($autodate = true, $null_values = false) {
-        $par = Sliders::$definition['primary'];
-            $this->position = (self::getLastPosition($this->$par)) + 1;
+        $par = self::$parent_definition['primary'];
+        $last_position = self::getLastPosition($this->$par);
+        $this->position = $last_position + 1;
         $this->handle_image();
         parent::add($autodate, $null_values);
     }
 
     public function delete() {
         parent::delete();
-        $par = Sliders::$definition['primary'];
+        $par = self::$parent_definition['primary'];
         $this->cleanPositions($this->$par);
         @unlink(self::get_image_path($this->$par) . $this->image);
     }
 
     public function updatePosition($way, $position) {
-        $sql = 'SELECT cp.`' . self::$definition['primary'] . '`, cp.`position`, cp.`' . Sliders::$definition['primary'] . '` 
+        $sql = 'SELECT cp.`' . self::$definition['primary'] . '`, cp.`position`, cp.`' . self::$parent_definition['primary'] . '` 
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '` cp 
-			WHERE cp.`' . Sliders::$definition['primary'] . '` = ' . (int) $this->id_sliderseverywhere . ' AND cp.' . self::$definition['primary'] . ' = ' . (int) $this->id . ' 
+			WHERE cp.`' . self::$parent_definition['primary'] . '` = ' . (int) $this->id_sliderseverywhere . ' AND cp.' . self::$definition['primary'] . ' = ' . (int) $this->id . ' 
 			ORDER BY cp.`position` ASC';
         if (!$res = Db::getInstance()->executeS($sql))
             return false;
@@ -100,10 +104,10 @@ class Slides extends ObjectModel {
 				SET `position`= `position` ' . ($way ? '- 1' : '+ 1') . '
 				WHERE `position`
 					' . ($way ? '> ' . (int) $moved_field['position'] . ' AND `position` <= ' . (int) $position : '< ' . (int) $moved_field['position'] . ' AND `position` >= ' . (int) $position) . '
-					AND `' . Sliders::$definition['primary'] . '`=' . (int) $this->id_sliderseverywhere . ';') && Db::getInstance()->execute('UPDATE `' . _DB_PREFIX_ . self::$definition['table'] . '`
+					AND `' . self::$parent_definition['primary'] . '`=' . (int) $this->id_sliderseverywhere . ';') && Db::getInstance()->execute('UPDATE `' . _DB_PREFIX_ . self::$definition['table'] . '`
 				SET `position` = ' . (int) $position . '
 				WHERE `' . self::$definition['primary'] . '` = ' . (int) $moved_field[self::$definition['primary']] . '
-				AND `' . Sliders::$definition['primary'] . '`=' . (int) $this->id_sliderseverywhere . ';'))
+				AND `' . self::$parent_definition['primary'] . '`=' . (int) $this->id_sliderseverywhere . ';'))
             return self::cleanPositions((int) $this->id_sliderseverywhere);
         return false;
     }
@@ -111,14 +115,14 @@ class Slides extends ObjectModel {
     public static function cleanPositions($ident) {
         $sql = 'SELECT `' . self::$definition['primary'] . '` 
 			FROM `' . _DB_PREFIX_ . self::$definition ['table'] . '` 
-			WHERE `' . Sliders::$definition['primary'] . '` = ' . (int) $ident . ' 
+			WHERE `' . self::$parent_definition['primary'] . '` = ' . (int) $ident . ' 
 			ORDER BY `position`';
 
         $result = Db::getInstance()->executeS($sql);
         for ($i = 0, $total = count($result); $i < $total; ++$i) {
             $sql = 'UPDATE `' . _DB_PREFIX_ . self::$definition['table'] . '` 
 				SET `position` = ' . (int) $i . ' 
-				WHERE `' . Sliders::$definition['primary'] . '` = ' . (int) $ident . '
+				WHERE `' . self::$parent_definition['primary'] . '` = ' . (int) $ident . '
 				AND `' . self::$definition['primary'] . '` = ' . (int) $result[$i][self::$definition['primary']];
             Db::getInstance()->execute($sql);
         }
@@ -128,7 +132,7 @@ class Slides extends ObjectModel {
     public static function getLastPosition($ident) {
         $sql = 'SELECT MAX(position) 
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '`
-			WHERE `' . Sliders::$definition['primary'] . '` = ' . (int) $ident;
+			WHERE `' . self::$parent_definition['primary'] . '` = ' . (int) $ident;
         return (Db::getInstance()->getValue($sql));
     }
 
@@ -140,10 +144,10 @@ class Slides extends ObjectModel {
     }
 
     public function handle_image() {
-        $par = Sliders::$definition['primary'];
+        $par = self::$parent_definition['primary'];
         if (isset($_FILES['image']) && isset($_FILES['image']['tmp_name']) && !empty($_FILES['image']['tmp_name'])) {
             //dir 
-            $dir = self::get_image_path(Tools::getValue(Sliders::$definition['primary']));
+            $dir = self::get_image_path(Tools::getValue(self::$parent_definition['primary']));
             $file_name = $_FILES['image']['name'];
             //$ext = substr($_FILES['image']['name'], strrpos($_FILES['image']['name'], '.') + 1);
             //$file_name = md5($_FILES['image']['name']) . '.' . $ext;

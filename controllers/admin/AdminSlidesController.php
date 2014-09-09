@@ -8,13 +8,18 @@
  * @license 	kuzmany.biz/prestashop
  * Reminder: You own a single production license. It would only be installed on one online store (or multistore)
  */
+require_once(_PS_MODULE_DIR_ . 'sliderseverywhere/models/Sliders.php');
 require_once(_PS_MODULE_DIR_ . 'sliderseverywhere/models/Slides.php');
 
 class AdminSlidesController extends ModuleAdminController {
 
     protected $position_identifier = 'id_sliderseverywhere_slides';
+    protected static $parent_definition;
 
     public function __construct() {
+        
+        self::$parent_definition = Sliders::$definition;    
+
         $this->bootstrap = true;
 
         $this->table = Slides::$definition['table'];
@@ -50,19 +55,17 @@ class AdminSlidesController extends ModuleAdminController {
             if (isset($checked[0]))
                 $obj = new Slides($checked[0]);
         }
-        $par = Sliders::$definition['primary'];
-
-
+        $par = self::$parent_definition['primary'];
 
         parent::postProcess();
         if (Tools::getIsset('submitFilter' . $this->table)) {
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . $obj->$par);
         } elseif (Tools::getIsset('status' . $this->table))
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . $obj->$par);
         elseif (Tools::getIsset('delete' . $this->table))
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par);
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . $obj->$par);
         elseif (Tools::isSubmit('submitAdd' . $this->table))
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']));
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']));
     }
 
     public function renderForm() {
@@ -70,7 +73,7 @@ class AdminSlidesController extends ModuleAdminController {
         if (!$obj = $this->loadObject(true))
             return;
         if ($obj->image) {
-            $par = Sliders::$definition['primary'];
+            $par = self::$parent_definition['primary'];
             $dir = _PS_MODULE_DIR_ . $this->module->name . '/img/' . $obj->$par . '/';
             $image = $dir . $obj->image;
         } else
@@ -84,7 +87,7 @@ class AdminSlidesController extends ModuleAdminController {
             'input' => array(
                 array(
                     'type' => 'hidden',
-                    'name' => Sliders::$definition['primary']
+                    'name' => self::$parent_definition['primary']
                 ),
                 array(
                     'type' => 'file',
@@ -97,20 +100,20 @@ class AdminSlidesController extends ModuleAdminController {
                     'type' => 'textarea',
                     'lang' => true,
                     'label' => $this->l('Embeded video'),
-                    'desc' => $this->l('Instead of image, you can add embeded video. Support for YouTube and Vimeo'),
+                    'hint' => $this->l('Instead of image, you can add embeded video supported YouTube and Vimeo.'),
                     'name' => 'video',
                 ),
                 array(
                     'type' => 'text',
                     'label' => $this->l('Caption'),
-                    'desc' => $this->l('Short description for slide'),
+                    'hint' => $this->l('Short description for slide'),
                     'lang' => true,
                     'name' => 'caption'
                 ),
                 array(
                     'type' => 'text',
                     'label' => $this->l('Url'),
-                    'desc' => $this->l('Associate    url (optional)'),
+                    'hint' => $this->l('Associate    url (optional)'),
                     'lang' => true,
                     'name' => 'url'
                 ),
@@ -118,7 +121,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'type' => 'select',
                     'label' => $this->l('Target'),
                     'name' => 'target',
-                    'desc' => $this->l('Target open window for url'),
+                    'hint' => $this->l('Target open window for url'),
                     'options' => array(
                         'query' => array(
                             array(
@@ -191,6 +194,17 @@ class AdminSlidesController extends ModuleAdminController {
     }
 
     public function renderList() {
+
+        if (!Tools::getValue(self::$parent_definition['primary'])) {
+            $this->page_header_toolbar_btn['save'] = array(
+                'href' => $this->context->link->getAdminLink('AdminSliders', true),
+                'icon' => 'process-icon-cancel',
+                'desc' => $this->l('Back to sliders list'),
+            );
+            $this->errors[] = Tools::displayError('Can\'t identify slider. Please <a href="' . $this->context->link->getAdminLink('AdminSliders', true) . '">go back</a> to sliders.', false);
+            return parent::renderList();
+        }
+
         $this->fields_list = array(
             'image' => array(
                 'title' => $this->l('Image'),
@@ -221,22 +235,16 @@ class AdminSlidesController extends ModuleAdminController {
             )
         );
 
-        $this->_join = 'LEFT JOIN ' . _DB_PREFIX_ . Sliders::$definition['table'] . ' AS c ON a.`' . Sliders::$definition['primary'] . '` = c.`' . Sliders::$definition['primary'] . '`';
-        $this->_where = 'AND a.`' . Sliders::$definition['primary'] . '` = ' . (int) Tools::getValue(Sliders::$definition['primary']);
+        $this->_join = 'LEFT JOIN ' . _DB_PREFIX_ . self::$parent_definition['table'] . ' AS c ON a.`' . self::$parent_definition['primary'] . '` = c.`' . self::$parent_definition['primary'] . '`';
+        $this->_where = 'AND a.`' . self::$parent_definition['primary'] . '` = ' . (int) Tools::getValue(self::$parent_definition['primary']);
         $this->_orderBy = 'position';
-
-        $this->toolbar_btn['new'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
-            'desc' => $this->l('Add slide')
-        );
-
         $this->page_header_toolbar_btn['new'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']),
             'desc' => $this->l('Add new slide'),
             'icon' => 'process-icon-new'
         );
         $this->page_header_toolbar_btn['newField'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSliders', true) . '&update' . Sliders::$definition['table'] . '&' . Sliders::$definition['primary'] . '=' . Tools::getValue(Sliders::$definition['primary']),
+            'href' => $this->context->link->getAdminLink('AdminSliders', true) . '&update' . self::$parent_definition['table'] . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']),
             'icon' => 'process-icon-edit',
             'desc' => $this->l('Edit slider'),
         );
@@ -251,7 +259,12 @@ class AdminSlidesController extends ModuleAdminController {
             'desc' => $this->l('Back to sliders list'),
         );
 
-        $this->content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(Sliders::$definition['primary']))) . '</div>';
+        $this->toolbar_btn['new'] = array(
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&add' . Slides::$definition['table'] . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']),
+            'desc' => $this->l('Add slide')
+        );
+
+        $this->content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(self::$parent_definition['primary']))) . '</div>';
         $this->content.= '<script>
          $(document).ready(function(){
          if(location.hash == "#preview")
@@ -259,7 +272,7 @@ class AdminSlidesController extends ModuleAdminController {
         })
                 </script>';
 // set new title
-        $slider = new Sliders(Tools::getValue(Sliders::$definition['primary']));
+        $slider = new Sliders(Tools::getValue(self::$parent_definition['primary']));
         $this->tpl_list_vars['title'] = $this->l('Slides of ') . $slider->alias;
         return parent::renderList();
     }
@@ -293,7 +306,7 @@ class AdminSlidesController extends ModuleAdminController {
 //render image at renderList
     public function getImage($echo, $row) {
         if (isset($row['image']) && $row['image'])
-            return ImageManager::thumbnail($this->get_image_path($row[Sliders::$definition['primary']]) . $echo, 'thumb_' . $echo, 50);
+            return ImageManager::thumbnail($this->get_image_path($row[self::$parent_definition['primary']]) . $echo, 'thumb_' . $echo, 50);
         elseif (isset($row['video']) && $row['video'])
             return $this->l('video');
     }

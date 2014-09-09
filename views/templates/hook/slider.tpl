@@ -3,7 +3,7 @@
     <script type="text/javascript">
         var slidereverywhere;
         $(document).ready(function() {
-            slidereverywhere = $('.bxslider{$bxcounter}').bxSlider({
+            slidereverywhere = $('.bxslider{$bxcounter|intval}').bxSlider({
         {if $slider->options->mode}mode: '{$slider->options->mode|escape:'html':'UTF-8'}',{/if}
                 captions: {$slider->options->captions|truefalse},
                         auto: {$slider->options->auto|truefalse},
@@ -34,14 +34,14 @@
             })
                 </script>
                 {if $slides}
-                    <div class="sliderseverywhere {$slider->alias}}"> 
-                        <ul class="bxslider{$bxcounter}">
+                    <div class="sliderseverywhere {$slider->alias|escape:'html':'UTF-8'}"> 
+                        <ul class="bxslider{$bxcounter|intval}">
                             {foreach from=$slides item='slide' name='slider'}
                                 <li>
                                     {if $slide.video}
-                                        {$slide.video}
+                                        {$slide.video|escape:'quotes'}
                                     {elseif $slide.image}
-                                        {if $slide.url}<a href="{$slide.url}" {if $slide.target}target="{$slide.target}"{/if}>{/if}
+                                        {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}
                                             <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image|escape:'htmlall':'UTF-8')}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />
                                             {if $slide.url}</a>{/if}
                                         {/if}
@@ -49,10 +49,10 @@
                             {/foreach}
                         </ul>
                         {if $slider->options->pagerCustom}
-                            <div id="bx-pager{$bxcounter}" class="thumbpager">
+                            <div id="bx-pager{$bxcounter|intval}" class="thumbpager">
                                 {foreach from=$slides item='slide' name='slider'}
-                                    <a data-slide-index="{$smarty.foreach.slider.index}" href=""  >
-                                        {$slide.image_helper.thumb}
+                                    <a data-slide-index="{$smarty.foreach.slider.index|intval}" href=""  >
+                                        {$slide.image_helper.thumb|escape:'html':'UTF-8'}
                                         {if $slide.image}
                                         {elseif $slide.video}
                                             <i class="icon-video"></i>

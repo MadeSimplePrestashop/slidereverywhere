@@ -40,18 +40,14 @@ class AdminSlidersController extends ModuleAdminController {
     }
 
     public function postProcess() {
-        $obj = $this->loadObject(true);
-        $par = Sliders::$definition['primary'];
-
         parent::postProcess();
-
         if (Tools::getIsset('delete' . $this->table))
             Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
         elseif (Tools::isSubmit('submitAdd' . $this->table))
             if (Tools::getIsset('submitPreview'))
-                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par . '#preview');
+                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $this->object->id . '#preview');
             elseif (Tools::getIsset('submitStay'))
-                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par . '&update' . $this->table);
+                Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders') . '&' . Sliders::$definition['primary'] . '=' . $this->object->id . '&update' . $this->table);
             else
                 Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSliders'));
     }
@@ -87,13 +83,14 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Alias'),
-                    'name' => 'alias'
+                    'name' => 'alias',
+                    'required' => true
                 ),
                 array(
                     'type' => 'select',
                     'label' => $this->l('Slide mode'),
                     'name' => 'mode',
-                    'desc' => $this->l('Type of transition between slides'),
+                    'hint' => $this->l('Type of transition between slides'),
                     'options' => array(
                         'query' => array(
                             array(
@@ -118,7 +115,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Captions'),
                     'name' => 'captions',
-                    'desc' => $this->l('Include image captions. Captions are derived from the image\'s title attribute'),
+                    'hint' => $this->l("Include image captions. Captions are derived from the image's title attribute"),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -137,7 +134,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Auto slide controls'),
                     'name' => 'autoControls',
-                    'desc' => $this->l('If true, "Start" / "Stop" controls will be added'),
+                    'hint' => $this->l('If true, "Start" / "Stop" controls will be added'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -156,7 +153,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Autoslide'),
                     'name' => 'auto',
-                    'desc' => $this->l('Slides will automatically transition'),
+                    'hint' => $this->l('Slides will automatically transition'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -175,7 +172,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Infinite loop'),
                     'name' => 'infiniteLoop',
-                    'desc' => $this->l('If true, clicking "Next" while on the last slide will transition to the first slide and vice-versa'),
+                    'hint' => $this->l('If true, clicking "Next" while on the last slide will transition to the first slide and vice-versa'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -194,7 +191,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Hide control on start/end'),
                     'name' => 'hideControlOnEnd',
-                    'desc' => $this->l('If true, "Next" control will be hidden on last slide and vice-versa. Note: Only used when infiniteLoop: false'),
+                    'hint' => $this->l('If true, "Next" control will be hidden on last slide and vice-versa. Note: Only used when infiniteLoop: false'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -213,7 +210,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Adaptive height'),
                     'name' => 'adaptiveHeight',
-                    'desc' => $this->l('Dynamically adjust slider height based on each slide\'s height'),
+                    'hint' => $this->l('Dynamically adjust slider height based on each slide\'s height'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -231,7 +228,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Slide width'),
-                    'desc' => $this->l('The width of each slide. This setting is required for all horizontal carousels!'),
+                    'hint' => $this->l('The width of each slide. This setting is required for all horizontal carousels!'),
                     'name' => 'slideWidth',
                     'suffix' => 'px',
                     'class' => 'fixed-width-xs',
@@ -240,7 +237,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Min slides'),
-                    'desc' => $this->l('The minimum number of slides to be shown. Slides will be sized down if carousel becomes smaller than the original size.'),
+                    'hint' => $this->l('The minimum number of slides to be shown. Slides will be sized down if carousel becomes smaller than the original size.'),
                     'name' => 'minSlides',
                     'class' => 'fixed-width-xs',
                     'default_value' => isset($options->minSlides) ? $options->minSlides : ''
@@ -248,7 +245,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Max slides'),
-                    'desc' => $this->l('The maximum number of slides to be shown. Slides will be sized up if carousel becomes larger than the original size.'),
+                    'hint' => $this->l('The maximum number of slides to be shown. Slides will be sized up if carousel becomes larger than the original size.'),
                     'name' => 'maxSlides',
                     'class' => 'fixed-width-xs',
                     'default_value' => isset($options->maxSlides) ? $options->maxSlides : ''
@@ -256,7 +253,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Slide margin'),
-                    'desc' => $this->l('Margin between each slide'),
+                    'hint' => $this->l('Margin between each slide'),
                     'name' => 'slideMargin',
                     'suffix' => 'px',
                     'class' => 'fixed-width-xs',
@@ -266,7 +263,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Pager'),
                     'name' => 'pager',
-                    'desc' => $this->l('If true, a pager will be added'),
+                    'hint' => $this->l('If true, a pager will be added'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -285,7 +282,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'select',
                     'label' => $this->l('Pager type'),
                     'name' => 'pagerType',
-                    'desc' => $this->l('If \'full\', a pager link will be generated for each slide. If \'short\', a x / y pager will be used (ex. 1 / 5)'),
+                    'hint' => $this->l('If \'full\', a pager link will be generated for each slide. If \'short\', a x / y pager will be used (ex. 1 / 5)'),
                     'options' => array(
                         'query' => array(
                             array(
@@ -306,7 +303,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Thumbnails pager'),
                     'name' => 'pagerCustom',
-                    'desc' => $this->l('Parent element to be used as the pager. Not for use with dynamic carousels.'),
+                    'hint' => $this->l('Parent element to be used as the pager. Not for use with dynamic carousels.'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -333,7 +330,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Ticker'),
                     'name' => 'ticker',
-                    'desc' => $this->l('Use slider in ticker mode (similar to a news ticker)'),
+                    'hint' => $this->l('Use slider in ticker mode (similar to a news ticker)'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -352,7 +349,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Ticker hover'),
                     'name' => 'tickerHover',
-                    'desc' => $this->l('Ticker will pause when mouse hovers over slider. Note: this functionality does NOT work if using CSS transitions!'),
+                    'hint' => $this->l('Ticker will pause when mouse hovers over slider. Note: this functionality does NOT work if using CSS transitions!'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -370,7 +367,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Speed'),
-                    'desc' => $this->l('Slide transition duration'),
+                    'hint' => $this->l('Slide transition duration'),
                     'name' => 'speed',
                     'suffix' => 'ms',
                     'class' => 'fixed-width-xs',
@@ -379,7 +376,7 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'type' => 'text',
                     'label' => $this->l('Start slide'),
-                    'desc' => $this->l('Starting slide index (zero-based)'),
+                    'hint' => $this->l('Starting slide index (zero-based)'),
                     'name' => 'startSlide',
                     'class' => 'fixed-width-xs',
                     'default_value' => isset($options->startSlide) ? $options->startSlide : ''
@@ -388,7 +385,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Random start'),
                     'name' => 'randomStart',
-                    'desc' => $this->l('Start slider on a random slider'),
+                    'hint' => $this->l('Start slider on a random slider'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -407,7 +404,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'switch',
                     'label' => $this->l('Use CSS for effects'),
                     'name' => 'useCSS',
-                    'desc' => $this->l('If true, CSS transitions will be used for horizontal and vertical slide animations (this uses native hardware acceleration). '),
+                    'hint' => $this->l('If true, CSS transitions will be used for horizontal and vertical slide animations (this uses native hardware acceleration). '),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -426,7 +423,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'select',
                     'label' => $this->l('Easing'),
                     'name' => 'easing_jquery',
-                    'desc' => $this->l('Only If useCSS is disabled or video is in slider'),
+                    'hint' => $this->l('Only If useCSS is disabled or video is in slider'),
                     'options' => array(
                         'query' =>
                         $easing
@@ -440,7 +437,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'type' => 'select',
                     'label' => $this->l('Easing (useCSS enabled)'),
                     'name' => 'easing_css',
-                    'desc' => $this->l('Only If useCSS is enabled.'),
+                    'hint' => $this->l('Only If useCSS is enabled.'),
                     'options' => array(
                         'query' => array(
                             array(
@@ -609,8 +606,9 @@ class AdminSlidersController extends ModuleAdminController {
 
 //render image at renderList
     public function getSlides($echo, $row) {
-        $parms = array();
-        $parms[Sliders::$definition['primary']] = $row[Sliders::$definition['primary']];
+        $parms = array($echo);
+        array_shift($parms);
+        $parms[Sliders::$definition['primary']] = $row[Sliders::$definition['primary']];        
         $slides = Slides::getAll($parms);
         return count($slides);
     }

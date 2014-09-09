@@ -26,7 +26,7 @@ class sliderseverywhere extends Module {
         $this->version = '1.0';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
-        $this->module_key = 'f881e7e331cc4f1c314de7f70fe72cd4';
+        $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
 
         parent::__construct();
 
