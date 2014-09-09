@@ -52,10 +52,9 @@ class Sliders extends ObjectModel {
     }
 
     private function transform_options() {
-        $parms = $_POST;
-        unset($parms[self::$definition['primary']]);
-        foreach (array_keys(self::$definition['fields']) as $key)
-            unset($parms[$key]);
+        $parms = array();
+        foreach (self::get_option_fields() as $option)
+            $parms[$option] = Tools::getValue($option);
         return Tools::jsonEncode($parms);
     }
 
@@ -221,6 +220,13 @@ class Sliders extends ObjectModel {
                 Db::getInstance()->execute($sql);
             }
         }
+    }
+
+    public static function get_option_fields() {
+        return array('mode', 'captions', 'autoControls', 'auto', 'infiniteLoop', 'hideControlOnEnd',
+            'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
+            'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
+            'useCSS', 'easing_jquery', 'easing_css');
     }
 
 }

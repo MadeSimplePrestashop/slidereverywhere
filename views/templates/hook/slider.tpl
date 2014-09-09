@@ -39,7 +39,7 @@
                             {foreach from=$slides item='slide' name='slider'}
                                 <li>
                                     {if $slide.video}
-                                        {$slide.video|escape:'quotes'}
+                                        {$slide.video|escape:'UTF-8' }
                                     {elseif $slide.image}
                                         {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}
                                             <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image|escape:'htmlall':'UTF-8')}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />

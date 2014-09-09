@@ -608,7 +608,7 @@ class AdminSlidersController extends ModuleAdminController {
     public function getSlides($echo, $row) {
         $parms = array($echo);
         array_shift($parms);
-        $parms[Sliders::$definition['primary']] = $row[Sliders::$definition['primary']];        
+        $parms[Sliders::$definition['primary']] = $row[Sliders::$definition['primary']];
         $slides = Slides::getAll($parms);
         return count($slides);
     }
