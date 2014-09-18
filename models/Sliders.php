@@ -105,6 +105,10 @@ class Sliders extends ObjectModel {
 //echo ImageManager::resize($source_path . $slide['image'], _PS_TMP_IMG_DIR_. '/web_' . $slide['image'],300,200);
         $slider = new Sliders($id, null, Context::getContext()->shop->id);
         $slider->options = Tools::jsonDecode($slider->options);
+        if (isset($slider->options->categories) && empty($slider->options->categories) == false)
+            if (Dispatcher::getInstance()->getController() != 'category' || !in_array(Tools::getValue('id_category'), $slider->options->categories))
+                return;
+
         foreach ($slides as $key => $slide) {
             if ($slide['image']) {
                 $source_path = Slides::get_image_path($id);
@@ -226,7 +230,7 @@ class Sliders extends ObjectModel {
         return array('mode', 'captions', 'autoControls', 'auto', 'infiniteLoop', 'hideControlOnEnd',
             'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
             'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
-            'useCSS', 'easing_jquery', 'easing_css');
+            'useCSS', 'easing_jquery', 'easing_css', 'categories');
     }
 
 }

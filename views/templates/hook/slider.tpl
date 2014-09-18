@@ -11,25 +11,25 @@
                         infiniteLoop: {$slider->options->infiniteLoop|truefalse},
                         hideControlOnEnd: {$slider->options->hideControlOnEnd|truefalse},
                         adaptiveHeight: {$slider->options->adaptiveHeight|truefalse},
-        {if $slider->options->slideWidth}slideWidth: {$slider->options->slideWidth},{/if}
-        {if $slider->options->minSlides}minSlides: {$slider->options->minSlides},{/if}
-        {if $slider->options->maxSlides}maxSlides: {$slider->options->maxSlides},{/if}
-        {if $slider->options->slideMargin}slideMargin: {$slider->options->slideMargin},{/if}
+        {if $slider->options->slideWidth}slideWidth: {$slider->options->slideWidth|intval},{/if}
+        {if $slider->options->minSlides}minSlides: {$slider->options->minSlides|intval},{/if}
+        {if $slider->options->maxSlides}maxSlides: {$slider->options->maxSlides|intval},{/if}
+        {if $slider->options->slideMargin}slideMargin: {$slider->options->slideMargin|intval},{/if}
                 pager: {$slider->options->pager|truefalse},
-        {if $slider->options->pagerType}pagerType: '{$slider->options->pagerType}',{/if}
-        {if $slider->options->pagerCustom}pagerCustom: '#bx-pager{$bxcounter}',{/if}
+        {if $slider->options->pagerType}pagerType: '{$slider->options->pagerType|escape:'html':'UTF-8'}',{/if}
+        {if $slider->options->pagerCustom}pagerCustom: '#bx-pager{$bxcounter|intval}',{/if}
         {if isset($slider->options->video)}video: {$slider->options->video|truefalse},{/if}
                 useCSS: {$slider->options->useCSS|truefalse},
                         ticker: {$slider->options->ticker|truefalse},
                         tickerHover: {$slider->options->tickerHover|truefalse},
-        {if $slider->options->startSlide}    startSlide: {$slider->options->startSlide},{/if}
+        {if $slider->options->startSlide}    startSlide: {$slider->options->startSlide|intval},{/if}
                 randomStart: {$slider->options->randomStart|truefalse},
         {if $slider->options->speed}
-                speed: {$slider->options->speed},{/if}
+                speed: {$slider->options->speed|intval},{/if}
             {if $slider->options->easing_jquery && !$slider->options->useCSS}
-                easing: '{$slider->options->easing_jquery}',{/if}
+                easing: '{$slider->options->easing_jquery|escape:'html':'UTF-8'}',{/if}
                 {if $slider->options->easing_css && $slider->options->useCSS}
-                easing: '{$slider->options->easing_css}',{/if}
+                easing: '{$slider->options->easing_css|escape:'html':'UTF-8'}',{/if}
             })
             })
                 </script>
@@ -42,11 +42,15 @@
                                         {$slide.video|escape:'UTF-8' }
                                     {elseif $slide.image}
                                         {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}
-                                            <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image|escape:'htmlall':'UTF-8')}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />
+                                            <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image)|escape:'htmlall':'UTF-8'}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />
                                             {if $slide.url}</a>{/if}
                                         {/if}
                                 </li>
                             {/foreach}
+                            <li>
+                                <h1>fafasf</h1>
+                                <p></p>
+                            </li>
                         </ul>
                         {if $slider->options->pagerCustom}
                             <div id="bx-pager{$bxcounter|intval}" class="thumbpager">

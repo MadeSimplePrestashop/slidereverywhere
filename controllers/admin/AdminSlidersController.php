@@ -68,6 +68,14 @@ class AdminSlidersController extends ModuleAdminController {
             unset($easing[$key]);
             $easing[$key]['name'] = $easin;
         }
+
+        $selected_categories = array();
+        if (isset($options->categories) && empty($options->categories) == false)
+            $selected_categories = $options->categories;
+
+        $root_category = Category::getRootCategory();
+        $root_category = array('id_category' => $root_category->id, 'name' => $root_category->name);
+
         array_unshift($easing, array('name' => ''));
         $this->fields_form = array(
             'legend' => array(
@@ -507,6 +515,37 @@ class AdminSlidersController extends ModuleAdminController {
                 'name' => 'name'
             )
             , 'default_value' => $active_hooks
+        );
+
+        $this->fields_form['input'][] = array(
+                    'type' => 'categories',
+                    'label' => $this->l('Categories'),
+                    'name' => 'categories',
+                    'desc' => $this->l('Left empty is disabled.'),
+                    'hint' => $this->l('Left empty is disabled.'),
+                    'tree' => array(
+                        'use_search' => false,
+                        'id' => 'categoryBox',
+                        'use_checkbox' => true,
+                        'selected_categories' => $selected_categories,
+                    ),
+                    'values' => array(
+                        'trads' => array(
+                            'Root' => $root_category,
+                            'selected' => $this->l('Selected'),
+                            'Collapse All' => $this->l('Collapse All'),
+                            'Expand All' => $this->l('Expand All'),
+                            'Check All' => $this->l('Check All'),
+                            'Uncheck All' => $this->l('Uncheck All')
+                        ),
+                        'selected_cat' => $selected_categories,
+                        'input_name' => 'categories[]',
+                        'use_radio' => false,
+                        'use_search' => false,
+                        'disabled_categories' => array(),
+                        'top_category' => Category::getTopCategory(),
+                        'use_context' => true,
+                    )
         );
 
         if (Shop::isFeatureActive()) {
