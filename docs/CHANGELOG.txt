@@ -1,0 +1,20 @@
+ Module Sliders Everywhere
+--------------------------------
+ Reminder: You own a single production license. It would only be installed on one online store (or multistore)
+
+Release Notes 
+--------------------------------
+####################################
+#   v 1.1 - (2014-1O-04)
+####################################
+
++ Added product categories view limitation 
++ Added tabs & tips on slider edit
++ Added new demo page (http://demo-prestashop.kuzmany.biz/en/content/6-sliders-everywhere-demo-page)
+
+
+####################################
+#   v 1.0 - (2014-09-09)
+####################################
+
+	Init release

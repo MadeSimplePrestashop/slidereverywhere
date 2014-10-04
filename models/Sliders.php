@@ -105,9 +105,24 @@ class Sliders extends ObjectModel {
 //echo ImageManager::resize($source_path . $slide['image'], _PS_TMP_IMG_DIR_. '/web_' . $slide['image'],300,200);
         $slider = new Sliders($id, null, Context::getContext()->shop->id);
         $slider->options = Tools::jsonDecode($slider->options);
+
+
         if (isset($slider->options->categories) && empty($slider->options->categories) == false)
             if (Dispatcher::getInstance()->getController() != 'category' || !in_array(Tools::getValue('id_category'), $slider->options->categories))
                 return;
+
+        if (isset($slider->options->cms) && empty($slider->options->cms) == false) {
+            $categories = array();
+            $cms = array();
+            foreach ($slider->options->cms as $c) {
+                if (strpos($c, 'category_') !== false)
+                    $categories[] = str_replace('category_', '', $c);
+                if (strpos($c, 'cms_') !== false)
+                    $cms[] = str_replace('cms_', '', $c);
+            }
+            if (Dispatcher::getInstance()->getController() != 'cms' || (!in_array(Tools::getValue('id_cms'), $cms) && !in_array(Tools::getValue('id_cms_category'), $categories)))
+                return;
+        }
 
         foreach ($slides as $key => $slide) {
             if ($slide['image']) {
@@ -124,7 +139,7 @@ class Sliders extends ObjectModel {
             $slides[$key]['image_helper']['width'] = $w;
             $slides[$key]['image_helper']['height'] = $h;
 
-            //if video 
+//if video 
             if ($slide['video']) {
                 $slider->options->video = true;
                 $slider->options->useCSS = false;
@@ -153,7 +168,6 @@ class Sliders extends ObjectModel {
 
 // smarty
     public static function get_slider($params) {
-
         $id = '';
         if (isset($params['alias'])) {
             $alias = $params['alias'];
@@ -230,7 +244,80 @@ class Sliders extends ObjectModel {
         return array('mode', 'captions', 'autoControls', 'auto', 'infiniteLoop', 'hideControlOnEnd',
             'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
             'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
-            'useCSS', 'easing_jquery', 'easing_css', 'categories');
+            'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms');
+    }
+
+    /* Get all CMS blocks */
+
+    public static function getAllCMSStructure($id_shop = false) {
+        $categories = self::getCMSCategories();
+        $id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+        $all = array();
+        foreach ($categories as $key => $value) {
+            $array_key = 'category_' . $value['id_cms_category'];
+            $value['name'] = str_repeat("- ", $value['level_depth']) . $value['name'];
+            $value['id'] = $array_key;
+            $all[$array_key] = $value;
+            $pages = self::getCMSPages($value['id_cms_category'], $id_shop);
+            foreach ($pages as $key2 => $page) {
+                $array_key = 'cms_' . $page['id_cms'];
+                $page['name'] = str_repeat("&nbsp;&nbsp;", $value['level_depth']) . $page['meta_title'];
+                $page['id'] = $array_key;
+                $all[$array_key] = $page;
+            }
+        }
+        return $all;
+    }
+
+    public static function getCMSPages($id_cms_category, $id_shop = false) {
+        $id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+
+        $sql = 'SELECT c.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
+			FROM `' . _DB_PREFIX_ . 'cms` c
+			INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs
+			ON (c.`id_cms` = cs.`id_cms`)
+			INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl
+			ON (c.`id_cms` = cl.`id_cms`)
+			WHERE c.`id_cms_category` = ' . (int) $id_cms_category . '
+			AND cs.`id_shop` = ' . (int) $id_shop . '
+			AND cl.`id_lang` = ' . (int) Context::getContext()->language->id . '
+			AND c.`active` = 1
+			ORDER BY `position`';
+
+        return Db::getInstance()->executeS($sql);
+    }
+
+    public static function getCMSCategories($recursive = false, $parent = 0) {
+        if ($recursive === false) {
+            $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
+					FROM `' . _DB_PREFIX_ . 'cms_category` bcp
+					INNER JOIN `' . _DB_PREFIX_ . 'cms_category_lang` cl
+					ON (bcp.`id_cms_category` = cl.`id_cms_category`)
+					WHERE cl.`id_lang` = ' . (int) Context::getContext()->language->id;
+            if ($parent)
+                $sql .= ' AND bcp.`id_parent` = ' . (int) $parent;
+
+            return Db::getInstance()->executeS($sql);
+        }
+        else {
+            $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
+					FROM `' . _DB_PREFIX_ . 'cms_category` bcp
+					INNER JOIN `' . _DB_PREFIX_ . 'cms_category_lang` cl
+					ON (bcp.`id_cms_category` = cl.`id_cms_category`)
+					WHERE cl.`id_lang` = ' . (int) Context::getContext()->language->id;
+            if ($parent)
+                $sql .= ' AND bcp.`id_parent` = ' . (int) $parent;
+
+            $results = Db::getInstance()->executeS($sql);
+            foreach ($results as $result) {
+                $sub_categories = self::getCMSCategories(true, $result['id_cms_category']);
+                if ($sub_categories && count($sub_categories) > 0)
+                    $result['sub_categories'] = $sub_categories;
+                $categories[] = $result;
+            }
+
+            return isset($categories) ? $categories : false;
+        }
     }
 
 }

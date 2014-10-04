@@ -24,6 +24,7 @@ class AdminSlidersController extends ModuleAdminController {
 
         $this->addRowAction('view');
         $this->addRowAction('edit');
+        $this->addRowAction('duplicate');
         $this->addRowAction('delete');
 
         parent::__construct();
@@ -83,18 +84,28 @@ class AdminSlidersController extends ModuleAdminController {
                 'title' => $this->l('Slider'),
                 'icon' => 'icon-cogs'
             ),
+            'tabs' => array(
+                'options' => $this->l('Slider'),
+                'carousel' => $this->l('Carousel/Ticker'),
+                'pager' => $this->l('Ticker'),
+                'pager' => $this->l('Pager'),
+                'display' => $this->l('Display'),
+            ),
             'input' => array(
                 array(
                     'type' => 'hidden',
                     'name' => Sliders::$definition['primary'],
+                    'tab' => 'options'
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'text',
                     'label' => $this->l('Alias'),
                     'name' => 'alias',
                     'required' => true
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'select',
                     'label' => $this->l('Slide mode'),
                     'name' => 'mode',
@@ -120,6 +131,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->mode) ? $options->mode : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Captions'),
                     'name' => 'captions',
@@ -139,6 +151,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->captions) ? $options->captions : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Auto slide controls'),
                     'name' => 'autoControls',
@@ -158,6 +171,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->autoControls) ? $options->autoControls : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Autoslide'),
                     'name' => 'auto',
@@ -177,6 +191,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->auto) ? $options->auto : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Infinite loop'),
                     'name' => 'infiniteLoop',
@@ -196,6 +211,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->infiniteLoop) ? $options->infiniteLoop : 1
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Hide control on start/end'),
                     'name' => 'hideControlOnEnd',
@@ -215,6 +231,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->hideControlOnEnd) ? $options->hideControlOnEnd : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Adaptive height'),
                     'name' => 'adaptiveHeight',
@@ -234,6 +251,13 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->adaptiveHeight) ? $options->adaptiveHeight : ''
                 ),
                 array(
+                    'tab' => 'carousel',
+                    'type' => 'html',
+                    'name' => 'html_data_carousel',
+                    'html_content' => '<strong>' . $this->l('Hint') . ':</strong> ' . $this->l("You can use carousel/ticker only with horizontal/vertical slide mode.")
+                ),
+                array(
+                    'tab' => 'carousel',
                     'type' => 'text',
                     'label' => $this->l('Slide width'),
                     'hint' => $this->l('The width of each slide. This setting is required for all horizontal carousels!'),
@@ -243,6 +267,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->slideWidth) ? $options->slideWidth : ''
                 ),
                 array(
+                    'tab' => 'carousel',
                     'type' => 'text',
                     'label' => $this->l('Min slides'),
                     'hint' => $this->l('The minimum number of slides to be shown. Slides will be sized down if carousel becomes smaller than the original size.'),
@@ -251,6 +276,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->minSlides) ? $options->minSlides : ''
                 ),
                 array(
+                    'tab' => 'carousel',
                     'type' => 'text',
                     'label' => $this->l('Max slides'),
                     'hint' => $this->l('The maximum number of slides to be shown. Slides will be sized up if carousel becomes larger than the original size.'),
@@ -259,6 +285,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->maxSlides) ? $options->maxSlides : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'text',
                     'label' => $this->l('Slide margin'),
                     'hint' => $this->l('Margin between each slide'),
@@ -268,6 +295,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->slideMargin) ? $options->slideMargin : ''
                 ),
                 array(
+                    'tab' => 'pager',
                     'type' => 'switch',
                     'label' => $this->l('Pager'),
                     'name' => 'pager',
@@ -287,6 +315,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->pager) ? $options->pager : 1
                 ),
                 array(
+                    'tab' => 'pager',
                     'type' => 'select',
                     'label' => $this->l('Pager type'),
                     'name' => 'pagerType',
@@ -308,6 +337,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->pagerType) ? $options->pagerType : ''
                 ),
                 array(
+                    'tab' => 'pager',
                     'type' => 'switch',
                     'label' => $this->l('Thumbnails pager'),
                     'name' => 'pagerCustom',
@@ -327,6 +357,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->pagerCustom) ? $options->pagerCustom : ''
                 ),
                 array(
+                    'tab' => 'pager',
                     'type' => 'text',
                     'label' => $this->l('Thumbnail width for pager'),
                     'name' => 'thumbnailWidth',
@@ -335,6 +366,13 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->thumbnailWidth) ? $options->thumbnailWidth : 100,
                 ),
                 array(
+                    'tab' => 'carousel',
+                    'type' => 'html',
+                    'name' => 'html_data',
+                    'html_content' => '<hr><strong>' . $this->l('Ticker mode') . ':</strong> ' . $this->l("Don 't forget edit the speed on options tab, because default speed is only 500ms.")
+                ),
+                array(
+                    'tab' => 'carousel',
                     'type' => 'switch',
                     'label' => $this->l('Ticker'),
                     'name' => 'ticker',
@@ -354,6 +392,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->ticker) ? $options->ticker : ''
                 ),
                 array(
+                    'tab' => 'carousel',
                     'type' => 'switch',
                     'label' => $this->l('Ticker hover'),
                     'name' => 'tickerHover',
@@ -373,6 +412,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->tickerHover) ? $options->tickerHover : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'text',
                     'label' => $this->l('Speed'),
                     'hint' => $this->l('Slide transition duration'),
@@ -382,6 +422,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->speed) ? $options->speed : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'text',
                     'label' => $this->l('Start slide'),
                     'hint' => $this->l('Starting slide index (zero-based)'),
@@ -390,6 +431,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->startSlide) ? $options->startSlide : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Random start'),
                     'name' => 'randomStart',
@@ -409,6 +451,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->randomStart) ? $options->randomStart : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'switch',
                     'label' => $this->l('Use CSS for effects'),
                     'name' => 'useCSS',
@@ -428,6 +471,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->useCSS) ? $options->useCSS : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'select',
                     'label' => $this->l('Easing'),
                     'name' => 'easing_jquery',
@@ -442,6 +486,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'default_value' => isset($options->easing_jquery) ? $options->easing_jquery : ''
                 ),
                 array(
+                    'tab' => 'options',
                     'type' => 'select',
                     'label' => $this->l('Easing (useCSS enabled)'),
                     'name' => 'easing_css',
@@ -450,7 +495,7 @@ class AdminSlidersController extends ModuleAdminController {
                         'query' => array(
                             array(
                                 'id' => '',
-                                'name' => $this->l('None')
+                                'name' => ''
                             ),
                             array(
                                 'id' => 'linear',
@@ -503,12 +548,14 @@ class AdminSlidersController extends ModuleAdminController {
         foreach ($this->module->hooks as $hook)
             $query[]['name'] = $hook;
         $this->fields_form['input'][] = array(
+            'tab' => 'display',
             'type' => 'select',
             'multiple' => true,
+            'size' => 7,
             'label' => $this->l('Hooks'),
             'name' => 'hooks[]',
-            'class' => 'chosen',
-            'hint' => $this->l('It\'s optional. Choose position.'),
+            'hint' => $this->l('It\'s optional. Choose a display position. More about hooks in documentation.'),
+            'desc' => $this->l('CTRL+click for select/unselect more options'),
             'options' => array(
                 'query' => $query,
                 'id' => 'name',
@@ -518,38 +565,58 @@ class AdminSlidersController extends ModuleAdminController {
         );
 
         $this->fields_form['input'][] = array(
-                    'type' => 'categories',
-                    'label' => $this->l('Categories'),
-                    'name' => 'categories',
-                    'desc' => $this->l('Left empty is disabled.'),
-                    'hint' => $this->l('Left empty is disabled.'),
-                    'tree' => array(
-                        'use_search' => false,
-                        'id' => 'categoryBox',
-                        'use_checkbox' => true,
-                        'selected_categories' => $selected_categories,
-                    ),
-                    'values' => array(
-                        'trads' => array(
-                            'Root' => $root_category,
-                            'selected' => $this->l('Selected'),
-                            'Collapse All' => $this->l('Collapse All'),
-                            'Expand All' => $this->l('Expand All'),
-                            'Check All' => $this->l('Check All'),
-                            'Uncheck All' => $this->l('Uncheck All')
-                        ),
-                        'selected_cat' => $selected_categories,
-                        'input_name' => 'categories[]',
-                        'use_radio' => false,
-                        'use_search' => false,
-                        'disabled_categories' => array(),
-                        'top_category' => Category::getTopCategory(),
-                        'use_context' => true,
-                    )
+            'tab' => 'display',
+            'type' => 'categories',
+            'label' => $this->l('Categories'),
+            'name' => 'categories',
+            'desc' => $this->l('Empty is disabled.'),
+            'hint' => $this->l('Empty is disabled.'),
+            'tree' => array(
+                'use_search' => false,
+                'id' => 'categoryBox',
+                'use_checkbox' => true,
+                'selected_categories' => $selected_categories,
+            ),
+            'values' => array(
+                'trads' => array(
+                    'Root' => $root_category,
+                    'selected' => $this->l('Selected'),
+                    'Collapse All' => $this->l('Collapse All'),
+                    'Expand All' => $this->l('Expand All'),
+                    'Check All' => $this->l('Check All'),
+                    'Uncheck All' => $this->l('Uncheck All')
+                ),
+                'selected_cat' => $selected_categories,
+                'input_name' => 'categories[]',
+                'use_radio' => false,
+                'use_search' => false,
+                'disabled_categories' => array(),
+                'top_category' => Category::getTopCategory(),
+                'use_context' => true,
+            )
         );
+        
+        $this->fields_form['input'][] = array(
+            'tab' => 'display',
+            'type' => 'select',
+            'multiple' => true,
+            'size' => 7,
+            'label' => $this->l('CMS categories and pages'),
+            'name' => 'cms[]',
+            'hint' => $this->l('It\'s optional.'),
+            'desc' => $this->l('Optional. CTRL+click for select/unselect more options'),
+            'options' => array(
+                'query' => Sliders::getAllCMSStructure(),
+                'id' => 'id',
+                'name' => 'name'
+            )
+            , 'default_value' => $options->cms
+        );
+
 
         if (Shop::isFeatureActive()) {
             $this->fields_form['input'][] = array(
+                'tab' => 'display',
                 'type' => 'shop',
                 'label' => $this->l('Shop association:'),
                 'name' => 'checkBoxShopAsso',
