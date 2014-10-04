@@ -80,9 +80,11 @@ class Sliders extends ObjectModel {
     }
 
     public function add($autodate = true, $null_values = false) {
-        $this->options = $this->transform_options();
+        if (!Tools::getIsset('duplicate' . self::$definition['table']))
+            $this->options = $this->transform_options();
         parent::add($autodate, $null_values);
-        $this->add_hooks($this->id, Tools::getValue('hooks'));
+        if (!Tools::getIsset('duplicate' . self::$definition['table']))
+            $this->add_hooks($this->id, Tools::getValue('hooks'));
     }
 
     public static function findIdByAlias($alias) {
@@ -102,10 +104,9 @@ class Sliders extends ObjectModel {
         if (empty($slides))
             return;
 
-//echo ImageManager::resize($source_path . $slide['image'], _PS_TMP_IMG_DIR_. '/web_' . $slide['image'],300,200);
+        //echo ImageManagr::resize($source_path . $slide['image'], _PS_TMP_IMG_DIR_. '/web_' . $slide['image'],300,200);
         $slider = new Sliders($id, null, Context::getContext()->shop->id);
         $slider->options = Tools::jsonDecode($slider->options);
-
 
         if (isset($slider->options->categories) && empty($slider->options->categories) == false)
             if (Dispatcher::getInstance()->getController() != 'category' || !in_array(Tools::getValue('id_category'), $slider->options->categories))
@@ -198,6 +199,31 @@ class Sliders extends ObjectModel {
             return;
         }
         return $result;
+    }
+
+    public static function duplicate() {
+        $slider = new Sliders(Tools::getValue(self::$definition['primary']));
+        if (!is_object($slider))
+            return;
+        unset($slider->id);
+        $slider->save();
+        $parms = array();
+        $parms[Sliders::$definition['primary']] = Tools::getValue(self::$definition['primary']);
+        $slides = Slides::getAll($parms);
+        $par = self::$definition['primary'];
+        foreach ($slides as $slide_old) {
+            $slide = new Slides($slide_old[Slides::$definition['primary']]);
+            unset($slide->id);
+            $slide->$par = $slider->id;
+            $slide->save();
+            //copy images
+            $source = Slides::get_image_path(Tools::getValue(self::$definition['primary']));
+            $dest = Slides::get_image_path($slider->id);
+            @mkdir($dest);
+            copy($source . $slide->image, $dest . $slide->image);
+            
+            //copy hooks
+        }
     }
 
     /*

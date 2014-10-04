@@ -62,6 +62,7 @@ class Slides extends ObjectModel {
         if (empty($parms) == false)
             foreach ($parms as $k => $p)
                 $sql->where('' . $k . ' =\'' . $p . '\'');
+        $sql->orderby('position');
         return Db::getInstance()->executeS($sql);
     }
 

@@ -32,7 +32,9 @@ class AdminSlidersController extends ModuleAdminController {
 
     public function initContent() {
 
-        if (Tools::getIsset('view' . $this->table))
+        if (Tools::getIsset('duplicate' . $this->table))
+            Sliders::duplicate();
+        elseif (Tools::getIsset('view' . $this->table))
             if (Tools::getIsset(Sliders::$definition['primary']))
                 Tools::redirectAdmin('index.php?controller=AdminSlides&' . Sliders::$definition['primary'] . '=' . (int) Tools::getValue(Sliders::$definition['primary']) . '&token=' . Tools::getAdminTokenLite('AdminSlides'));
             else
@@ -58,7 +60,7 @@ class AdminSlidersController extends ModuleAdminController {
         $obj = $this->loadObject(true);
         if (!$obj)
             return;
-
+        
         if (is_object($obj))
             $options = Tools::jsonDecode($obj->options);
         else
@@ -595,7 +597,7 @@ class AdminSlidersController extends ModuleAdminController {
                 'use_context' => true,
             )
         );
-        
+
         $this->fields_form['input'][] = array(
             'tab' => 'display',
             'type' => 'select',
