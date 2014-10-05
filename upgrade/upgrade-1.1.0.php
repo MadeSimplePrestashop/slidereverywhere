@@ -13,7 +13,6 @@ if (!defined('_PS_VERSION_'))
 
 
 function upgrade_module_1_1_0($module) {
-    
     //remove hooks table, it wasn't necessary
     $sliders = Sliders::getAll();
     foreach ($sliders as $slider) {

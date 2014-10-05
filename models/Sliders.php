@@ -72,7 +72,7 @@ class Sliders extends ObjectModel {
         $source_path = Slides::get_image_path($this->id);
         if ($slides) {
             foreach ($slides as $slide) {
-                echo ImageManager::thumbnail($source_path . $slide['image'], '/pager_' . $slide['image'], Tools::getValue('thumbnailWidth'), 'jpg', true, true);
+                ImageManager::thumbnail($source_path . $slide['image'], '/pager_' . $slide['image'], Tools::getValue('thumbnailWidth'), 'jpg', true, true);
             }
         }
     }
@@ -106,8 +106,10 @@ class Sliders extends ObjectModel {
         $slider->options = Tools::jsonDecode($slider->options);
 
         $view = array();
-        (isset($slider->options->categories) && empty($slider->options->categories) == false ? array_push($view, 'category') : '');
-        (isset($slider->options->cms) && empty($slider->options->cms) == false ? array_push($view, 'cms') : '');
+        if (Dispatcher::getInstance()->getController() != 'AdminSlides') {
+            (isset($slider->options->categories) && empty($slider->options->categories) == false ? array_push($view, 'category') : '');
+            (isset($slider->options->cms) && empty($slider->options->cms) == false ? array_push($view, 'cms') : '');
+        }
 
         if (empty($view) == false) {
             if (!in_array(Dispatcher::getInstance()->getController(), $view))
@@ -233,7 +235,7 @@ class Sliders extends ObjectModel {
         return array('mode', 'captions', 'autoControls', 'auto', 'infiniteLoop', 'hideControlOnEnd',
             'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
             'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
-            'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms', 'hooks');
+            'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms', 'hooks', 'pause', 'autoHover', 'autoStart', 'controls');
     }
 
     /* Get all CMS blocks */
@@ -242,13 +244,13 @@ class Sliders extends ObjectModel {
         $categories = self::getCMSCategories();
         $id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
         $all = array();
-        foreach ($categories as $key => $value) {
+        foreach ($categories as $value) {
             $array_key = 'category_' . $value['id_cms_category'];
             $value['name'] = str_repeat("- ", $value['level_depth']) . $value['name'];
             $value['id'] = $array_key;
             $all[$array_key] = $value;
             $pages = self::getCMSPages($value['id_cms_category'], $id_shop);
-            foreach ($pages as $key2 => $page) {
+            foreach ($pages as $page) {
                 $array_key = 'cms_' . $page['id_cms'];
                 $page['name'] = str_repeat("&nbsp;&nbsp;", $value['level_depth']) . $page['meta_title'];
                 $page['id'] = $array_key;
@@ -298,6 +300,7 @@ class Sliders extends ObjectModel {
                 $sql .= ' AND bcp.`id_parent` = ' . (int) $parent;
 
             $results = Db::getInstance()->executeS($sql);
+            $categories = array();
             foreach ($results as $result) {
                 $sub_categories = self::getCMSCategories(true, $result['id_cms_category']);
                 if ($sub_categories && count($sub_categories) > 0)
@@ -307,6 +310,15 @@ class Sliders extends ObjectModel {
 
             return isset($categories) ? $categories : false;
         }
+    }
+
+    //depraced from 1.1
+    public static function get_hooks_by_id($id) {
+        $sql = 'SELECT hook
+			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '_hook`
+			WHERE `' . self::$definition['primary'] . '` = ' . $id;
+
+        return (Db::getInstance()->executeS($sql));
     }
 
 }

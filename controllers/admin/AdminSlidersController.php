@@ -157,9 +157,9 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'tab' => 'options',
                     'type' => 'switch',
-                    'label' => $this->l('Auto slide controls'),
-                    'name' => 'autoControls',
-                    'hint' => $this->l('If true, "Start" / "Stop" controls will be added'),
+                    'label' => $this->l('Controls'),
+                    'name' => 'controls',
+                    'hint' => $this->l('If true, "Next" / "Prev" controls will be added'),
                     'values' => array(
                         array(
                             'id' => 'active_on',
@@ -172,7 +172,7 @@ class AdminSlidersController extends ModuleAdminController {
                             'label' => $this->l('Disabled')
                         )
                     ),
-                    'default_value' => isset($options->autoControls) ? $options->autoControls : ''
+                    'default_value' => isset($options->controls) ? $options->controls : true
                 ),
                 array(
                     'tab' => 'options',
@@ -193,6 +193,66 @@ class AdminSlidersController extends ModuleAdminController {
                         )
                     ),
                     'default_value' => isset($options->auto) ? $options->auto : ''
+                ),
+                array(
+                    'tab' => 'options',
+                    'type' => 'switch',
+                    'label' => $this->l('Auto slide controls'),
+                    'name' => 'autoControls',
+                    'hint' => $this->l('If true, "Start" / "Stop" controls will be added'),
+                    'values' => array(
+                        array(
+                            'id' => 'active_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id' => 'active_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled')
+                        )
+                    ),
+                    'default_value' => isset($options->autoControls) ? $options->autoControls : ''
+                ),
+                array(
+                    'tab' => 'options',
+                    'type' => 'switch',
+                    'label' => $this->l('Auto start'),
+                    'name' => 'autoStart',
+                    'hint' => $this->l('Auto show starts playing on load. If false, slideshow will start when the "Start" control is clicked'),
+                    'values' => array(
+                        array(
+                            'id' => 'active_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id' => 'active_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled')
+                        )
+                    ),
+                    'default_value' => isset($options->autoStart) ? $options->autoStart : ''
+                ),
+                array(
+                    'tab' => 'options',
+                    'type' => 'switch',
+                    'label' => $this->l('Auto hover'),
+                    'name' => 'autoHover',
+                    'hint' => $this->l('Auto show will pause when mouse hovers over slider'),
+                    'values' => array(
+                        array(
+                            'id' => 'active_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id' => 'active_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled')
+                        )
+                    ),
+                    'default_value' => isset($options->autoHover) ? $options->autoHover : ''
                 ),
                 array(
                     'tab' => 'options',
@@ -267,7 +327,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'hint' => $this->l('The width of each slide. This setting is required for all horizontal carousels!'),
                     'name' => 'slideWidth',
                     'suffix' => 'px',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->slideWidth) ? $options->slideWidth : ''
                 ),
                 array(
@@ -276,7 +336,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'label' => $this->l('Min slides'),
                     'hint' => $this->l('The minimum number of slides to be shown. Slides will be sized down if carousel becomes smaller than the original size.'),
                     'name' => 'minSlides',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->minSlides) ? $options->minSlides : ''
                 ),
                 array(
@@ -285,7 +345,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'label' => $this->l('Max slides'),
                     'hint' => $this->l('The maximum number of slides to be shown. Slides will be sized up if carousel becomes larger than the original size.'),
                     'name' => 'maxSlides',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->maxSlides) ? $options->maxSlides : ''
                 ),
                 array(
@@ -295,7 +355,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'hint' => $this->l('Margin between each slide'),
                     'name' => 'slideMargin',
                     'suffix' => 'px',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->slideMargin) ? $options->slideMargin : ''
                 ),
                 array(
@@ -366,7 +426,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'label' => $this->l('Thumbnail width for pager'),
                     'name' => 'thumbnailWidth',
                     'suffix' => 'px',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->thumbnailWidth) ? $options->thumbnailWidth : 100,
                 ),
                 array(
@@ -418,11 +478,21 @@ class AdminSlidersController extends ModuleAdminController {
                 array(
                     'tab' => 'options',
                     'type' => 'text',
+                    'label' => $this->l('Pause'),
+                    'hint' => $this->l('The amount of time (in ms) between each auto transition. Default 4000ms'),
+                    'name' => 'pause',
+                    'suffix' => 'ms',
+                    'class' => 'fixed-width-sm',
+                    'default_value' => isset($options->pause) ? $options->pause : ''
+                ),
+                array(
+                    'tab' => 'options',
+                    'type' => 'text',
                     'label' => $this->l('Speed'),
                     'hint' => $this->l('Slide transition duration'),
                     'name' => 'speed',
                     'suffix' => 'ms',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->speed) ? $options->speed : ''
                 ),
                 array(
@@ -431,7 +501,7 @@ class AdminSlidersController extends ModuleAdminController {
                     'label' => $this->l('Start slide'),
                     'hint' => $this->l('Starting slide index (zero-based)'),
                     'name' => 'startSlide',
-                    'class' => 'fixed-width-xs',
+                    'class' => 'fixed-width-sm',
                     'default_value' => isset($options->startSlide) ? $options->startSlide : ''
                 ),
                 array(
