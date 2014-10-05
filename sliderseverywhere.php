@@ -117,21 +117,24 @@ class sliderseverywhere extends Module {
      * @return type
      */
     private function find_ids_from_hooks($hook) {
-        $hooks = Cache::retrieve(__CLASS__ . __FUNCTION__);
-        if ($hooks == -1)
+        $sliders = Cache::retrieve(__CLASS__ . __FUNCTION__);
+        if ($sliders == -1)
             return array();
-        if (!$hooks) {
-            $hooks = Sliders::load_all_hooks();
-            if ($hooks)
-                Cache::store(__CLASS__ . __FUNCTION__, $hooks);
+        if (!$sliders) {
+            $sliders = Sliders::getAll();
+            if ($sliders)
+                Cache::store(__CLASS__ . __FUNCTION__, $sliders);
             else
                 Cache::store(__CLASS__ . __FUNCTION__, -1);
         }
-        
+
         $ids = array();
-        foreach ($hooks as $h)
-            if ($hook == $h['hook'])
-                $ids[] = $h[Sliders::$definition['primary']];
+        foreach ($sliders as $slider) {
+            $options = Tools::jsonDecode($slider['options']);
+            if (!in_array($hook, $options->hooks))
+                continue;
+            $ids[] = $slider[Sliders::$definition['primary']];
+        }
 
         return $ids;
     }
@@ -205,5 +208,5 @@ class sliderseverywhere extends Module {
     public function hookDisplayBanner($params) {
         return $this->load_hook_sliders(__FUNCTION__);
     }
-   
+
 }

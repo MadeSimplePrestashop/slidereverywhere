@@ -60,7 +60,9 @@ class AdminSlidersController extends ModuleAdminController {
         $obj = $this->loadObject(true);
         if (!$obj)
             return;
-        
+
+        $par = Sliders::$definition['primary'];
+
         if (is_object($obj))
             $options = Tools::jsonDecode($obj->options);
         else
@@ -540,12 +542,6 @@ class AdminSlidersController extends ModuleAdminController {
                 'name' => 'submit',
             )
         );
-        $active_hooks = array();
-        if ($obj->id) {
-            $hooks = Sliders::get_hooks_by_id($obj->id);
-            foreach ($hooks as $hook)
-                $active_hooks[] = $hook['hook'];
-        }
         $query = array();
         foreach ($this->module->hooks as $hook)
             $query[]['name'] = $hook;
@@ -563,7 +559,7 @@ class AdminSlidersController extends ModuleAdminController {
                 'id' => 'name',
                 'name' => 'name'
             )
-            , 'default_value' => $active_hooks
+            , 'default_value' => $options->hooks
         );
 
         $this->fields_form['input'][] = array(
@@ -652,7 +648,6 @@ class AdminSlidersController extends ModuleAdminController {
         }
 
 
-        $par = Sliders::$definition['primary'];
         $this->page_header_toolbar_btn['new'] = array(
             'href' => $this->context->link->getAdminLink('AdminSlides') . '&' . Sliders::$definition['primary'] . '=' . $obj->$par,
             'desc' => $this->l('Go to slides'),
