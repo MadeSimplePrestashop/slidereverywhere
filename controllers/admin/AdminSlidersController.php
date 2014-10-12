@@ -26,6 +26,8 @@ class AdminSlidersController extends ModuleAdminController {
         $this->addRowAction('edit');
         $this->addRowAction('duplicate');
         $this->addRowAction('delete');
+        
+        Shop::addTableAssociation($this->table, array('type' => 'shop'));
 
         parent::__construct();
     }
