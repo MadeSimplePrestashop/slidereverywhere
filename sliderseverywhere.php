@@ -23,7 +23,7 @@ class sliderseverywhere extends Module {
     public function __construct() {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
-        $this->version = '1.1';
+        $this->version = '1.1.1';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
@@ -110,6 +110,19 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('function', $this->name, array('sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
+        if (!Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') != $this->getLiveEditToken()) {
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
+
+            $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.min.css');
+            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
+        }
     }
 
     /**
@@ -132,11 +145,12 @@ class sliderseverywhere extends Module {
         $ids = array();
         foreach ($sliders as $slider) {
             $options = Tools::jsonDecode($slider['options']);
+            if (!is_array($options->hooks))
+                continue;
             if (!in_array($hook, $options->hooks))
                 continue;
             $ids[] = $slider[Sliders::$definition['primary']];
         }
-
         return $ids;
     }
 
@@ -183,6 +197,11 @@ class sliderseverywhere extends Module {
     }
 
     public function hookDisplayFooter($params) {
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken() && Tools::getIsset('id_employee') && Tools::getIsset('id_shop')) {
+            $this->context->controller->addCSS($this->getPathUri() . 'views/css/inspector.css', 'all');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/inspector.js');
+        }
+
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
@@ -208,6 +227,12 @@ class sliderseverywhere extends Module {
 
     public function hookDisplayBanner($params) {
         return $this->load_hook_sliders(__FUNCTION__);
+    }
+
+    public function getLiveEditToken() {
+        return Tools::getAdminToken($this->name . (int) Tab::getIdFromClassName($this->name)
+                        . (is_object(Context::getContext()->employee) ? (int) Context::getContext()->employee->id :
+                                Tools::getValue('id_employee')));
     }
 
 }

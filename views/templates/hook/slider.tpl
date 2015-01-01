@@ -40,7 +40,11 @@
                         <ul class="bxslider{$bxcounter|intval}">
                             {foreach from=$slides item='slide' name='slider'}
                                 <li>
-                                    {if $slide.video}
+                                    {if $slide.builder}
+                                        <div class="az-container">
+                                        {$slide.builder|urldecode|escape:'UTF-8'}
+                                        </div>
+                                    {elseif $slide.video}
                                         {$slide.video|escape:'UTF-8' }
                                     {elseif $slide.image}
                                         {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}

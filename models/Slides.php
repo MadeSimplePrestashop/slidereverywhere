@@ -17,6 +17,7 @@ class Slides extends ObjectModel {
     public $caption;
     public $target;
     public $video;
+    public $builder;
     public $url;
     public $active;
     private static $parent_definition;
@@ -45,6 +46,7 @@ class Slides extends ObjectModel {
             'caption' => array('type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isString'),
             'url' => array('type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isString'),
             'video' => array('type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isString'),
+            'builder' => array('type' => self::TYPE_HTML),
             'target' => array('type' => self::TYPE_HTML, 'validate' => 'isString'),
             'position' => array('type' => self::TYPE_INT),
             'active' => array('type' => self::TYPE_INT)

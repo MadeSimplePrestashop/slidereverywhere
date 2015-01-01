@@ -17,8 +17,8 @@ class AdminSlidesController extends ModuleAdminController {
     protected static $parent_definition;
 
     public function __construct() {
-        
-        self::$parent_definition = Sliders::$definition;    
+
+        self::$parent_definition = Sliders::$definition;
 
         $this->bootstrap = true;
 
@@ -78,11 +78,28 @@ class AdminSlidesController extends ModuleAdminController {
             $image = $dir . $obj->image;
         } else
             $image = '';
+
+        $params = array('live_edit_token' => $this->module->getLiveEditToken(), 'id_employee' => $this->context->employee->id);
+        if ($obj->id)
+            $params[Slides::$definition['primary']] = $obj->id;
+        $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
+
+        $builder_value = '<input type="hidden" name="builder" id="builder" /><a href="' . $builder_url . '"  target="_blank"><button type="button"  class="btn btn-default">' . $this->l('Open builder in new window') . '</button></a>';
+        if (isset($obj) && isset($obj->builder) && empty($obj->builder) == false)
+            $builder_value .= '<br /><br /> <small>' . $this->l('Preview (not with full functionality, just preview)') . '</small> <br /><div id="az-preview" class="az-container">' . urldecode($obj->builder) . '</div>';
+
+        $this->fields_value = array('builder' => $builder_value);
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
                 'title' => $this->l('Slide'),
                 'icon' => 'icon-cogs'
+            ),
+            'tabs' => array(
+                'settings' => $this->l('Settings'),
+                'image' => $this->l('Image'),
+                'video' => $this->l('Video'),
+                'buildertab' => $this->l('Builder')
             ),
             'input' => array(
                 array(
@@ -90,6 +107,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => self::$parent_definition['primary']
                 ),
                 array(
+                    'tab' => 'image',
                     'type' => 'file',
                     'label' => $this->l('Image'),
                     'name' => 'image',
@@ -97,13 +115,15 @@ class AdminSlidesController extends ModuleAdminController {
                     'image' => $image ? ImageManager::thumbnail($image, 'thumb_detail_' . $obj->image, 200) : ''
                 ),
                 array(
+                    'tab' => 'video',
                     'type' => 'textarea',
                     'lang' => true,
                     'label' => $this->l('Embeded video'),
-                    'hint' => $this->l('Instead of image, you can add embeded video supported YouTube and Vimeo.'),
+                    'desc' => $this->l('Instead of image, you can add embeded video supported YouTube and Vimeo.'),
                     'name' => 'video',
                 ),
                 array(
+                    'tab' => 'image',
                     'type' => 'text',
                     'label' => $this->l('Caption'),
                     'hint' => $this->l('Short description for slide'),
@@ -111,6 +131,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => 'caption'
                 ),
                 array(
+                    'tab' => 'image',
                     'type' => 'text',
                     'label' => $this->l('Url'),
                     'hint' => $this->l('Associate    url (optional)'),
@@ -118,6 +139,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => 'url'
                 ),
                 'target' => array(
+                    'tab' => 'image',
                     'type' => 'select',
                     'label' => $this->l('Target'),
                     'name' => 'target',
@@ -150,6 +172,12 @@ class AdminSlidesController extends ModuleAdminController {
                     )
                 ),
                 array(
+                    'tab' => 'buildertab',
+                    'type' => 'free',
+                    'name' => 'builder',
+                ),
+                array(
+                    'tab' => 'settings',
                     'type' => 'switch',
                     'label' => $this->l('Active'),
                     'name' => 'active',
@@ -177,11 +205,29 @@ class AdminSlidesController extends ModuleAdminController {
 
         if (Shop::isFeatureActive()) {
             $this->fields_form['input'][] = array(
+                'tab' => 'settings',
                 'type' => 'shop',
                 'label' => $this->l('Shop association:'),
                 'name' => 'checkBoxShopAsso',
             );
         }
+       
+        
+        $this->page_header_toolbar_btn['save'] = array(
+            'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();',
+            'desc' => $this->l('Save')
+        );
+        $this->page_header_toolbar_btn['save-and-stay'] = array(
+            'short' => 'SaveAndStay',
+            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitStay");$("#' . $this->table . '_form button:submit").click();',
+            'desc' => $this->l('Save and stay'),
+            'force_desc' => true,
+        );
+        $this->page_header_toolbar_btn['delete'] = array(
+                'href' => $this->context->link->getAdminLink('AdminSlides', true),
+                'icon' => 'process-icon-cancel',
+                'desc' => $this->l('Back to slides list'),
+            );
 
 //back button
         $this->content.= '<script>

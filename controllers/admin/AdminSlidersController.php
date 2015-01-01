@@ -26,7 +26,7 @@ class AdminSlidersController extends ModuleAdminController {
         $this->addRowAction('edit');
         $this->addRowAction('duplicate');
         $this->addRowAction('delete');
-        
+
         Shop::addTableAssociation($this->table, array('type' => 'shop'));
 
         parent::__construct();
@@ -82,8 +82,8 @@ class AdminSlidersController extends ModuleAdminController {
 
         $root_category = Category::getRootCategory();
         $root_category = array('id_category' => $root_category->id, 'name' => $root_category->name);
-
         array_unshift($easing, array('name' => ''));
+
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
@@ -635,6 +635,22 @@ class AdminSlidersController extends ModuleAdminController {
         );
 
         $this->fields_form['input'][] = array(
+            array(
+                'id' => '',
+                'tab' => 'display',
+                'type' => 'textbutton',
+                'label' => 'Position on web',
+                'name' => 'element',
+                'button' => array(
+                    'label' => 'Select website element',
+                    'attributes' => array(
+                        'onclick' => 'alert(\'something done\');'
+                    )
+                )
+            )
+        );
+
+        $this->fields_form['input'][] = array(
             'tab' => 'display',
             'type' => 'categories',
             'label' => $this->l('Categories'),
@@ -730,6 +746,8 @@ class AdminSlidersController extends ModuleAdminController {
             'desc' => $this->l('Return to sliders list'),
             'icon' => 'process-icon-cancel'
         );
+        
+        
 
         $this->tpl_list_vars['title'] = 'test';
 
