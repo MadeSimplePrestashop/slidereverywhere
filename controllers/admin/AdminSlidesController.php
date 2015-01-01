@@ -64,16 +64,19 @@ class AdminSlidesController extends ModuleAdminController {
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . $obj->$par);
         elseif (Tools::getIsset('delete' . $this->table))
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . $obj->$par);
+        elseif (Tools::getIsset('submitStay'))
+            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminSlides') . '&' . Slides::$definition['primary'] . '=' . $this->object->id . '&update' . $this->table);
         elseif (Tools::isSubmit('submitAdd' . $this->table))
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']));
     }
 
     public function renderForm() {
 
+        $par = self::$parent_definition['primary'];
+
         if (!$obj = $this->loadObject(true))
             return;
         if ($obj->image) {
-            $par = self::$parent_definition['primary'];
             $dir = _PS_MODULE_DIR_ . $this->module->name . '/img/' . $obj->$par . '/';
             $image = $dir . $obj->image;
         } else
@@ -211,8 +214,8 @@ class AdminSlidesController extends ModuleAdminController {
                 'name' => 'checkBoxShopAsso',
             );
         }
-       
-        
+
+
         $this->page_header_toolbar_btn['save'] = array(
             'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();',
             'desc' => $this->l('Save')
@@ -224,10 +227,10 @@ class AdminSlidesController extends ModuleAdminController {
             'force_desc' => true,
         );
         $this->page_header_toolbar_btn['delete'] = array(
-                'href' => $this->context->link->getAdminLink('AdminSlides', true),
-                'icon' => 'process-icon-cancel',
-                'desc' => $this->l('Back to slides list'),
-            );
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . '=' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
+            'icon' => 'process-icon-cancel',
+            'desc' => $this->l('Back to slides list'),
+        );
 
 //back button
         $this->content.= '<script>

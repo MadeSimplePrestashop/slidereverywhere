@@ -746,8 +746,6 @@ class AdminSlidersController extends ModuleAdminController {
             'desc' => $this->l('Return to sliders list'),
             'icon' => 'process-icon-cancel'
         );
-        
-        
 
         $this->tpl_list_vars['title'] = 'test';
 
