@@ -72,6 +72,7 @@ class AdminSlidesController extends ModuleAdminController {
 
     public function renderForm() {
 
+        $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.css');
         $par = self::$parent_definition['primary'];
 
         if (!$obj = $this->loadObject(true))
@@ -87,9 +88,9 @@ class AdminSlidesController extends ModuleAdminController {
             $params[Slides::$definition['primary']] = $obj->id;
         $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
 
-        $builder_value = '<input type="hidden" name="builder" id="builder" /><a href="' . $builder_url . '"  target="_blank"><button type="button"  class="btn btn-default">' . $this->l('Open builder in new window') . '</button></a>';
-        if (isset($obj) && isset($obj->builder) && empty($obj->builder) == false)
-            $builder_value .= '<br /><br /> <small>' . $this->l('Preview (not with full functionality, just preview)') . '</small> <br /><div id="az-preview" class="az-container">' . urldecode($obj->builder) . '</div>';
+        $default_code = '<div id="b2" class="az-element az-row row" style="" data-az-id="b2" data-azb="az_row" data-azat-device="sm" data-azcnt="true"><div class="az-element az-ctnr az-column  col-sm-12" style="" data-az-id="b3" data-azb="az_column" data-azat-width="1/1" data-azcnt="true"><div class="az-element az-layers " data-az-id="b4" data-azb="az_layers" ></div></div></div>';
+        $builder_value = '<input type="hidden" value="' . (isset($obj) && isset($obj->builder) && empty($obj->builder) == false ? $obj->builder : urlencode($default_code)) . '" name="builder" id="builder" /><a href="' . $builder_url . '"  target="_blank"><button type="button"  class="btn btn-default">' . $this->l('Open builder in new window') . '</button></a>';
+        $builder_value .= '<br /><br /> <small>' . $this->l('Preview, just preview. Not fully functionalited. Border is not included.)') . '</small> <br /><br /><div class="az-container-case"><div id="az-preview" class="az-container">' . (isset($obj) && isset($obj->builder) && empty($obj->builder) == false ? urldecode($obj->builder) : '') . '</div></div>';
 
         $this->fields_value = array('builder' => $builder_value);
         $this->fields_form = array(

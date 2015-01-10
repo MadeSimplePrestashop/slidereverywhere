@@ -120,6 +120,7 @@ class sliderseverywhere extends Module {
 
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.min.css');
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
+            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_admin.css');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
         }
