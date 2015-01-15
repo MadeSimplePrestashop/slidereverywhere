@@ -154,16 +154,16 @@
             });
         }
     }
-    function azexo_save_container(type, name, shortcode) {
-        function enc(str) {
-            var encoded = "";
-            for (i = 0; i < str.length; i++) {
-                var a = str.charCodeAt(i);
-                var b = a ^ 7;
-                encoded = encoded + String.fromCharCode(b);
-            }
-            return encoded;
+    function enc(str) {
+        var encoded = "";
+        for (i = 0; i < str.length; i++) {
+            var a = str.charCodeAt(i);
+            var b = a ^ 7;
+            encoded = encoded + String.fromCharCode(b);
         }
+        return encoded;
+    }
+    function azexo_save_container(type, name, shortcode) {
         if ('ajaxurl' in window) {
             $.ajax({
                 type: 'POST',
@@ -225,6 +225,10 @@
                     callback('');
                 });
             } else {
+                if (azexo_exporter) {
+                    callback('');
+                    return;
+                }
                 type = (type === '') ? 'default' : type;
                 var url = window.azexo_baseurl + '../azexo_containers/' + type + '/' + name;
                 $.ajax({
@@ -238,6 +242,10 @@
                 });
             }
         } else {
+            if (azexo_exporter) {
+                callback('');
+                return;
+            }
             type = (type === '') ? 'default' : type;
             azexo_add_js({
                 path: '../azexo_containers/' + type + '/' + name + '.js',
@@ -248,8 +256,6 @@
             });
         }
     }
-    
-   
     // -- cms elements ---
     function azexo_get_cms_element_names(callback) {
         if ('azexo_cms_element_names' in window) {
@@ -317,7 +323,7 @@
     function azexo_get_elements(callback) {
         if ('azexo_template_elements' in window) {
             for (var name in window.azexo_template_elements) {
-                window.azexo_template_elements[name] = decodeURIComponent(atob(window.azexo_template_elements[name]));
+                window.azexo_template_elements[name].html = decodeURIComponent(atob(window.azexo_template_elements[name].html));
             }
             callback(window.azexo_template_elements);
             return;
@@ -328,6 +334,7 @@
                 url: window.azexo_baseurl + 'ajax.php',
                 data: {
                     action: 'get_elements',
+                    url: window.location.href,
                 },
                 dataType: "json",
                 cache: !window.azexo_editor,
@@ -340,7 +347,7 @@
                 path: '../azexo_elements/elements.js',
                 callback: function() {
                     for (var name in azexo_template_elements) {
-                        azexo_template_elements[name] = decodeURIComponent(atob(azexo_template_elements[name]));
+                        azexo_template_elements[name].html = decodeURIComponent(atob(azexo_template_elements[name].html));
                     }
                     callback(azexo_template_elements);
                 }
@@ -668,6 +675,41 @@
                         values: values,
                     },
                     dataType: "json",
+                    cache: false,
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            }
+        } else {
+            callback('');
+        }
+    }
+    function azexo_export(site, callback) {
+        if (window.azexo_online) {
+            if ('ajaxurl' in window) {
+                $.ajax({
+                    type: 'POST',
+                    url: window.ajaxurl,
+                    data: {
+                        action: 'azexo_export',
+                        url: window.location.href,
+                        site: site,
+                    },
+                    cache: false,
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: window.azexo_baseurl + 'ajax.php',
+                    data: {
+                        action: 'export',
+                        url: window.location.href,
+                        site: site,
+                    },
                     cache: false,
                     context: this
                 }).done(function(data) {
@@ -1144,13 +1186,13 @@
     }
     $.fn.closest_descendents = function(filter) {
         var $found = $(),
-                $currentSet = this; // Current place
+                $currentSet = this;
         while ($currentSet.length) {
             $found = $.merge($found, $currentSet.filter(filter));
             $currentSet = $currentSet.not(filter);
             $currentSet = $currentSet.children();
         }
-        return $found; // Return first match of the collection
+        return $found;
     }
     // ------------------PARAMS------------------------------------
     function BaseParamType() {
@@ -1301,10 +1343,13 @@
                         return false;
                     }
                 }
-                callback.call(element, values);
                 $('#az-editor-modal')[fp + 'modal']("hide");
+                callback.call(element, values);
                 return false;
             });
+            $('#az-editor-modal').find('[data-dismiss="modal"]').click(function() {
+                azexo_elements.edit_stack = [];
+            });                        
             $('#az-editor-modal')[fp + 'modal']('show');
         },
         opened: function() {
@@ -1464,7 +1509,7 @@
     // ------------------CORE------------------------------------
     window.azexo_add_css = function(path, callback) {
         var url = window.azexo_baseurl + path;
-        if ($('link[href*="' + url + '"]').length) {
+        if ($('link[href*="' + url + '"]').length || 'azexo_exported' in window) {
             callback();
             return;
         }
@@ -1494,7 +1539,7 @@
         }
     }
     window.azexo_add_js = function(options) {
-        if ('loaded' in options && options.loaded) {
+        if ('loaded' in options && options.loaded || 'azexo_exported' in window) {
             options.callback();
         } else {
             azexo_add_external_js(window.azexo_baseurl + options.path, 'callback' in options ? options.callback : function() {
@@ -1539,6 +1584,7 @@
         elements_instances_by_an_name: {},
         template_elements_loaded: false,
         cms_elements_loaded: false,
+        edit_stack: [],
         try_render_unknown_elements: function() {
             if (this.template_elements_loaded && this.cms_elements_loaded) {
                 for (var id in azexo_elements.elements_instances) {
@@ -1565,114 +1611,296 @@
             }
         },
         create_template_elements: function(elements) {
-            for (var name in elements) {
-                var template = elements[name];
+            var editable = [];
+            if ('azexo_editable' in window)
+                editable = window.azexo_editable;
+            var styleable = [];
+            if ('azexo_styleable' in window)
+                styleable = window.azexo_styleable;
+            var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
+                return item.replace(/^/, '.').replace(/ /, '.')
+            });
+            var icon_selector = icons.join(', ');
+            for (var path in elements) {
+                var name = elements[path].name;
+                var template = elements[path].html;
+                var thumbnail = '';
+                if ('thumbnail' in elements[path])
+                    thumbnail = elements[path].thumbnail;
 
-                var TemplateElement = function(parent, parse) {
+                var TemplateElement = function(parent, position) {
                     TemplateElement.baseclass.apply(this, arguments);
+                    this.content = this.template;
                 }
-                register_animated_element(name, false, TemplateElement);
+                register_element(name, false, TemplateElement);
+
                 mixin(TemplateElement.prototype, {
                     name: name,
                     icon: 'fa fa-cube',
                     description: t(''),
                     template: template,
+                    thumbnail: thumbnail,
                     params: [
                     ].concat(TemplateElement.prototype.params),
-                    show_settings_on_create: true,
+                    show_settings_on_create: false,
                     has_content: true,
                     category: 'Template-elements',
-                    render: function($, p, fp) {
-                        var template = this.template;
-                        for (var i = 0; i < this.params.length; i++) {
-                            var value = this.attrs[this.params[i].param_name];
-                            //
-                            if (this.params[i].type == 'textfield') {
-                                template = template.replace('[[' + this.params[i].param_name + ']]', value);
+                    editable: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', '.az-editable'].concat(editable),
+                    styleable: ['.az-styleable'].concat(styleable),
+                    show_controls: function() {
+                        if (window.azexo_editor) {
+                            TemplateElement.baseclass.prototype.show_controls.apply(this, arguments);
+                            var editor_opener = function () {
+                                if(azexo_elements.edit_stack.length > 0) {
+                                    var args = azexo_elements.edit_stack.shift();
+                                    open_editor(args.node, args.edit, args.style, editor_opener);
+                                }                                                
                             }
-                            //
-                            if (this.params[i].type == 'textarea') {
-                                template = template.replace('{{' + this.params[i].param_name + '}}', value);
+                            function open_editor(node, edit, style, callback) {
+                                var params = [];
+                                var image = '';
+                                var link = '';
+                                var icon = '';
+                                var content = $.trim($(node).text());
+                                if (content != '') {
+                                    content = $(node).html();
+                                }
+                                if (edit) {
+                                    if ($(node).is(icon_selector)) {
+                                        for (var i = 0; i < icons.length; i++) {
+                                            if ($(node).is(icons[i])) {
+                                                icon = icons[i].split('.');
+                                                icon.shift();
+                                                icon = icon.join(' ');
+                                                break;
+                                            }
+                                        }
+                                        params.push(make_param_type({
+                                            type: 'icon',
+                                            heading: t('Icon'),
+                                            param_name: 'icon',
+                                        }));
+                                    }
+                                    if ($(node).prop("tagName") != 'IMG') {
+                                        if (content != '') {
+                                            params.push(make_param_type({
+                                                type: 'textarea',
+                                                heading: t('Content'),
+                                                param_name: 'content',
+                                            }));
+                                        }
+                                    } else {
+                                        image = $(node).attr('src');
+                                        params.push(make_param_type({
+                                            type: 'image',
+                                            heading: t('Image'),
+                                            param_name: 'image',
+                                            description: t('Select image from media library.'),
+                                        }));
+                                    }
+                                    if ($(node).prop("tagName") == 'A') {
+                                        link = $(node).attr('href');
+                                        params.push(make_param_type({
+                                            type: 'link',
+                                            heading: t('Link'),
+                                            param_name: 'link',
+                                            description: t('Conent link (url).'),
+                                        }));
+                                    }
+                                }
+                                if (style) {
+                                    params.push(make_param_type({
+                                        type: 'textfield',
+                                        heading: t('Content classes'),
+                                        param_name: 'el_class',
+                                        description: t('If you wish to style particular content element differently, then use this field to add a class name and then refer to it in your css file.')
+                                    }));
+                                    params.push(make_param_type({
+                                        type: 'style',
+                                        heading: t('Content style'),
+                                        param_name: 'style',
+                                        description: t('Style options.'),
+                                        tab: t('Style')
+                                    }));
+                                }
+                                $(node).removeClass('editable-highlight');
+                                $(node).removeClass('styleable-highlight');
+                                $(node).removeClass(icon);
+                                var classes = $(node).attr('class');
+                                $(node).addClass(icon);
+                                if (typeof classes === typeof undefined || classes === false) {
+                                    classes = '';
+                                }
+                                var styles = $(node).attr('style');
+                                if (typeof styles === typeof undefined || styles === false) {
+                                    styles = '';
+                                }
+                                BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
+                                    if (edit) {
+                                        if (icon != '') {
+                                            $(node).removeClass(icon);
+                                            values['el_class'] = values['el_class'] + ' ' + values['icon'];
+                                        }
+                                        if ($(node).prop("tagName") == 'A') {
+                                            $(node).attr('href', values['link']);
+                                        }
+                                        if ($(node).prop("tagName") == 'IMG') {
+                                            $(node).attr('src', values['image']);
+                                        } else {
+                                            if (content != '' && values['content'] != '') {
+                                                $(node).html(values['content']);
+                                            }
+                                        }
+                                    }
+                                    if (style) {
+                                        $(node).attr('class', values['el_class']);
+                                        $(node).attr('style', values['style']);
+                                    }
+                                    callback();
+                                });
                             }
-                            //
-                            if (this.params[i].type == 'image') {
-                                template = template.replace('((' + this.params[i].param_name + '))', value);
+                            for (var i = 0; i < this.styleable.length; i++) {
+                                $(this.dom_element).find(this.styleable[i]).mouseenter(function() {
+                                    $(this).addClass('styleable-highlight');
+                                });
+                                $(this.dom_element).find(this.styleable[i]).mouseleave(function() {
+                                    $(this).removeClass('styleable-highligpushht');
+                                });
+                                $(this.dom_element).find(this.styleable[i]).click(function(e) {
+                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: false,
+                                            style: true,
+                                        });                                        
+                                        editor_opener();
+                                        return false;
+                                    } else {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: false,
+                                            style: true,
+                                        });                                        
+                                    }
+                                });
                             }
-                            //
-                            if (this.params[i].type == 'link') {
-                                template = template.replace('<<' + this.params[i].param_name + '>>', value);
+                            for (var i = 0; i < this.editable.length; i++) {
+                                $(this.dom_element).find(this.editable[i]).mouseenter(function() {
+                                    $(this).addClass('editable-highlight');
+                                });
+                                $(this.dom_element).find(this.editable[i]).mouseleave(function() {
+                                    $(this).removeClass('editable-highlight');
+                                });
+                                $(this.dom_element).find(this.editable[i]).click(function(e) {
+                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: true,
+                                            style: true,
+                                        });
+                                        editor_opener();                                            
+                                        return false;
+                                    } else {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: true,
+                                            style: true,
+                                        });
+                                    }
+                                });
                             }
                         }
-                        this.dom_element = $('<div class="az-element az-template ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + template + '</div>');
+                    },
+                    render: function($, p, fp) {
+                        this.dom_element = $('<div class="az-element az-template ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.content + '</div>');
                         this.dom_content_element = this.dom_element;
                         TemplateElement.baseclass.prototype.render.apply(this, arguments);
                     },
                 });
-                //
-                var pattern = /\[\[([^\]]*)\]\]/g;
-                var i = 0;
-                var match = {};
-                while ((match = pattern.exec(template)) != null) {
-                    var param = make_param_type({
-                        type: 'textfield',
-                        param_name: 'param' + i,
-                        value: match[1]
-                    });
-                    TemplateElement.prototype.params.unshift(param);
-                    template = substr_replace(template, '[[param' + i + ']]', match.index, match[0].length);
-                    i++;
-                }
-                TemplateElement.prototype.template = template;
-                //
-                var pattern = /\{\{([^\}]*)\}\}/g;
-                while ((match = pattern.exec(template)) != null) {
-                    var param = make_param_type({
-                        type: 'textarea',
-                        param_name: 'param' + i,
-                        value: match[1]
-                    });
-                    TemplateElement.prototype.params.unshift(param);
-                    template = substr_replace(template, '{{param' + i + '}}', match.index, match[0].length);
-                    i++;
-                }
-                TemplateElement.prototype.template = template;
-                //
-                var pattern = /\(\(([^\)]*)\)\)/g;
-                while ((match = pattern.exec(template)) != null) {
-                    var param = make_param_type({
-                        type: 'image',
-                        param_name: 'param' + i,
-                        value: match[1]
-                    });
-                    TemplateElement.prototype.params.unshift(param);
-                    template = substr_replace(template, '((param' + i + '))', match.index, match[0].length);
-                    i++;
-                }
-                TemplateElement.prototype.template = template;
-                //
-                var pattern = /\<\<([^\>]*)\>\>/g;
-                while ((match = pattern.exec(template)) != null) {
-                    var param = make_param_type({
-                        type: 'link',
-                        param_name: 'param' + i,
-                        value: match[1]
-                    });
-                    TemplateElement.prototype.params.unshift(param);
-                    template = substr_replace(template, '<<param' + i + '>>', match.index, match[0].length);
-                    i++;
-                }
-                TemplateElement.prototype.template = template;
             }
             this.template_elements_loaded = true;
+            make_azexo_extend();
             this.try_render_unknown_elements();
+            if (window.azexo_editor) {
+                var menu = {'_': []};
+                for (var path in elements) {
+                    var folders = path.split('|');
+                    folders.pop();
+                    var current = menu;
+                    for (var i = 0; i < folders.length; i++) {
+                        if (!(folders[i] in current))
+                            current[folders[i]] = {'_': []};
+                        current = current[folders[i]];
+                    }
+                    current['_'].push(elements[path]);
+                }
+                var panel = $('<div id="az-template-elements" class="az-right-sidebar"></div>').appendTo('body');
+                $('<h3>' + t('Template-elements') + '</h3>').appendTo(panel);
+                function build_menu(item) {
+                    if (Object.keys(item).length === 1 && ('_' in item))
+                        return null;
+                    var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
+                    for (var name in item) {
+                        if (name != '_') {
+                            var li = $('<li></li>').appendTo(m);
+                            var it = item[name];
+                            $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
+                                var menu_item = this;
+                                $(thumbnails).empty();
+                                for (var i = 0; i < it['_'].length; i++) {
+                                    $('<div class="az-thumbnail" data-az-base="' + it['_'][i].name + '" style="background-image: url(' + encodeURI(it['_'][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
+                                }
+                                $(thumbnails).sortable({
+                                    items: '.az-thumbnail',
+                                    connectWith: '.az-ctnr',
+                                    start: function(event, ui) {
+                                        $(panel).css('right', '0px');
+                                    },
+                                    stop: function(event, ui) {
+                                        $(panel).css('right', '');
+                                    },
+                                    update: function(event, ui) {
+                                        var container = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
+                                        var postition = 0;
+                                        var children = $(ui.item).parent().find('[data-az-id], .az-thumbnail');
+                                        for (var i = 0; i < children.length; i++) {
+                                            if ($(children[i]).hasClass('az-thumbnail')) {
+                                                postition = i;
+                                                break;
+                                            }
+                                        }
+                                        var element = azexo_elements.create_element(container, $(ui.item).attr('data-az-base'), postition, function() {
+                                        });
+                                        $(ui.item).detach();
+                                        $(menu_item).click();
+                                    },
+                                    placeholder: 'az-sortable-placeholder',
+                                    forcePlaceholderSize: true,
+                                    over: function(event, ui) {
+                                        ui.placeholder.attr('class', ui.helper.attr('class'));
+                                        ui.placeholder.removeClass('ui-sortable-helper');
+                                        ui.placeholder.addClass('az-sortable-placeholder');
+                                    }
+                                });
+                                return false;
+                            });
+                            $(li).append(build_menu(item[name]));
+                        }
+                    }
+                    return m;
+                }
+                $(panel).append(build_menu(menu));
+                $('<hr>').appendTo(panel);
+                var thumbnails = $('<div id="az-thumbnails"></div>').appendTo(panel);
+            }
         },
         create_cms_elements: function(elements) {
             for (var key in elements) {
                 var base = 'az_' + key;
-                var CMSElement = function(parent, parse) {
+                var CMSElement = function(parent, position) {
                     CMSElement.baseclass.apply(this, arguments);
                 }
-                register_animated_element(base, false, CMSElement);
+                register_element(base, false, CMSElement);
                 mixin(CMSElement.prototype, {
                     name: elements[key],
                     icon: 'fa fa-cube',
@@ -1727,7 +1955,34 @@
                 });
             }
             this.cms_elements_loaded = true;
+            make_azexo_extend();
             this.try_render_unknown_elements();
+        },
+        create_element: function(container, base, position, pre_render_callback) {
+            var depth = container.get_nested_depth(base);
+            if (depth < BaseElement.prototype.max_nested_depth) {
+
+                if (container instanceof ContainerElement && container.parent == null && base != 'az_section') {
+                    var section = new SectionElement(container, position);
+                    section.update_dom();
+                    var constructor = BaseElement.prototype.elements[base];
+                    var child = new constructor(section, false);
+                    pre_render_callback(child);
+                    child.update_dom();
+                    container.update_empty();
+                    section.update_empty();
+                } else {
+                    var constructor = BaseElement.prototype.elements[base];
+                    var child = new constructor(container, position);
+                    pre_render_callback(child);
+                    child.update_dom();
+                    container.update_empty();
+                }
+                return child;
+            } else {
+                alert(t('Element can not be added. Max nested depth reached.'));
+            }
+            return false;
         },
         make_elements_modal: function(container, pre_render_callback) {
             var disallowed_elements = container.get_all_disallowed_elements();
@@ -1748,6 +2003,9 @@
             var elements_tabs = $('<div id="az-elements-tabs"></div>');
             var i = 0;
             var menu = '<ul class="' + p + 'nav ' + p + 'nav-tabs">';
+            //edited kuzmany.biz    
+            delete tabs['Layout'];
+            delete tabs['Wizard'];
             for (var title in tabs) {
                 i++;
                 if (title === '')
@@ -1781,34 +2039,12 @@
             $(elements_tabs).find('> ul a:first')[fp + 'tab']('show');
             $(elements_modal).find('[data-az-element]').click(function() {
                 var key = $(this).attr('data-az-element');
-
-                var depth = container.get_nested_depth(key);
-                if (depth < BaseElement.prototype.max_nested_depth) {
-
-                    if (container instanceof ContainerElement && container.parent == null && (key != 'az_row' && key != 'az_section')) {
-                        var row = new RowElement(container, false);
-                        row.update_dom();
-
-                        var constructor = BaseElement.prototype.elements[key];
-                        var child = new constructor(row.children[0], false);
-                        pre_render_callback(child);
-                        child.update_dom();
-                        container.update_empty();
-                        row.children[0].update_empty();
-                        row.update_empty();
-                    } else {
-                        var constructor = BaseElement.prototype.elements[key];
-                        var child = new constructor(container, false);
-                        pre_render_callback(child);
-                        child.update_dom();
-                        container.update_empty();
-                    }
+                var child = azexo_elements.create_element(container, key, false, pre_render_callback);
+                if (child) {
                     $('#az-elements-modal')[fp + 'modal']("hide");
                     if (child.show_settings_on_create) {
                         child.edit();
                     }
-                } else {
-                    alert(t('Element can not be added. Max nested depth reached.'));
                 }
             });
             if (window.azexo_online)
@@ -1861,25 +2097,29 @@
             $(document).trigger("azexo_delete_element", id);
             delete this.elements_instances[id];
         },
-        add_element: function(id, element, parse) {
+        add_element: function(id, element, position) {
             this.elements_instances[id] = element;
-            $(document).trigger("azexo_add_element", {id: id, parse: parse});
+            $(document).trigger("azexo_add_element", {id: id, position: position});
         },
     });
 //
 //
 //
-    function BaseElement(parent, parse) {
+    function BaseElement(parent, position) {
         if (azexo_frontend)
             this.id = _.uniqueId('f');
         else
             this.id = _.uniqueId('b');
         if (parent != null) {
             this.parent = parent;
-            if (parse)
-                parent.children.push(this);
-            else
-                parent.children.unshift(this);
+            if (typeof position === 'boolean') {
+                if (position)
+                    parent.children.push(this);
+                else
+                    parent.children.unshift(this);
+            } else {
+                parent.children.splice(position, 0, this);
+            }
         }
         //
         this.children = [];
@@ -1905,10 +2145,13 @@
             }
         }
         this.controls = null;
-        azexo_elements.add_element(this.id, this, parse);
+        azexo_elements.add_element(this.id, this, position);
     }
+    var classes = {};
+    if ('azexo_classes' in window)
+        classes = window.azexo_classes;
     BaseElement.prototype = {
-        el_classes: _.object([p + 'optgroup-bootstrap', p + 'bg-primary', p + 'text-primary', p + 'bg-success', p + 'text-success', p + 'bg-default', p + 'text-default', p + 'text-muted', p + 'small', p + 'text-left', p + 'text-right', p + 'text-center', p + 'text-justify', p + 'pull-left', p + 'pull-right', p + 'center-block', p + 'well', p + 'visible-xs-block', p + 'visible-sm-block', p + 'visible-md-block', p + 'visible-lg-block', p + 'hidden-xs', p + 'hidden-sm', p + 'hidden-md', p + 'hidden-lg'], [t("Bootstrap classes"), t("Background primary style"), t("Text primary style"), t("Background success style"), t("Text success style"), t("Background default style"), t("Text default style"), t("Text muted style"), t("Text small style"), t("Text align left"), t("Text align right"), t("Text align center"), t("Text align justify"), t("Pull left"), t("Pull right"), t("Block align center"), t("Well"), t("Visible on extra small devices, phones (<768px)"), t("Visible on small devices, tablets (≥768px)"), t("Visible on medium devices, desktops (≥992px)"), t("Visible onn large devices, desktops (≥1200px)"), t("Hidden on extra small devices, phones (<768px)"), t("Hidden on small devices, tablets (≥768px)"), t("Hidden on medium devices, desktops (≥992px)"), t("Hidden on large devices, desktops (≥1200px)")]),
+        el_classes: $.extend(_.object([p + 'optgroup-bootstrap', p + 'bg-primary', p + 'text-primary', p + 'bg-success', p + 'text-success', p + 'bg-default', p + 'text-default', p + 'text-muted', p + 'small', p + 'text-left', p + 'text-right', p + 'text-center', p + 'text-justify', p + 'pull-left', p + 'pull-right', p + 'center-block', p + 'well', p + 'visible-xs-block', p + 'visible-sm-block', p + 'visible-md-block', p + 'visible-lg-block', p + 'hidden-xs', p + 'hidden-sm', p + 'hidden-md', p + 'hidden-lg'], [t("Bootstrap classes"), t("Background primary style"), t("Text primary style"), t("Background success style"), t("Text success style"), t("Background default style"), t("Text default style"), t("Text muted style"), t("Text small style"), t("Text align left"), t("Text align right"), t("Text align center"), t("Text align justify"), t("Pull left"), t("Pull right"), t("Block align center"), t("Well"), t("Visible on extra small devices, phones (<768px)"), t("Visible on small devices, tablets (≥768px)"), t("Visible on medium devices, desktops (≥992px)"), t("Visible on large devices, desktops (≥1200px)"), t("Hidden on extra small devices, phones (<768px)"), t("Hidden on small devices, tablets (≥768px)"), t("Hidden on medium devices, desktops (≥992px)"), t("Hidden on large devices, desktops (≥1200px)")]), classes),
         elements: {},
         tags: {},
         max_nested_depth: 3,
@@ -2000,6 +2243,7 @@
             }),
         ],
         icon: '',
+        thumbnail: '',
         is_container: false,
         has_content: false,
         frontend_render: false,
@@ -2010,6 +2254,7 @@
         disallowed_elements: [],
         show_parent_controls: false,
         highlighted: true,
+        style_selector: '',
         controls_position: function() {
             if (!this.is_container || this.has_content) {
                 var element_height = $(this.dom_element).height();
@@ -2218,7 +2463,11 @@
             }
         },
         get_button: function() {
-            return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'pull-left ' + p + 'text-overflow" data-az-element="' + this.base + '"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
+            if (this.thumbnail == '') {
+                return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'pull-left ' + p + 'text-overflow" data-az-element="' + this.base + '"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
+            } else {
+                return '<div class="' + p + 'well ' + p + 'pull-left" data-az-element="' + this.base + '" style="background-image: url(' + encodeURI(this.thumbnail) + '); background-position: center center; background-size: cover;"></div>';
+            }
         },
         click_add: function(e) {
             e.data.object.add();
@@ -2278,6 +2527,12 @@
             }
             this.showed($, p, fp);
         },
+        get_hover_style: function() {
+            if ('hover_style' in this.attrs)
+                return '<style id="hover-style-' + this.id + '">.hover-style-' + this.id + ':hover ' + this.style_selector + ' { ' + this.attrs['hover_style'] + '} </style>';
+            else
+                return '';
+        },
         showed: function($, p, fp) {
             if ('pos_left' in this.attrs && this.attrs['pos_left'] != '')
                 $(this.dom_element).css("left", this.attrs['pos_left']);
@@ -2294,12 +2549,27 @@
             if ('pos_zindex' in this.attrs && this.attrs['pos_zindex'] != '')
                 $(this.dom_element).css("z-index", this.attrs['pos_zindex']);
             if ('hover_style' in this.attrs && this.attrs['hover_style'] != '') {
-                $('head').append("<style>.hover-style-" + this.id + ":hover { " + this.attrs['hover_style'] + " } </style>");
+                $('head').find('#hover-style-' + this.id).remove();
+                $('head').append(this.get_hover_style());
                 $(this.dom_element).addClass('hover-style-' + this.id);
             }
         },
         render: function($, p, fp) {
             $(this.dom_element).attr('data-az-id', this.id);
+        },
+        trigger_start_in_animation: function() {
+            for (var i = 0; i < this.children.length; i++) {
+                if ('trigger_start_in_animation' in this.children[i]) {
+                    this.children[i].trigger_start_in_animation();
+                }
+            }
+        },
+        trigger_start_out_animation: function() {
+            for (var i = 0; i < this.children.length; i++) {
+                if ('trigger_start_out_animation' in this.children[i]) {
+                    this.children[i].trigger_start_out_animation();
+                }
+            }
         },
         update_data: function() {
             $(this.dom_element).attr('data-azb', this.base);
@@ -2353,37 +2623,16 @@
         },
         update_sorting: function(event, ui) {
             var element = azexo_elements.get_element($(ui.item).closest('[data-az-id]').attr('data-az-id'));
-            ui.source = azexo_elements.get_element($(this).closest('[data-az-id]').attr('data-az-id'));
-            ui.from_pos = element.get_child_position();
-            ui.source.update_sorting_children();
-//            var options = $(this).sortable('option');
-//            var children = [];
-//            $(this).find(options.items).each(function() {
-//                children.push(azexo_elements.get_element($(this).attr('data-az-id')));
-//            });
-//            source.children = children;
-//            for (var i = 0; i < source.children.length; i++)
-//                source.children[i].parent = source;
-//            source.update_empty();            
-            ui.target = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
-            if (ui.source.id != ui.target.id)
-                ui.target.update_sorting_children();
-            ui.to_pos = element.get_child_position();
-
-
-//            if (!_.isNull(ui.sender)) {
-//                var sender_options = $(ui.sender).sortable('option');
-//                var sender = azexo_elements.get_element($(ui.sender).closest('[data-az-id]').attr('data-az-id'));
-//                var children = [];
-//                $(ui.sender).find(sender_options.items).each(function() {
-//                    children.push(azexo_elements.get_element($(this).attr('data-az-id')));
-//                });
-//                sender.children = children;
-//                for (var i = 0; i < sender.children.length; i++)
-//                    sender.children[i].parent = sender;
-//                sender.update_empty();
-//            }
-            $(document).trigger("azexo_update_sorting", ui);
+            if (element) {
+                ui.source = azexo_elements.get_element($(this).closest('[data-az-id]').attr('data-az-id'));
+                ui.from_pos = element.get_child_position();
+                ui.source.update_sorting_children();
+                ui.target = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
+                if (ui.source.id != ui.target.id)
+                    ui.target.update_sorting_children();
+                ui.to_pos = element.get_child_position();
+                $(document).trigger("azexo_update_sorting", ui);
+            }
         },
         click_edit: function(e) {
             e.data.object.edit();
@@ -2540,8 +2789,8 @@
 
                 if (this.get_nested_depth(shortcode) > BaseElement.prototype.max_nested_depth)
                     return;
-                if (this instanceof ContainerElement && this.parent == null && (shortcode != 'az_row' && shortcode != 'az_section')) {
-                    this.parse_shortcode('[az_row][az_column width="1/1"]' + content + '[/az_column][/az_row]');
+                if (this instanceof ContainerElement && this.parent == null && shortcode != 'az_section') {
+                    this.parse_shortcode('[az_section]' + content + '[/az_section]');
                     return;
                 }
                 var constructor = UnknownElement;
@@ -2805,7 +3054,7 @@
 //
 //
 //
-    function UnknownElement(parent, parse) {
+    function UnknownElement(parent, position) {
         UnknownElement.baseclass.apply(this, arguments);
     }
     register_element('az_unknown', true, UnknownElement);
@@ -2847,7 +3096,6 @@
     azexo_elements = new AZEXOElements();
     if (!('azexo_editor' in window))
         window.azexo_editor = false;
-
     function toggle_editor_controls() {
         if (window.azexo_editor) {
             azexo_add_css('css/font-awesome.css', function() {
@@ -2868,6 +3116,7 @@
                 }
                 el.update_sortable();
             }
+            $('#az-exporter').show();
         } else {
             for (var id in azexo_elements.elements_instances) {
                 var el = azexo_elements.elements_instances[id];
@@ -2879,6 +3128,7 @@
                 }
                 el.update_empty();
             }
+            $('#az-exporter').hide();
         }
     }
     function try_login() {
@@ -2888,6 +3138,8 @@
         azexo_login(function(data) {
             window.azexo_editor = data;
             toggle_editor_controls();
+            if (!data && azexo_exporter)
+                open_settings_form();
         });
     }
     try_login();
@@ -2905,13 +3157,15 @@
     }
     onReadyFirst(function() {
         azexo_load();
+        if (azexo_exporter)
+            enable_exporter();
         $.holdReady(false);
     });
     function connect_container(dom_element) {
         if ($(dom_element).length > 0) {
             var html = $(dom_element).html();
             var match = /^\s*\<[\s\S]*\>\s*$/.exec(html);
-            if (match || html == '') {
+            if (match || (html == '' && 'ajaxurl' in window)) {
                 $(dom_element).find('> script').detach().appendTo('head');
                 $(dom_element).find('> link[href]').detach().appendTo('head');
                 //$(dom_element).find('> script').remove();
@@ -2955,7 +3209,11 @@
                 $(container.dom_element).attr('style', $(dom_element).attr('style'));
                 $(container.dom_element).css('display', '');
                 $(container.dom_element).addClass('azexo');
+                var type = $(dom_element).attr('data-az-type');
+                var name = $(dom_element).attr('data-az-name');
                 $(dom_element).replaceWith(container.dom_element);
+                $(container.dom_element).attr('data-az-type', type);
+                $(container.dom_element).attr('data-az-name', name);
                 container.showed($, p, fp);
                 if (window.azexo_editor)
                     container.show_controls();
@@ -2968,6 +3226,34 @@
         return null;
     }
     var azexo_loaded = false;
+    function open_settings_form() {
+        $('#az-admin-modal').remove();
+        var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Azexo Composer") + '</h4></div>';
+        var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+        var modal = $('<div id="az-admin-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+        var form = null;
+        azexo_get_settings_form(function(data) {
+            if (data.length > 0 && data != '0' && data != 'false') {
+                form = $(data);
+                $(modal).find('.' + p + 'modal-body').append(form);
+                if (window.azexo_editor) {
+                    $('<button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Logout") + '</button>').appendTo('#az-admin-modal .modal-footer').click(function() {
+                        setCookie('azexo_password', '', null);
+                        window.location.reload();
+                    });
+                }
+                $('#az-admin-modal').find('.save').click(function() {
+                    azexo_submit_settings_form(form.serialize(), function(data) {
+                        if (data)
+                            window.location.reload();
+                        $('#az-admin-modal')[fp + 'modal']("hide");
+                    });
+                    return false;
+                });
+                $('#az-admin-modal')[fp + 'modal']('show');
+            }
+        });
+    }
     function azexo_load() {
         if (azexo_loaded)
             return;
@@ -2984,41 +3270,7 @@
         }
         $('body').on('keydown.azexo', function(event) {
             if (event.ctrlKey && event.altKey) {
-                $('#az-admin-modal').remove();
-                var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Admin area") + '</h4></div>';
-                var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
-                var modal = $('<div id="az-admin-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                var form = null;
-                if (window.azexo_editor) {
-                    azexo_get_settings_form(function(data) {
-                        if (data.length > 0 && data != '0' && data != 'false') {
-                            form = $(data);
-                            $(modal).find('.' + p + 'modal-body').append(form);
-                            $('<button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Logout") + '</button>').appendTo('#az-admin-modal .modal-footer').click(function() {
-                                setCookie('azexo_password', '', null);
-                                window.azexo_editor = false;
-                                toggle_editor_controls();
-                            });
-                            $('#az-admin-modal').find('.save').click(function() {
-                                azexo_submit_settings_form(form.serialize(), function(data) {
-                                    $('#az-admin-modal')[fp + 'modal']("hide");
-                                });
-                                return false;
-                            });
-                            $('#az-admin-modal')[fp + 'modal']('show');
-                        }
-                    });
-                } else {
-                    form = $('<form></form>').append('<div class="' + p + 'form-group"><label>' + t('Login') + '</label><div><input class="' + p + 'form-control" name="password" type="password" placeholder="' + t('Please enter password here') + '" ></div><p class="' + p + 'help-block">' + t('') + '</p></div>');
-                    $(modal).find('.' + p + 'modal-body').append(form);
-                    $('#az-admin-modal').find('.save').click(function() {
-                        setCookie('azexo_password', $('#az-admin-modal').find('[name="password"]').val(), null);
-                        try_login();
-                        $('#az-admin-modal')[fp + 'modal']("hide");
-                        return false;
-                    });
-                    $('#az-admin-modal')[fp + 'modal']('show');
-                }
+                open_settings_form();
             }
         });
     }
@@ -3196,7 +3448,7 @@
         "zoomOutRight": t('zoomOutRight'),
         "zoomOutUp": t('zoomOutUp'),
     };
-    function AnimatedElement(parent, parse) {
+    function AnimatedElement(parent, position) {
         AnimatedElement.baseclass.apply(this, arguments);
     }
     extend(AnimatedElement, BaseElement);
@@ -3654,22 +3906,14 @@
             if (this.attrs['an_start'] == 'trigger') {
                 this.start_in_animation();
             } else {
-                for (var i = 0; i < this.children.length; i++) {
-                    if ('trigger_start_in_animation' in this.children[i]) {
-                        this.children[i].trigger_start_in_animation();
-                    }
-                }
+                AnimatedElement.baseclass.prototype.trigger_start_in_animation.apply(this, arguments);
             }
         },
         trigger_start_out_animation: function() {
             if (this.attrs['an_start'] == 'trigger') {
                 this.start_out_animation();
             } else {
-                for (var i = 0; i < this.children.length; i++) {
-                    if ('trigger_start_out_animation' in this.children[i]) {
-                        this.children[i].trigger_start_out_animation();
-                    }
-                }
+                AnimatedElement.baseclass.prototype.trigger_start_out_animation.apply(this, arguments);
             }
         },
         animation_letters: function() {
@@ -4572,58 +4816,23 @@
 //
 //
 //
-    function SectionElement(parent, parse) {
+    function SectionElement(parent, position) {
         SectionElement.baseclass.apply(this, arguments);
     }
-    register_element('az_section', true, SectionElement);
+    register_animated_element('az_section', true, SectionElement);
     mixin(SectionElement.prototype, {
         name: t('Section'),
         icon: 'fa fa-square-o',
         description: t('Bootstrap grid container'),
         category: t('Layout'),
         params: [
-        ].concat(SectionElement.prototype.params),
-        is_container: true,
-        disallowed_elements: ['az_section'],
-        get_button: function() {
-            return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
-        },
-        render: function($, p, fp) {
-            this.dom_element = $('<div class="az-element az-section ' + this.attrs['el_class'] + ' " style="' + this.attrs['style'] + '"></div>');
-            this.dom_content_element = $('<div class="az-ctnr ' + p + 'container"></div>').appendTo(this.dom_element);
-            SectionElement.baseclass.prototype.render.apply(this, arguments);
-        },
-    });
-//
-//
-//
-
-    function RowElement(parent, parse) {
-        RowElement.baseclass.apply(this, arguments);
-        this.columns = '';
-        if (!parse) {
-            this.set_columns('1/1');
-        }
-        this.attrs['device'] = 'sm';
-    }
-    register_animated_element('az_row', true, RowElement);
-    mixin(RowElement.prototype, {
-        name: t('Row'),
-        icon: 'fa fa-table',
-        description: t('One row to implement a Bootstrap grid layout with responsive ability. You can choose number of columns and thier widths. Used by default.'),
-        category: t('Layout'),
-        params: [
             make_param_type({
-                type: 'dropdown',
-                heading: t('Device'),
-                param_name: 'device',
+                type: 'checkbox',
+                heading: t('Fluid?'),
+                param_name: 'fluid',
                 value: {
-                    xs: t('Extra small devices Phones (<768px)'),
-                    sm: t('Small devices Tablets (≥768px)'),
-                    md: t('Medium devices Desktops (≥992px)'),
-                    lg: t('Large devices Desktops (≥1200px)')
+                    'yes': t("Yes, please"),
                 },
-                description: t('Bootstrap responsive grid system')
             }),
             make_param_type({
                 type: 'dropdown',
@@ -4685,6 +4894,93 @@
                 value: '0',
                 dependency: {'element': 'effect', 'value': ['youtube']},
             }),
+        ].concat(SectionElement.prototype.params),
+        is_container: true,
+//        disallowed_elements: ['az_section'], - section is useful for popup element which can be placed anywhere
+        get_button: function() {
+            return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
+        },
+        showed: function($, p, fp) {
+            SectionElement.baseclass.prototype.showed.apply(this, arguments);
+            var element = this;
+            switch (this.attrs['effect']) {
+                case 'parallax':
+                    this.add_js_list({
+                        paths: ['jquery.parallax/jquery.parallax.js', 'jquery-waypoints/waypoints.min.js'],
+                        loaded: 'waypoint' in $.fn && 'parallax' in $.fn,
+                        callback: function() {
+                            $(element.dom_element).waypoint(function(direction) {
+                                $(element.dom_element).css('background-attachment', 'fixed');
+                                $(element.dom_element).css('background-position', '50% 0');
+                                $(element.dom_element).parallax("50%", element.attrs['parallax_speed'] / 100);
+                            }, {offset: '100%', triggerOnce: true});
+                            $(document).trigger('scroll');
+                        }});
+                    break;
+                case 'fixed':
+                    $(element.dom_element).css('background-attachment', 'fixed');
+                    break;
+                case 'youtube':
+                    var loop = _.indexOf(element.attrs['video_options'].split(','), 'loop') >= 0;
+                    var mute = _.indexOf(element.attrs['video_options'].split(','), 'mute') >= 0;
+                    this.add_css('jquery.mb.YTPlayer/css/YTPlayer.css', 'mb_YTPlayer' in $.fn, function() {
+                    });
+                    this.add_js_list({
+                        paths: ['jquery.mb.YTPlayer/inc/jquery.mb.YTPlayer.js', 'jquery-waypoints/waypoints.min.js'],
+                        loaded: 'waypoint' in $.fn && 'mb_YTPlayer' in $.fn,
+                        callback: function() {
+                            $(element.dom_element).waypoint(function(direction) {
+                                $(element.dom_element).attr('data-property', "{videoURL:'" + youtube_parser(element.attrs['video_youtube']) + "',containment:'#" + element.id + "', showControls:false, autoPlay:true, loop:" + loop.toString() + ", mute:" + mute.toString() + ", startAt:" + element.attrs['video_start'] + ", stopAt:" + element.attrs['video_stop'] + ", opacity:1, addRaster:false, quality:'default'}");
+                                $(element.dom_element).mb_YTPlayer();
+                                $(element.dom_element).playYTP();
+                            }, {offset: '100%', triggerOnce: true});
+                            $(document).trigger('scroll');
+                        }});
+                    break;
+                default:
+                    break;
+            }
+        },
+        render: function($, p, fp) {
+            this.dom_element = $('<div id="' + this.id + '" class="az-element az-section ' + this.attrs['el_class'] + ' " style="' + this.attrs['style'] + '"></div>');
+            if (this.attrs['fluid'] == 'yes')
+                this.dom_content_element = $('<div class="az-ctnr ' + p + 'container-fluid"></div>').appendTo(this.dom_element);
+            else
+                this.dom_content_element = $('<div class="az-ctnr ' + p + 'container"></div>').appendTo(this.dom_element);
+            SectionElement.baseclass.prototype.render.apply(this, arguments);
+        },
+    });
+//
+//
+//
+
+    function RowElement(parent, position) {
+        RowElement.baseclass.apply(this, arguments);
+        this.columns = '';
+        if (!position || typeof position !== 'boolean') {
+            this.set_columns('1/1');
+        }
+        this.attrs['device'] = 'sm';
+    }
+    register_animated_element('az_row', true, RowElement);
+    mixin(RowElement.prototype, {
+        name: t('Row'),
+        icon: 'fa fa-table',
+        description: t('One row to implement a Bootstrap grid layout with responsive ability. You can choose number of columns and thier widths. Used by default.'),
+        category: t('Layout'),
+        params: [
+            make_param_type({
+                type: 'dropdown',
+                heading: t('Device'),
+                param_name: 'device',
+                value: {
+                    xs: t('Extra small devices Phones (<768px)'),
+                    sm: t('Small devices Tablets (≥768px)'),
+                    md: t('Medium devices Desktops (≥992px)'),
+                    lg: t('Large devices Desktops (≥1200px)')
+                },
+                description: t('Bootstrap responsive grid system')
+            }),
         ].concat(RowElement.prototype.params),
         is_container: true,
         get_button: function() {
@@ -4731,7 +5027,7 @@
                     $(element.dom_element).mouseleave(function() {
                         $(columns)[fp + 'popover']('hide');
                         $(columns).css('display', '');
-                    });                    
+                    });
                 });
             }
         },
@@ -4757,8 +5053,10 @@
         update_sorting: function(event, ui) {
             RowElement.baseclass.prototype.update_sorting.apply(this, arguments);
             var element = azexo_elements.get_element($(this).closest('[data-az-id]').attr('data-az-id'));
-            for (var i = 0; i < element.children.length; i++) {
-                element.children[i].update_empty();
+            if (element) {
+                for (var i = 0; i < element.children.length; i++) {
+                    element.children[i].update_empty();
+                }
             }
         },
         update_dom: function() {
@@ -4832,49 +5130,8 @@
             }
             this.update_sortable();
         },
-        showed: function($, p, fp) {
-            RowElement.baseclass.prototype.showed.apply(this, arguments);
-            var element = this;
-            switch (this.attrs['effect']) {
-                case 'parallax':
-                    this.add_js_list({
-                        paths: ['jquery.parallax/jquery.parallax.js', 'jquery-waypoints/waypoints.min.js'],
-                        loaded: 'waypoint' in $.fn && 'parallax' in $.fn,
-                        callback: function() {
-                            $(element.dom_element).waypoint(function(direction) {
-                                $(element.dom_element).css('background-attachment', 'fixed');
-                                $(element.dom_element).css('background-position', '50% 0');
-                                $(element.dom_element).parallax("50%", element.attrs['parallax_speed'] / 100);
-                            }, {offset: '100%', triggerOnce: true});
-                            $(document).trigger('scroll');
-                        }});
-                    break;
-                case 'fixed':
-                    $(element.dom_element).css('background-attachment', 'fixed');
-                    break;
-                case 'youtube':
-                    var loop = _.indexOf(element.attrs['video_options'].split(','), 'loop') >= 0;
-                    var mute = _.indexOf(element.attrs['video_options'].split(','), 'mute') >= 0;
-                    this.add_css('jquery.mb.YTPlayer/css/YTPlayer.css', 'mb_YTPlayer' in $.fn, function() {
-                    });
-                    this.add_js_list({
-                        paths: ['jquery.mb.YTPlayer/inc/jquery.mb.YTPlayer.js', 'jquery-waypoints/waypoints.min.js'],
-                        loaded: 'waypoint' in $.fn && 'mb_YTPlayer' in $.fn,
-                        callback: function() {
-                            $(element.dom_element).waypoint(function(direction) {
-                                $(element.dom_element).attr('data-property', "{videoURL:'" + youtube_parser(element.attrs['video_youtube']) + "',containment:'#" + element.id + "', showControls:false, autoPlay:true, loop:" + loop.toString() + ", mute:" + mute.toString() + ", startAt:" + element.attrs['video_start'] + ", stopAt:" + element.attrs['video_stop'] + ", opacity:1, addRaster:false, quality:'default'}");
-                                $(element.dom_element).mb_YTPlayer();
-                                $(element.dom_element).playYTP();
-                            }, {offset: '100%', triggerOnce: true});
-                            $(document).trigger('scroll');
-                        }});
-                    break;
-                default:
-                    break;
-            }
-        },
         render: function($, p, fp) {
-            this.dom_element = $('<div id="' + this.id + '" class="az-element az-row ' + p + 'row ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+            this.dom_element = $('<div class="az-element az-row ' + p + 'row ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
             this.dom_content_element = this.dom_element;
             RowElement.baseclass.prototype.render.apply(this, arguments);
         },
@@ -4882,8 +5139,8 @@
 //
 //
 //
-    function ColumnElement(parent, parse) {
-        ColumnElement.baseclass.call(this, parent, parse);
+    function ColumnElement(parent, position) {
+        ColumnElement.baseclass.call(this, parent, position);
     }
     register_element('az_column', true, ColumnElement);
     mixin(ColumnElement.prototype, {
@@ -4899,6 +5156,7 @@
         hidden: true,
         is_container: true,
         show_parent_controls: true,
+        disallowed_elements: ['az_section'],
         get_empty: function() {
             return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this row and current column. You can choose columns layout by mouse over (or click) this button: ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-th"></span></div></div>';
         },
@@ -4928,10 +5186,10 @@
 //
 //
 //
-    function GridElement(parent, parse) {
+    function GridElement(parent, position) {
         GridElement.baseclass.apply(this, arguments);
         this.linked_elements_index = {};
-        if (!parse) {
+        if (!position || typeof position !== 'boolean') {
             this.add_item();
         }
         this.attach_events();
@@ -4991,8 +5249,10 @@
         update_sorting: function(event, ui) {
             GridElement.baseclass.prototype.update_sorting.apply(this, arguments);
             var element = azexo_elements.get_element($(this).closest('[data-az-id]').attr('data-az-id'));
-            for (var i = 0; i < element.children.length; i++) {
-                element.children[i].update_empty();
+            if (element) {
+                for (var i = 0; i < element.children.length; i++) {
+                    element.children[i].update_empty();
+                }
             }
         },
         show_controls: function() {
@@ -5034,7 +5294,7 @@
                                 if (!('element_adding' in grid_element)) {
                                     grid_element.element_adding = true;
                                     grid_element.add_control(el);
-                                    if (!data.parse || el.base == 'az_column')
+                                    if (!data.position || el.base == 'az_column')
                                         el.synchronize();
                                     if ($(el.parent.dom_content_element).hasClass('ui-sortable') && el.id != item.id)
                                         $(el.parent.dom_content_element).sortable("option", "containment", item.dom_content_element);
@@ -5296,7 +5556,7 @@
 //
 //
 //
-    function ItemElement(parent, parse) {
+    function ItemElement(parent, position) {
         ItemElement.baseclass.apply(this, arguments);
     }
     register_element('az_item', true, ItemElement);
@@ -5369,7 +5629,7 @@
 //
 //
 //
-    function LayersElement(parent, parse) {
+    function LayersElement(parent, position) {
         LayersElement.baseclass.apply(this, arguments);
     }
     register_animated_element('az_layers', true, LayersElement);
@@ -5392,6 +5652,20 @@
                 param_name: 'height',
                 max: '10000',
                 value: '500',
+            }),
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Responsive?'),
+                param_name: 'responsive',
+                value: {
+                    'yes': t("Yes, please"),
+                },
+            }),
+            make_param_type({
+                type: 'integer_slider',
+                heading: t('Original width'),
+                param_name: 'o_width',
+                hidden: true,
             }),
         ].concat(LayersElement.prototype.params),
         show_settings_on_create: true,
@@ -5428,18 +5702,19 @@
                 function store_position(dom_element) {
                     var id = $(dom_element).closest('[data-az-id]').attr('data-az-id');
                     var el = azexo_elements.get_element(id);
-                    el.attrs['pos_left'] = parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%";
-                    el.attrs['pos_top'] = parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%";
-                    el.attrs['pos_width'] = parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
-                    el.attrs['pos_height'] = parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%";
+                    el.attrs['pos_left'] = parseInt($(dom_element).css("left")) / ($(element.dom_content_element).width() / 100) + "%";
+                    el.attrs['pos_top'] = parseInt($(dom_element).css("top")) / ($(element.dom_content_element).height() / 100) + "%";
+                    el.attrs['pos_width'] = parseInt($(dom_element).css("width")) / ($(element.dom_content_element).width() / 100) + "%";
+                    el.attrs['pos_height'] = parseInt($(dom_element).css("height")) / ($(element.dom_content_element).height() / 100) + "%";
                     to_percents(dom_element);
+                    element.attrs['o_width'] = $(element.dom_element).width();
                     $(document).trigger("azexo_update_element", id);
                 }
                 function to_percents(dom_element) {
-                    $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%");
-                    $(dom_element).css("top", parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%");
-                    $(dom_element).css("width", parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%");
-                    $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%");
+                    $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_content_element).width() / 100) + "%");
+                    $(dom_element).css("top", parseInt($(dom_element).css("top")) / ($(element.dom_content_element).height() / 100) + "%");
+                    $(dom_element).css("width", parseInt($(dom_element).css("width")) / ($(element.dom_content_element).width() / 100) + "%");
+                    $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_content_element).height() / 100) + "%");
                 }
                 $(this.dom_content_element).resizable({
 //                    containment: "parent",
@@ -5451,6 +5726,7 @@
                     },
                     stop: function(event, ui) {
                         element.attrs['width'] = parseInt($(element.dom_content_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
+                        $(element.dom_content_element).width(element.attrs['width']);
                         element.attrs['height'] = $(element.dom_content_element).height();
                         $(document).trigger("azexo_update_element", element.id);
                     }
@@ -5556,6 +5832,41 @@
             if (window.azexo_editor)
                 this.update_sortable();
         },
+        showed: function($, p, fp) {
+            LayersElement.baseclass.prototype.showed.apply(this, arguments);
+            var element = this;
+            $(window).off('resize.az_layers' + element.id);
+            if (this.attrs['responsive'] == 'yes') {
+                function get_element_font_size(el, attr) {
+                    var v = '';
+                    var match = el.attrs[attr].match(/font-size[: ]*([\-\d\.]*)(px|%|em) *;/);
+                    if (match != null)
+                        v = match[1];
+                    return v;
+                }
+                function update_font_sizes(el, ratio) {
+                    //hover font size not updated !!!
+                    var fs = get_element_font_size(el, 'style');
+                    if (fs != '') {
+                        fs = fs * ratio;
+                        $(el.dom_element).css('font-size', fs + 'px');
+                    }
+                    for (var i = 0; i < el.children.length; i++)
+                        update_font_sizes(element.children[i], ratio);
+                }
+
+                $(window).on('resize.az_layers' + element.id, function() {
+                    var width = $(element.dom_element).width();
+                    if (!('o_width' in element.attrs) || element.attrs['o_width'] == '')
+                        element.attrs['o_width'] = width;
+                    var ratio = width / element.attrs['o_width'];
+                    $(element.dom_element).css('font-size', ratio * 100 + '%');
+                    $(element.dom_content_element).css('height', element.attrs['height'] * ratio + 'px');
+                    update_font_sizes(element, ratio);
+                });
+                $(window).trigger('resize');
+            }
+        },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-layers ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div id="' + this.id + '" class="az-ctnr"></div></div>');
             this.dom_content_element = $(this.dom_element).find('.az-ctnr');
@@ -5567,9 +5878,9 @@
 //
 //
 //
-    function TabsElement(parent, parse) {
+    function TabsElement(parent, position) {
         TabsElement.baseclass.apply(this, arguments);
-        if (!parse) {
+        if (!position || typeof position !== 'boolean') {
             this.add_tab();
         }
     }
@@ -5612,18 +5923,20 @@
             }
         },
         update_sorting: function(event, ui) {
-            var options = $(this).sortable('option');
             var element = azexo_elements.get_element($(this).attr('data-az-id'));
-            var children = [];
-            $(this).find(options.items).each(function() {
-                var id = $(this).find('a[data-toggle="tab"]').attr('href').replace('#', '');
-                children.push(azexo_elements.get_element(id));
-            });
-            element.children = children;
-            for (var i = 0; i < element.children.length; i++)
-                element.children[i].parent = element;
-            element.update_dom();
-            $(document).trigger("azexo_update_sorting", ui);
+            if (element) {
+                var options = $(this).sortable('option');
+                var children = [];
+                $(this).find(options.items).each(function() {
+                    var id = $(this).find('a[data-toggle="tab"]').attr('href').replace('#', '');
+                    children.push(azexo_elements.get_element(id));
+                });
+                element.children = children;
+                for (var i = 0; i < element.children.length; i++)
+                    element.children[i].parent = element;
+                element.update_dom();
+                $(document).trigger("azexo_update_sorting", ui);
+            }
         },
         click_add_tab: function(e) {
             e.data.object.add_tab();
@@ -5655,7 +5968,7 @@
 //
 //
 //
-    function TabElement(parent, parse) {
+    function TabElement(parent, position) {
         TabElement.baseclass.apply(this, arguments);
     }
     register_element('az_tab', true, TabElement);
@@ -5710,9 +6023,9 @@
 //
 //
 //
-    function AccordionElement(parent, parse) {
+    function AccordionElement(parent, position) {
         AccordionElement.baseclass.apply(this, arguments);
-        if (!parse) {
+        if (!position || typeof position !== 'boolean') {
             this.add_toggle();
         }
     }
@@ -5812,7 +6125,7 @@
 //
 //
 //
-    function ToggleElement(parent, parse) {
+    function ToggleElement(parent, position) {
         ToggleElement.baseclass.apply(this, arguments);
     }
     register_element('az_toggle', true, ToggleElement);
@@ -5853,9 +6166,9 @@
 //
 //
 //
-    function CarouselElement(parent, parse) {
+    function CarouselElement(parent, position) {
         CarouselElement.baseclass.apply(this, arguments);
-        if (!parse) {
+        if (!position || typeof position !== 'boolean') {
             this.add_slide();
         }
     }
@@ -5955,11 +6268,8 @@
                                 var id = $(item).attr('data-az-id');
                                 var el = azexo_elements.get_element(id);
                                 if (!_.isUndefined(el)) {
-                                    for (var j = 0; j < el.children.length; j++) {
-                                        if ('trigger_start_out_animation' in el.children[j]) {
-                                            el.children[j].trigger_start_out_animation();
-                                        }
-                                    }
+                                    if ('trigger_start_out_animation' in el)
+                                        el.trigger_start_out_animation();
                                 }
                             }
                         }
@@ -5969,11 +6279,8 @@
                                 var id = $(item).attr('data-az-id');
                                 var el = azexo_elements.get_element(id);
                                 if (!_.isUndefined(el)) {
-                                    for (var j = 0; j < el.children.length; j++) {
-                                        if ('trigger_start_in_animation' in el.children[j]) {
-                                            el.children[j].trigger_start_in_animation();
-                                        }
-                                    }
+                                    if ('trigger_start_in_animation' in el)
+                                        el.trigger_start_in_animation();
                                 }
                             }
                         }
@@ -6010,7 +6317,7 @@
 //
 //
 //
-    function SlideElement(parent, parse) {
+    function SlideElement(parent, position) {
         SlideElement.baseclass.apply(this, arguments);
     }
     register_element('az_slide', true, SlideElement);
@@ -6052,9 +6359,9 @@
 //
 //
 //
-    function PresentationElement(parent, parse) {
+    function PresentationElement(parent, position) {
         PresentationElement.baseclass.apply(this, arguments);
-        if (!parse) {
+        if (!position || typeof position !== 'boolean') {
             this.add_step();
         }
         if (window.azexo_editor) {
@@ -6421,22 +6728,16 @@
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
                         if (!_.isUndefined(el)) {
-                            for (var j = 0; j < el.children.length; j++) {
-                                if ('trigger_start_out_animation' in el.children[j]) {
-                                    el.children[j].trigger_start_in_animation();
-                                }
-                            }
+                            if ('trigger_start_out_animation' in el)
+                                el.trigger_start_out_animation();
                         }
                     }, false);
                     element.dom_element.get(0).addEventListener("impress:stepleave", function(event) {
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
                         if (!_.isUndefined(el)) {
-                            for (var j = 0; j < el.children.length; j++) {
-                                if ('trigger_start_in_animation' in el.children[j]) {
-                                    el.children[j].trigger_start_out_animation();
-                                }
-                            }
+                            if ('trigger_start_in_animation' in el)
+                                el.trigger_start_in_animation();
                         }
                     }, false);
                     $(element.dom_element).find('> .' + p + 'pagination > li > .' + p + 'prev').click(function() {
@@ -6522,7 +6823,7 @@
 //
 //
 //
-    function StepElement(parent, parse) {
+    function StepElement(parent, position) {
         StepElement.baseclass.apply(this, arguments);
     }
     register_element('az_step', true, StepElement);
@@ -6706,7 +7007,7 @@
 //
 //
 //
-    function ContainerElement(parent, parse) {
+    function ContainerElement(parent, position) {
         ContainerElement.baseclass.apply(this, arguments);
         this.rendered = false;
         this.loaded_container = null;
@@ -6731,6 +7032,7 @@
         show_settings_on_create: true,
         is_container: true,
         hidden: !window.azexo_online,
+        saveable: true,
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
         },
@@ -6761,11 +7063,14 @@
                     $(this.controls).find('.drag-and-drop').removeClass(p + 'glyphicon-move');
                     $(this.controls).find('.drag-and-drop').removeClass('drag-and-drop');
                 }
-                $('<button title="' + title("Save container") + '" class="control save-container ' + p + 'btn ' + p + 'btn-success ' + p + 'glyphicon ' + p + 'glyphicon-save" > </button>').appendTo(this.controls).click({object: this}, this.click_save_container);
-                var element = this;
+                //edited kuzmany.biz
+                if (this.saveable){
+                    $('<button title="' + title("Save container") + '" class="control save-container ' + p + 'btn ' + p + 'btn-success ' + p + 'glyphicon ' + p + 'glyphicon-save" > </button>').appendTo(this.controls).click({object: this}, this.click_save_container);
+                      var element = this;
                 //edited kuzmany.biz
                 $('.save-builder,.save-return-builder').click({object: this}, function(){
-                    var html = $.trim(((element.get_container_html()).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')).replace(/<link\b[^>]*>/gi,''));
+//                    var html = element.get_container_html();
+                    var html = (((element.get_container_html()).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')).replace(/<link\b[^>]*>/gi,''));
                     window.opener.$('#builder').val(encodeURIComponent(html));
                     window.opener.$('#az-preview').html(html);
                     if($(this).hasClass('save-return-builder'))
@@ -6773,11 +7078,34 @@
                     //console.log(element.get_container_html());
                 });
             }
+            }
         },
         get_my_shortcode: function() {
             return this.get_children_shortcode();
         },
-        get_container_html: function() {
+        get_hover_styles: function(element) {
+            var hover_styles = '';
+            if (element.attrs['hover_style'] != '')
+                hover_styles = element.get_hover_style();
+            for (var i = 0; i < element.children.length; i++) {
+                hover_styles = hover_styles + this.get_hover_styles(element.children[i]);
+            }
+            return hover_styles;
+        },
+        get_js: function(element) {
+            var html = '';
+            for (var url in element.js)
+                html += '<script src="' + url + '"></script>\n';
+            return html;
+        },
+        get_css: function(element) {
+            var html = '';
+            for (var url in element.css)
+                html += '<link rel="stylesheet" type="text/css" href="' + url + '">\n';
+            return html;
+        },
+        get_loader: function() {
+            var element = this;
             function get_object_method_js(object, method, own) {
                 if (own) {
                     if (!object.hasOwnProperty(method))
@@ -6918,50 +7246,6 @@
                 }
                 return attributes;
             }
-            function check_dinamic(element) {
-                if (element.constructor.prototype.hasOwnProperty('showed')) {
-                    var exception = false;
-                    if ('is_cms_element' in element)
-                        exception = true;
-                    switch (element.base) {
-                        case 'az_container':
-                            if (element.parent == null)
-                                exception = true;
-                            break;
-                        case 'az_image':
-                            if (element.attrs['img_link_large'] != 'yes'
-                                    && element.attrs['adipoli_start'] == 'none'
-                                    && element.attrs['adipoli_hover'] == 'none'
-                                    && element.attrs['splits'] != 'yes')
-                                exception = true;
-                            break;
-                        case 'az_row':
-                            if (element.attrs['effect'] == '')
-                                exception = true;
-                            break;
-                        default:
-                            break;
-                    }
-                    if (!exception)
-                        return true;
-                }
-                for (var i = 0; i < element.children.length; i++) {
-                    if (check_dinamic(element.children[i])) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            function get_hover_styles(element) {
-                var hover_styles = '';
-                if (element.attrs['hover_style'] != '')
-                    hover_styles = "<style>.hover-style-" + element.id + ":hover { " + element.attrs['hover_style'] + " } </style>";
-                for (var i = 0; i < element.children.length; i++) {
-                    hover_styles = hover_styles + get_hover_styles(element.children[i]);
-                }
-                return hover_styles;
-            }
-            var element = this;
             var bases = get_contained_elements(element);
             var attributes = check_attributes(element);
             function get_javascript() {
@@ -7006,6 +7290,7 @@
                 javascript += BaseElement.name + ".prototype.elements = {};\n";
                 javascript += BaseElement.name + ".prototype.tags = {};\n";
                 javascript += get_element_params_js(BaseElement);
+                javascript += get_class_method_js(BaseElement, 'get_hover_style', true);
                 javascript += get_class_method_js(BaseElement, 'showed', true);
                 javascript += get_class_method_js(BaseElement, 'render', true);
                 javascript += get_class_method_js(BaseElement, 'recursive_render', true);
@@ -7021,9 +7306,14 @@
                 javascript += get_class_method_js(BaseElement, 'add_js', true);
                 javascript += get_class_method_js(BaseElement, 'add_external_js', true);
                 javascript += get_class_method_js(BaseElement, 'get_my_container', true);
+                if ('an_start' in attributes) {
+                    javascript += get_class_method_js(BaseElement, 'trigger_start_in_animation', true);
+                    javascript += get_class_method_js(BaseElement, 'trigger_start_out_animation', true);
+                }
                 javascript += register_element.toString() + "\n";
                 javascript += UnknownElement.toString() + "\n";
                 javascript += register_element.name + "('az_unknown', true, " + UnknownElement.name + ");\n";
+                javascript += UnknownElement.name + ".prototype.has_content = true;\n";
 
                 javascript += "window.azexo_baseurl = '" + window.azexo_baseurl + "';\n";
 //                if ('ajaxurl' in window)
@@ -7036,6 +7326,7 @@
                 javascript += "var " + azexo_elements_name + " = new " + AZEXOElements.name + "();\n";
                 javascript += "var " + scroll_magic_name + " = null;\n";
                 javascript += "window.azexo_editor = false;\n";
+                javascript += "window.azexo_exported = " + window.azexo_exporter.toString() + ";\n";
                 javascript += "var " + azexo_containers_name + " = [];\n";
                 javascript += "var " + azexo_containers_loaded_name + " = {};\n";
                 javascript += connect_container.toString() + "\n";
@@ -7076,15 +7367,15 @@
 
                 if (SectionElement.prototype.base in bases) {
                     javascript += SectionElement.toString() + "\n";
-                    javascript += register_element.name + "('" + SectionElement.prototype.base + "', true, " + SectionElement.name + ");\n";
+                    javascript += register_animated_element.name + "('" + SectionElement.prototype.base + "', true, " + SectionElement.name + ");\n";
                     javascript += get_element_params_js(SectionElement);
+                    javascript += get_class_method_js(SectionElement, 'showed', true);
                 }
 
                 if (RowElement.prototype.base in bases) {
                     javascript += RowElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + RowElement.prototype.base + "', true, " + RowElement.name + ");\n";
                     javascript += get_element_params_js(RowElement);
-                    javascript += get_class_method_js(RowElement, 'showed', true);
                     javascript += RowElement.name + ".prototype.set_columns = function(columns){};\n";
                     javascript += ColumnElement.toString() + "\n";
                     javascript += register_element.name + "('" + ColumnElement.prototype.base + "', true, " + ColumnElement.name + ");\n";
@@ -7110,6 +7401,7 @@
                     javascript += LayersElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + LayersElement.prototype.base + "', true, " + LayersElement.name + ");\n";
                     javascript += get_element_params_js(LayersElement);
+                    javascript += get_class_method_js(LayersElement, 'showed', true);
                 }
 
                 if (TabsElement.prototype.base in bases) {
@@ -7240,28 +7532,47 @@
                 javascript += "})(window.jQuery);\n";
                 return javascript;
             }
-            function get_js(element) {
-                var html = '';
-//                if (p == 'ax-') {
-//                    element.js[window.azexo_baseurl + 'azexo-bootstrap.min.js'] = true;
-//                }
-//                element.js[window.azexo_baseurl + 'js/underscore-min.js'] = true;
-//                element.js[window.azexo_baseurl + 'js/smoothscroll.js'] = true;
-//                element.js[window.azexo_baseurl + 'jquery-waypoints/waypoints.min.js'] = true;
-                for (var url in element.js)
-                    html += '<script src="' + url + '"></script>\n';
-                return html;
+            function check_dinamic(element) {
+                if (element.constructor.prototype.hasOwnProperty('showed')) {
+                    var exception = false;
+                    if ('is_cms_element' in element)
+                        exception = true;
+                    switch (element.base) {
+                        case 'az_container':
+                            if (element.parent == null)
+                                exception = true;
+                            break;
+                        case 'az_image':
+                            if (element.attrs['img_link_large'] != 'yes'
+                                    && element.attrs['adipoli_start'] == 'none'
+                                    && element.attrs['adipoli_hover'] == 'none'
+                                    && element.attrs['splits'] != 'yes')
+                                exception = true;
+                            break;
+                        case 'az_section':
+                            if (element.attrs['effect'] == '')
+                                exception = true;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (!exception)
+                        return true;
+                }
+                for (var i = 0; i < element.children.length; i++) {
+                    if (check_dinamic(element.children[i])) {
+                        return true;
+                    }
+                }
+                return false;
             }
-            function get_css(element) {
-                var html = '';
-//                if (p == 'ax-') {
-//                    element.css[window.azexo_baseurl + 'azexo-bootstrap.min.css'] = true;
-//                }
-//                element.css[window.azexo_baseurl + 'azexo_composer.css'] = true;
-                for (var url in element.css)
-                    html += '<link rel="stylesheet" type="text/css" href="' + url + '">\n';
-                return html;
+            var javascript = '';
+            if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes) {
+                javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
             }
+            return javascript;
+        },
+        get_html: function() {
             this.recursive_update_data();
             this.recursive_clear_animation();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
@@ -7276,14 +7587,12 @@
             $(dom).find('.ui-resizable').removeClass('ui-resizable');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
             $(dom).find('.az-element.az-container > .az-ctnr').empty();
-            $(dom).find('.az-element.az-cms-element').empty();            
+            $(dom).find('.az-element.az-cms-element').empty();
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
-
-            var javascript = '';
-            if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes) {
-                javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
-            }
-            return get_css(element) + get_hover_styles(element) + get_js(element) + javascript + $(dom).html();
+            return $(dom).html();
+        },
+        get_container_html: function() {
+            return this.get_css(this) + this.get_hover_styles(this) + this.get_js(this) + this.get_loader() + this.get_html();
         },
         click_save_container: function(e) {
             e.data.object.save_container();
@@ -7315,6 +7624,11 @@
                     if (match) {
                         element.loaded_container = element.attrs['container'];
                         $(shortcode).appendTo(element.dom_content_element);
+                        $(element.dom_content_element).find('> script').detach().appendTo('head');
+                        $(element.dom_content_element).find('> link[href]').detach().appendTo('head');
+                        $(element.dom_element).css('display', '');
+                        $(element.dom_element).addClass('azexo');
+
                         element.parse_html(element.dom_content_element);
                         $(element.dom_element).attr('data-az-id', element.id);
                         element.html_content = true;
@@ -7354,6 +7668,7 @@
                             $(document).trigger('scroll');
                         }
                     }
+                    azexo_elements.try_render_unknown_elements();
                 });
             }
         },
@@ -7408,19 +7723,19 @@
 //
 //
 //
-    RowElement.prototype.params.push(make_param_type({
+    SectionElement.prototype.params.push(make_param_type({
         type: 'textfield',
         heading: t('Menu item title'),
         param_name: 'menu_item_title',
         description: t('Title which will be used in scroll menu.'),
         tab: t('Menu'),
     }));
-    function ScrollMenuElement(parent, parse) {
+    function ScrollMenuElement(parent, position) {
         ScrollMenuElement.baseclass.apply(this, arguments);
         this.menu_items = {};
         for (var id in azexo_elements.elements_instances) {
             var el = azexo_elements.elements_instances[id];
-            if (el instanceof RowElement) {
+            if (el instanceof SectionElement) {
                 if (el.attrs['menu_item_title'] != '') {
                     this.menu_items[id] = el.attrs['menu_item_title'];
                 }
@@ -7434,7 +7749,7 @@
             });
 //            $('body')[fp+'scrollspy']('refresh');
             var el = azexo_elements.get_element(id);
-            if (el instanceof RowElement) {
+            if (el instanceof SectionElement) {
                 if (el.attrs['menu_item_title'] != '') {
                     element.menu_items[id] = el.attrs['menu_item_title'];
                     element.replace_render();
@@ -7460,7 +7775,7 @@
                     });
 //                    $('body')[fp+'scrollspy']('refresh');
                     var el = azexo_elements.get_element(id);
-                    if (el instanceof RowElement) {
+                    if (el instanceof SectionElement) {
                         delete element.menu_items[id];
                         element.replace_render();
                         element.showed($, p, fp);
@@ -7574,7 +7889,7 @@
 //    
 //
 //
-    function FormElement(parent, parse) {
+    function FormElement(parent, position) {
         FormElement.baseclass.apply(this, arguments);
     }
     register_animated_element('az_form', true, FormElement);
@@ -7603,6 +7918,12 @@
                 param_name: 'submited_message',
                 value: t('Submited'),
             }),
+            make_param_type({
+                type: 'textfield',
+                heading: t('Action URL'),
+                param_name: 'action',
+                description: t('URL of server script which will receive submitted form data.'),
+            }),
         ].concat(FormElement.prototype.params),
         is_container: true,
         hidden: !window.azexo_online,
@@ -7617,7 +7938,9 @@
             if (window.azexo_editor) {
                 FormElement.baseclass.prototype.show_controls.apply(this, arguments);
                 var element = this;
-                $('<button title="' + title("Show submissions") + '" class="control show-submissions ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-list-alt" > </button>').appendTo(this.controls).click({object: this}, this.click_show_submissions);
+                if (this.attrs['action'] == '') {
+                    $('<button title="' + title("Show submissions") + '" class="control show-submissions ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-list-alt" > </button>').appendTo(this.controls).click({object: this}, this.click_show_submissions);
+                }
 
                 var buttons = '<div class="form-fields ' + p + 'btn-group ' + p + 'btn-group-sm">';
                 for (var key in FormDataElement.prototype.form_elements) {
@@ -7742,36 +8065,38 @@
         showed: function($, p, fp) {
             FormElement.baseclass.prototype.showed.apply(this, arguments);
             var element = this;
-            this.add_external_js('http://www.google.com/recaptcha/api/js/recaptcha_ajax.js', function() {
-                if ('recaptcha_publickey' in window) {
-                    Recaptcha.create(window.recaptcha_publickey, 'captcha_' + element.id,
-                            {
-                                theme: "clean",
-                            }
-                    );
-                } else {
-                    azexo_get_recaptcha_publickey(function(data) {
-                        Recaptcha.create(data, 'captcha_' + element.id,
+            if (this.attrs['action'] == '') {
+                this.add_external_js('http://www.google.com/recaptcha/api/js/recaptcha_ajax.js', function() {
+                    if ('recaptcha_publickey' in window) {
+                        Recaptcha.create(window.recaptcha_publickey, 'captcha_' + element.id,
                                 {
                                     theme: "clean",
                                 }
                         );
-                    });
-                }
-            });
-            $(element.dom_element).submit(function() {
-                var container = element.get_my_container();
-                azexo_submit_form(container.attrs['container'].split('/')[0], container.attrs['container'].split('/')[1], element.attrs['name'], $(element.dom_element).serialize(), function(data) {
-                    if (data) {
-                        (element.dom_element).prepend(get_alert(element.attrs['submited_message']));
+                    } else {
+                        azexo_get_recaptcha_publickey(function(data) {
+                            Recaptcha.create(data, 'captcha_' + element.id,
+                                    {
+                                        theme: "clean",
+                                    }
+                            );
+                        });
                     }
                 });
-                return false;
-            });
+                $(element.dom_element).submit(function() {
+                    var container = element.get_my_container();
+                    azexo_submit_form(container.attrs['container'].split('/')[0], container.attrs['container'].split('/')[1], element.attrs['name'], $(element.dom_element).serialize(), function(data) {
+                        if (data) {
+                            (element.dom_element).prepend(get_alert(element.attrs['submited_message']));
+                        }
+                    });
+                    return false;
+                });
+            }
         },
         render: function($, p, fp) {
             var element = this;
-            this.dom_element = $('<form class="az-element az-form ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" role="form" enctype="multipart/form-data"></form>');
+            this.dom_element = $('<form action="' + this.attrs['action'] + '" method="post" class="az-element az-form ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" role="form" enctype="multipart/form-data"></form>');
             this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
             $('<div class="' + p + 'form-group"><div id="captcha_' + this.id + '"></div></div>').appendTo(this.dom_element);
             $('<div class="' + p + 'form-group"><button class="' + p + 'btn ' + p + 'btn-lg ' + p + 'btn-primary" type="submit">' + this.attrs['submit_title'] + '</button></div>').appendTo(this.dom_element);
@@ -7781,7 +8106,7 @@
 //
 //
 //
-    function FormDataElement(parent, parse) {
+    function FormDataElement(parent, position) {
         FormDataElement.baseclass.apply(this, arguments);
     }
     extend(FormDataElement, AnimatedElement);
@@ -7804,6 +8129,13 @@
                     'yes': t("Yes, please"),
                 },
             }),
+            make_param_type({
+                type: 'textfield',
+                heading: t('Title'),
+                param_name: 'title',
+                description: t('Required.'),
+                required: true,
+            }),
         ].concat(FormDataElement.prototype.params),
     });
     function register_form_data_element(base, Element) {
@@ -7820,7 +8152,7 @@
         if ('azexo_elements' in window) {
             for (var i = 0; i < window.azexo_elements.length; i++) {
                 var element = window.azexo_elements[i];
-                var ExternalElement = function(parent, parse) {
+                var ExternalElement = function(parent, position) {
                     ExternalElement.baseclass.apply(this, arguments);
                 }
                 register_animated_element(element.base, element.is_container, ExternalElement);
@@ -7843,7 +8175,7 @@
         if ('azexo_form_elements' in window) {
             for (var i = 0; i < window.azexo_form_elements.length; i++) {
                 var element = window.azexo_form_elements[i];
-                var ExternalElement = function(parent, parse) {
+                var ExternalElement = function(parent, position) {
                     ExternalElement.baseclass.apply(this, arguments);
                 }
                 register_form_data_element(element.base, ExternalElement);
@@ -7866,13 +8198,18 @@
         if ('azexo_extend' in window) {
             for (var base in window.azexo_extend) {
                 var element = window.azexo_extend[base];
-                var params = element.params;
+                var params = {};
+                if ('params' in element)
+                    params = element.params;
                 element.params = {};
                 var reigstered_element = BaseElement.prototype.elements[base];
-                mixin(reigstered_element.prototype, element);
-                for (var i = 0; i < params.length; i++) {
-                    var param = make_param_type(params[i]);
-                    reigstered_element.prototype.params.push(param);
+                if (!('extended' in reigstered_element)) {
+                    reigstered_element.extended = true;
+                    mixin(reigstered_element.prototype, element);
+                    for (var i = 0; i < params.length; i++) {
+                        var param = make_param_type(params[i]);
+                        reigstered_element.prototype.params.push(param);
+                    }
                 }
             }
         }
@@ -7894,9 +8231,219 @@
         azexo_get_cms_element_names(function(elements) {
             if (_.isObject(elements)) {
                 azexo_elements.create_cms_elements(elements);
+            } else {
+                azexo_elements.cms_elements_loaded = true;
             }
         });
     }
     create_cms_elements();
+//
+//
+//
+// ------------------EXPORTER------------------------------------
+    var original_head = '';
+    var original_body = '';
+    var original_body_attributes = '';
+    var exporter = {};
+    var site_containers = {};
+    var site_pages = {};
+    function enable_exporter() {
+        if ($('#az-exporter').length == 0) {
+            window.links_select = function(input, delimiter) {
+                var options = {};
+                for (var name in site_pages) {
+                    options[name + '.html'] = site_pages[name].title;
+                }
+                chosen_select(options, input);
+            }
+            for (var i = 0; i < azexo_containers.length; i++) {
+                azexo_containers[i].saveable = false;
+            }
+            original_head = $('head').html();
+            original_body = $('body').html();
+            original_body_attributes = $('body').prop("attributes");
+            var panel = $('<div id="az-exporter" class="az-left-sidebar ' + p + 'text-center"></div>').appendTo('body');
+            var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-sm"></div>').appendTo(panel);
+            $('<hr>').appendTo(panel);
+            function switch_page(name) {
+                for (var i = 0; i < azexo_containers.length; i++) {
+                    var parent = $(azexo_containers[i].dom_element).parent();
+                    $(azexo_containers[i].dom_element).detach();
+                    $(site_containers[name][i].dom_element).appendTo(parent);
+                }
+                azexo_containers = site_containers[name];
+                $(name_input).val(name);
+                $(title_input).val(site_pages[name].title);
+            }
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Add page') + '</button>').appendTo(buttons).click(function() {
+                var name = window.prompt(t('Please enter page name'), '');
+                if (name != '' && name != null) {
+                    site_containers[name] = [];
+                    for (var i = 0; i < azexo_containers.length; i++) {
+                        var container = new ContainerElement(null, false);
+                        container.saveable = false;
+                        container.rendered = true;
+                        site_containers[name].push(container);
+                        container.attrs['container'] = azexo_containers[i].attrs['container'];
+                        container.html_content = true;
+                        container.loaded_container = container.attrs['container'];
+
+                        container.render($, p, fp);
+                        $(container.dom_element).attr('data-az-id', container.id);
+                        $(container.dom_element).addClass('azexo-editor');
+                        $(container.dom_element).addClass('azexo');
+                        container.show_controls();
+                        container.update_sortable();
+                        container.showed($, p, fp);
+                    }
+                    add_page(name);
+                    switch_page(name);
+                }
+                return false;
+            });
+            $('<button class="' + p + 'btn ' + p + 'btn-danger">' + t('Remove page') + '</button>').appendTo(buttons).click(function() {
+                if ($(pages).find('a').length > 1) {
+                    var name = $(pages).find('.' + p + 'active').text();
+                    $(pages).find('.' + p + 'active').remove();
+                    var new_name = $(pages).find('a:first-child').addClass(p + 'active').text();
+                    switch_page(new_name);
+                    delete site_containers[name];
+                    site_containers[name] = null;
+                }
+                return false;
+            });
+            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('Export') + '</button>').appendTo(buttons).click(function() {
+                var site = {};
+                for (var name in site_containers) {
+                    var html = get_page_html(site_containers[name], true, site_pages[name].title);
+                    site[name] = btoa(enc(encodeURIComponent(html)));
+                }
+                azexo_add_js({
+                    path: 'js/json2.min.js',
+                    loaded: 'JSON' in window,
+                    callback: function() {
+                        azexo_export(JSON.stringify(site), function(data) {
+                            if (data)
+                                window.location = data;
+                        });
+                    }
+                });
+                return false;
+            });
+            site_containers['home'] = azexo_containers;
+            $('<h3>' + t('Pages') + '</h3>').appendTo(panel);
+            var pages = $('<div class="' + p + 'list-group"></div>').appendTo(panel);
+            $('<hr>').appendTo(panel);
+            var form = $('<div class="' + p + 'text-left"></div>').appendTo(panel);
+            $('<h3>' + t('Page settings') + '</h3>').appendTo(form);
+            var name_input = $('<div class="' + p + 'form-group"><label>' + t('File name') + '</label><div><input class="' + p + 'form-control" name="name" type="text"></div><p class="' + p + 'help-block">' + t('"html"-extension will be added during export process') + '</p></div>').appendTo(form).find('input').change(function() {
+                var name = $(pages).find('.' + p + 'active').text();
+                var new_name = $(this).val();
+                site_containers[new_name] = site_containers[name];
+                site_containers[name] = null;
+                site_pages[new_name] = site_pages[name];
+                site_pages[name] = null;
+                $(pages).find('a.' + p + 'active:contains("' + name + '")').text(new_name);
+            });
+            var title_input = $('<div class="' + p + 'form-group"><label>' + t('Title') + '</label><div><input class="' + p + 'form-control" name="title" type="text"></div><p class="' + p + 'help-block">' + t('') + '</p></div>').appendTo(form).find('input').change(function() {
+                var name = $(pages).find('.' + p + 'active').text();
+                site_pages[name].title = $(this).val();
+            });
+
+            add_page('home');
+            $(name_input).val('home');
+            $(title_input).val('home');
+            function add_page(name) {
+                $(pages).find('a').removeClass(p + 'active');
+                site_pages[name] = {name: name, title: name};
+                $('<a href="#" class="' + p + 'list-group-item ' + p + 'active">' + name + '</a>').appendTo(pages).click(function() {
+                    if (!$(this).hasClass(p + 'active')) {
+                        $(pages).find('a').removeClass(p + 'active');
+                        $(this).addClass(p + 'active');
+                        switch_page($(this).text());
+                    }
+                    return false;
+                });
+            }
+            if (!window.azexo_editor)
+                $(panel).hide();
+        }
+    }
+    function make_absolute_urls(dom) {
+        $(dom).find('link[href]').each(function() {
+            $(this).attr('href', toAbsoluteURL($(this).attr('href')));
+        });
+        $(dom).find('script[src]').each(function() {
+            $(this).attr('src', toAbsoluteURL($(this).attr('src')));
+        });
+        $(dom).find('img[src]').each(function() {
+            $(this).attr('src', toAbsoluteURL($(this).attr('src')));
+        });
+    }
+    function remove_js(dom, name) {
+        $(dom).find('script[src*="' + name + '"]').remove();
+    }
+    function remove_css(dom, name) {
+        $(dom).find('link[href*="' + name + '"]').remove();
+    }
+    function get_page_html(containers, loader, title) {
+        var js = {};
+        var css = {};
+        var dom = $('<div>' + original_body + '</div>');
+        for (var i = 0; i < containers.length; i++) {
+            var container = containers[i];
+            var type = container.attrs['container'].split('/')[0];
+            var name = container.attrs['container'].split('/')[1];
+            var element = $(dom).find('.az-container[data-az-type="' + type + '"][data-az-name="' + name + '"]');
+            $(element).empty();
+            $(element).append(container.get_hover_styles(container));
+            if (loader) {
+                var azexo_online = window.azexo_online;
+                window.azexo_online = false;
+                $(element).append(container.get_loader());
+                window.azexo_online = azexo_online;
+            }
+            $(element).append(container.get_html());
+            js = $.extend(js, containers[i].js);
+            css = $.extend(css, containers[i].css);
+        }
+        var attributes = '';
+        $.each(original_body_attributes, function() {
+            attributes = attributes + this.name + '"' + this.value + '" ';
+        });
+        make_absolute_urls(dom);
+        $(dom).find('.azexo-backend, #azexo-backend').remove();
+        var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
+
+        var dom = $('<div>' + original_head + '</div>');
+        $(dom).find('.azexo-backend, #azexo-backend').remove();
+
+//        remove_css(dom, 'bootstrap.min.css');
+//        remove_js(dom, 'jquery.min.js');
+        remove_js(dom, 'jquery-ui.min.js');
+//        remove_js(dom, 'underscore-min.js');
+//        remove_js(dom, 'bootstrap.min.js');
+//        remove_js(dom, 'waypoints.min.js');
+        remove_js(dom, 'azexo_param_types.min.js');
+        remove_js(dom, 'azexo_param_types.js');
+        remove_js(dom, 'azexo_elements_premium.min.js');
+        remove_js(dom, 'azexo_elements_premium.js');
+        remove_js(dom, 'azexo_elements.min.js');
+        remove_js(dom, 'azexo_elements.js');
+        remove_js(dom, 'azexo_composer.min.js');
+        remove_js(dom, 'azexo_composer.js');
+//        remove_css(dom, 'azexo_composer.css');        
+
+        $(dom).find('title').text(title);
+        make_absolute_urls(dom);
+        for (var url in js) {
+            $(dom).append('<script src="' + toAbsoluteURL(url) + '"></script>');
+        }
+        for (var url in css) {
+            $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
+        }
+        var page_head = '<head>' + $(dom).html() + '</head>';
+        return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
+    }
 
 })(window.jQuery, false, '', '', {}, {}, {}, null, [], {});

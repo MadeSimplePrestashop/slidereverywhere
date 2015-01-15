@@ -80,7 +80,7 @@
     "rotateOutUpRight": true
   },
 
-  "SliderBuilderObject": {
+  "sliders": {
     "slideInDown": true,
     "slideInLeft": true,
     "slideInRight": true,

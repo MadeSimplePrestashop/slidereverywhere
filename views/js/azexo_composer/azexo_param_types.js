@@ -260,30 +260,20 @@
         }
     }
     function nouislider(slider, min, max, value, step, target) {
-        azexo_add_css('nouislider/jquery.nouislider.css', function() {
+        azexo_add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
         });
         azexo_add_js({
-            path: 'nouislider/jquery.nouislider.min.js',
+            path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
             callback: function() {
                 $(slider).noUiSlider({
-                    range: {
-                        min: parseFloat(min),
-                        max: parseFloat(max)
-                    },
-                    start: (value == '') ? NaN : parseFloat(value),
-                    handles: 1,
+                    start: [(value == '' || isNaN(parseFloat(value)) || value == 'NaN') ? min : parseFloat(value)],
                     step: parseFloat(step),
-                    behaviour: "extend-tap",
-                    serialization: {
-                        lower: [$.Link({
-                                target: target
-                            })],
+                    range: {
+                        min: [parseFloat(min)],
+                        max: [parseFloat(max)]
                     },
-                    slide: function() {
-                    },
-                    set: function() {
-                    }
-                }).change(function() {
+                }).on('change', function() {
+                    $(target).val($(slider).val());
                 });
             }
         });
@@ -300,6 +290,10 @@
             $(img).attr('height', height);
         return img;
     }
+
+    var icons = [];
+    if ('azexo_icons' in window)
+        icons = window.azexo_icons;
 
     var azexo_param_types = [
         {
@@ -389,6 +383,9 @@
                                 if (_.isObject(tinymce)) {
                                     var tinymce_config = {
                                         theme: "modern",
+                                        force_br_newlines: false,
+                                        force_p_newlines: false,
+                                        forced_root_block : '',
                                         plugins: [
                                             "advlist autolink link image lists charmap print preview hr anchor pagebreak",
                                             "searchreplace wordcount visualblocks visualchars insertdatetime media nonbreaking",
@@ -861,8 +858,8 @@
             type: 'tagged_images',
             get_value: function() {
                 var value = '';
-                $(this.dom_element).find('tbody tr').each(function(){
-                    value += $(this).find('input.image').val() +'{'+$(this).find('input.tags').val()+'}';
+                $(this.dom_element).find('tbody tr').each(function() {
+                    value += $(this).find('input.image').val() + '{' + $(this).find('input.tags').val() + '}';
                 });
                 return value;
             },
@@ -877,7 +874,7 @@
                     });
                     return row;
                 }
-                this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div class="add-image ' + p + 'btn-group ' + p + 'center-block"></div><table class="' + p + 'table"><thead><tr><td></td><td>'+t('Image')+'</td><td>'+t('Tags')+'</td><td>'+t('Remove')+'</td></tr></thead><tbody class="images-group"></tbody></table><p class="' + p + 'help-block">' + this.description + '</p></div>');
+                this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div class="add-image ' + p + 'btn-group ' + p + 'center-block"></div><table class="' + p + 'table"><thead><tr><td></td><td>' + t('Image') + '</td><td>' + t('Tags') + '</td><td>' + t('Remove') + '</td></tr></thead><tbody class="images-group"></tbody></table><p class="' + p + 'help-block">' + this.description + '</p></div>');
                 $('<button title="' + t("Add one image") + '" class="add-image ' + p + 'btn ' + p + 'btn-default">' + t("Add one image") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function() {
                     add_image($(param.dom_element).find('tbody.images-group'), '', '');
                     $(param.dom_element).find('tbody.images-group').sortable({
@@ -887,14 +884,14 @@
                         forcePlaceholderSize: true,
                     });
                     return false;
-                });                
+                });
                 $('<button title="' + t("Add images") + '" class="add-images ' + p + 'btn ' + p + 'btn-default">' + t("Add images") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function() {
                     return false;
-                });                
-                if(value != '') {
+                });
+                if (value != '') {
                     var rows = value.split('}');
                     for (var i = 0; i < rows.length; i++) {
-                        if(rows[i] != '') {
+                        if (rows[i] != '') {
                             var row = rows[i].split('{');
                             add_image($(param.dom_element).find('tbody.images-group'), row[0], row[1]);
                         }
@@ -1113,7 +1110,7 @@
                 p + 'glyphicon ' + p + 'glyphicon-cloud-upload',
                 p + 'glyphicon ' + p + 'glyphicon-tree-conifer',
                 p + 'glyphicon ' + p + 'glyphicon-tree-deciduous',
-            ],
+            ].concat(icons),
             get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },

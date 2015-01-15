@@ -18,7 +18,6 @@
         '_self': t('Same window'),
         '_blank': t('New window'),
     };
-
     var azexo_elements = [
         {
             base: 'az_text',
@@ -37,9 +36,46 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-text ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</div>');
                 this.dom_content_element = this.dom_element;
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
+        {
+            base: 'az_link',
+            name: t('Link'),
+            icon: 'fa fa-link',
+            description: t('Link wrapper'),
+            params: [
+                {
+                    type: 'link',
+                    heading: t('Link'),
+                    param_name: 'link',
+                    description: t('Conent link (url).'),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Link target'),
+                    param_name: 'link_target',
+                    description: t('Select where to open link.'),
+                    value: target_options,
+                    dependency: {'element': 'link', 'not_empty': {}},
+                },
+            ],
+            is_container: true,
+            show_settings_on_create: true,
+            showed: function($, p, fp) {
+                this.baseclass.prototype.showed.apply(this, arguments);
+                var element = this;
+                $(element.dom_element).click(function() {
+                    window.open(element.attrs['link'], element.attrs['link_target']);
+                    return false;
+                });
+            },
+            render: function($, p, fp) {
+                this.dom_element = $('<div class="az-element az-link ' + this.attrs['el_class'] + '"></div>');
+                this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -77,7 +113,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 if (this.attrs['link'] == '') {
                     this.dom_element = $('<div class="az-element az-icon ' + this.attrs['el_class'] + '"><span class="' + this.attrs['icon'] + '" style="' + this.attrs['style'] + '"></span></div>');
                 } else {
@@ -228,7 +264,7 @@
             frontend_render: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var prettyphoto_config = {
@@ -244,7 +280,6 @@
                     modal: false, /* If set to true, only the close button will close the window */
                     social_tools: ''
                 };
-
                 if (this.attrs['img_link_large'] == 'yes') {
                     this.add_css('prettyphoto/css/prettyPhoto.css', 'prettyPhoto' in $.fn, function() {
                     });
@@ -293,7 +328,7 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 var id = this.id;
                 var element = this;
                 this.dom_element = $('<div class="az-element az-image ' + this.attrs['el_class'] + '"></div>');
@@ -311,9 +346,7 @@
                 }
                 var img = render_image(this.attrs['image'], this.attrs['width'], this.attrs['height']);
                 $(img).appendTo(this.dom_element);
-
                 $(this.dom_element).find('img').attr('style', this.attrs['style']);
-
                 if (this.attrs['img_link_large'] == 'yes') {
                     $(this.dom_element).find('img').each(function() {
                         $(this).wrap('<a href="' + $(this).attr('src') + '" data-rel="prettyPhoto[rel-' + id + ']"></a>');
@@ -368,9 +401,10 @@
                 },
             ],
             show_settings_on_create: true,
+            style_selector: '> .' + p + 'btn',
             render: function($, p, fp) {
-                
-                
+
+
                 if (this.attrs['link'] == '') {
                     this.dom_element = $('<div class="az-element az-button ' + this.attrs['el_class'] + '"><button type="button" class="' + p + 'btn ' + this.attrs['type'] + ' ' + this.attrs['size'] + '" style="' + this.attrs['style'] + '">' + this.attrs['title'] + '</button></div>');
                 } else {
@@ -391,8 +425,8 @@
                 return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this jumbotron.') + '</div></div>';
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-ctnr az-jumbotron ' + p + 'jumbotron ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -422,8 +456,8 @@
                 return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this panel. You can enter panel title by click on this button: ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-pencil"></span></div></div>';
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-panel ' + p + 'panel ' + this.attrs['el_class'] + ' ' + this.attrs['type'] + '" style="' + this.attrs['style'] + '"></div>');
                 if (this.attrs['title'] != '') {
                     var heading = $('<div class="' + p + 'panel-heading"><h3 class="' + p + 'panel-title">' + this.attrs['title'] + '</div></div>');
@@ -527,36 +561,47 @@
                 return '<div class="az-empty"><div class="bottom ' + p + 'well"><h1>' + t('At the moment popup is empty. Click to put an element here.') + '</h1></div></div>';
             },
             showed: function($, p, fp) {
-                
-                
+                this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
+                var opened = false;
                 function open_popup() {
+                    opened = true;
+                    $.fn[fp + 'modal'].Constructor.prototype.$body = $(document.body);
+                    $.fn[fp + 'modal'].Constructor.prototype.checkScrollbar();
+                    $('body').addClass(p + 'modal-open');
+                    $.fn[fp + 'modal'].Constructor.prototype.setScrollbar();
                     $(element.dom_content_element).removeClass(p + 'hidden');
-                    for (var i = 0; i < element.children.length; i++) {
-                        if ('trigger_start_in_animation' in element.children[i]) {
-                            element.children[i].trigger_start_in_animation();
+                    if ('trigger_start_in_animation' in element)
+                        element.trigger_start_in_animation();
+                    var close = function() {
+                        if (opened) {
+                            opened = false;
+                            setTimeout(function() {
+                                $(element.backdrop).remove();
+                                $(element.dom_content_element).addClass(p + 'hidden');
+                                $('body').removeClass(p + 'modal-open');
+                                $.fn[fp + 'modal'].Constructor.prototype.resetScrollbar();
+                                $(document).off('keyup.az_popup');
+                            }, element.attrs['hiding_pause']);
+                            if ('trigger_start_out_animation' in element)
+                                element.trigger_start_out_animation();
                         }
-                    }
-
-                    $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(function() {
-                        var backdrop = this;
-                        setTimeout(function() {
-                            $(backdrop).remove();
-                            $(element.dom_content_element).addClass(p + 'hidden');
-                        }, element.attrs['hiding_pause']);
-                        for (var i = 0; i < element.children.length; i++) {
-                            if ('trigger_start_out_animation' in element.children[i]) {
-                                element.children[i].trigger_start_out_animation();
-                            }
+                        return false;
+                    };
+                    $(document).on('keyup.az_popup', function(e) {
+                        if (e.keyCode == 27) {
+                            close();
                         }
                     });
+                    $(element.dom_content_element).find('.az-popup-close').click(close);
+                    element.backdrop = $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(close);
                     return false;
                 }
                 $(this.dom_element).find('.open-popup').click(open_popup);
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-popup ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 switch (this.attrs['type']) {
                     case '':
@@ -589,7 +634,7 @@
                     default:
                         break;
                 }
-                this.dom_content_element = $('<div class="' + p + 'container az-popup-ctnr az-ctnr ' + p + 'hidden"></div>').appendTo(this.dom_element);
+                this.dom_content_element = $('<div class=" az-popup-ctnr az-ctnr ' + p + 'hidden"><div class="az-popup-close"></div></div>').appendTo(this.dom_element);
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -615,7 +660,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-alert ' + p + 'alert ' + this.attrs['type'] + ' ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['message'] + '</div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
@@ -662,8 +707,10 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
-                this.dom_element = $('<blockquote class="az-element az-blockquote ' + this.attrs['el_class'] + ' ' + this.attrs['reverse'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</blockquote>');
+                var reverse = this.attrs['reverse'];
+                if (reverse != '')
+                    reverse = p + reverse;
+                this.dom_element = $('<blockquote class="az-element az-blockquote ' + this.attrs['el_class'] + ' ' + reverse + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</blockquote>');
                 this.dom_content_element = this.dom_element;
                 if (this.attrs['cite'] != '')
                     $(this.dom_element).append('<footer><cite>' + this.attrs['cite'] + '</cite></footer>');
@@ -704,9 +751,12 @@
                 },
             ],
             render: function($, p, fp) {
-                
-                
-                this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + this.attrs['options'].replace(',', ' ') + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
+                var options = this.attrs['options'];
+                if (options != '')
+                    options = _.map(options.split(','), function(value) {
+                        return p + value;
+                    }).join(' ');
+                this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + options + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -806,11 +856,11 @@
             frontend_render: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var sliderTimeout = this.attrs['interval'] * 1000;
-                var SliderBuilderObjectpeed = 800;
+                var sliderSpeed = 800;
                 switch (this.attrs['type']) {
                     case 'flexslider_slide':
                     case 'flexslider_fade':
@@ -829,7 +879,7 @@
                                     animation: element.attrs['type'].split('_')[1],
                                     slideshow: slideshow,
                                     slideshowSpeed: sliderTimeout,
-                                    SliderBuilderObjectpeed: SliderBuilderObjectpeed,
+                                    sliderSpeed: sliderSpeed,
                                     smoothHeight: true
                                 });
                             }});
@@ -849,7 +899,7 @@
                                     slices: 15, // For slice animations
                                     boxCols: 8, // For box animations
                                     boxRows: 4, // For box animations
-                                    animSpeed: SliderBuilderObjectpeed, // Slide transition speed
+                                    animSpeed: sliderSpeed, // Slide transition speed
                                     pauseTime: sliderTimeout, // How long each slide will show
                                     startSlide: 0, // Set starting Slide (0 index)
                                     directionNav: true, // Next & Prev navigation
@@ -913,7 +963,7 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 var id = this.id;
                 var element = this;
                 var images = this.attrs['images'].split(',');
@@ -1028,8 +1078,8 @@
             ],
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
-                
+
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var prettyphoto_config = {
@@ -1066,16 +1116,13 @@
                 });
             },
             render: function($, p, fp) {
-                
-                
+
+
                 var id = this.id;
                 var element = this;
                 var images = this.attrs['images'].split(',');
-
                 this.dom_element = $('<div id="' + this.id + '" class="az-element az-images-carousel ' + p + 'carousel ' + p + 'slide ' + this.attrs['el_class'] + '" data-ride="carousel" style="' + this.attrs['style'] + '"></div>');
-
                 var hide = this.attrs['hide'].split(',');
-
                 if ($.inArray('pagination_control', hide) < 0) {
                     var indicators = $('<ol class="' + p + 'carousel-indicators"></ol>');
                     for (var i = 0; i < images.length; i++) {
@@ -1095,7 +1142,6 @@
                     $(item).height(this.attrs['height'] + 'px');
                 }
                 $(this.dom_element).append(inner);
-
                 if ($.inArray('prev_next_buttons', hide) < 0) {
                     var controls = $('<a class="' + p + 'left ' + p + 'carousel-control" href="#' + this.id + '" data-slide="prev"><span class="' + p + 'glyphicon ' + p + 'glyphicon-chevron-left"></span></a><a class="' + p + 'right ' + p + 'carousel-control" href="#' + this.id + '" data-slide="next"><span class="' + p + 'glyphicon ' + p + 'glyphicon-chevron-right"></span></a>');
                     $(this.dom_element).append(controls);
@@ -1103,8 +1149,6 @@
 
                 $(this.dom_element).find('.' + p + 'carousel-indicators li:first').addClass(p + 'active');
                 $(this.dom_element).find('.' + p + 'carousel-inner .' + p + 'item:first').addClass(p + 'active');
-
-
                 switch (this.attrs['onclick']) {
                     case 'link_image':
                         $(this.dom_element).find('.' + p + 'carousel-inner .' + p + 'item img').each(function() {
@@ -1153,7 +1197,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 function youtube_parser(url) {
                     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
                     var match = url.match(regExp);
@@ -1200,580 +1244,9 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-html ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</div>');
                 this.dom_content_element = this.dom_element;
-                this.baseclass.prototype.render.apply(this, arguments);
-            },
-        },
-        {
-            base: 'az_countdown',
-            name: t('Countdown Timer'),
-            icon: 'fa fa-clock-o',
-            description: t('Place countdown element'),
-            params: [
-                {
-                    type: 'dropdown',
-                    heading: t('Countdown style'),
-                    param_name: 'countdown_style',
-                    description: t('Select the style for the countdown element.'),
-                    value: {
-                        'style1': t('Style 1'),
-                        'style2': t('Style 2'),
-                        'style3': t('Style 3'),
-                        'style4': t('Style 4'),
-                        'style5': t('Style 5'),
-                        'style6': t('Style 6'),
-                        'style7': t('Style 7'),
-                        'style8': t('Style 8'),
-                        'style9': t('Style 9'),
-                        'style10': t('Style 10'),
-                    },
-                },
-                {
-                    type: 'dropdown',
-                    heading: t('Date / Time Limitations'),
-                    param_name: 'counter_scope',
-                    description: t('Select the countdown scope in terms of date and time.'),
-                    value: {
-                        'date': t('Specify Date Only'),
-                        'date_time': t('Specify Date and Time'),
-                        'repeating': t('Specifiy Time Only (repeating on every day)'),
-                        'resetting': t('Resetting Counter (set interval up to 24 hours)'),
-                    },
-                },
-                {
-                    type: 'datetime',
-                    heading: t('Date'),
-                    param_name: 'date',
-                    datepicker: true,
-                    description: t('Select the date to which you want to count down to.'),
-                    formatDate: 'd.m.Y',
-                    dependency: {'element': 'counter_scope', 'value': ['date']},
-                },
-                {
-                    type: 'datetime',
-                    heading: t('Date / Time'),
-                    param_name: 'date_time',
-                    timepicker: true,
-                    datepicker: true,
-                    description: t('Select the date and time to which you want to count down to.'),
-                    formatDate: 'd.m.Y',
-                    formatTime: 'H',
-                    dependency: {'element': 'counter_scope', 'value': ['date_time']},
-                },
-                {
-                    type: 'datetime',
-                    heading: t('Time'),
-                    param_name: 'time',
-                    timepicker: true,
-                    description: t('Select the time on the day above to which you want to count down to.'),
-                    formatTime: 'H',
-                    dependency: {'element': 'counter_scope', 'value': ['repeating']},
-                },
-                {
-                    type: 'integer_slider',
-                    heading: t('Reset in Hours'),
-                    param_name: 'reset_hours',
-                    max: 24,
-                    description: t('Define the number of hours until countdown reset.'),
-                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
-                },
-                {
-                    type: 'integer_slider',
-                    heading: t('Reset in Minutes'),
-                    param_name: 'reset_minutes',
-                    max: 60,
-                    description: t('Define the number of minutes until countdown reset.'),
-                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
-                },
-                {
-                    type: 'integer_slider',
-                    heading: t('Reset in Seconds'),
-                    param_name: 'reset_seconds',
-                    max: 60,
-                    description: t('Define the number of seconds until countdown reset.'),
-                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
-                },
-                {
-                    type: 'link',
-                    heading: t('Page Referrer'),
-                    param_name: 'referrer',
-                    description: t('Provide an optional link to another site/page to be opened after countdown expires.'),
-                    dependency: {'element': 'counter_scope', 'value': ['repeating', 'resetting']},
-                },
-                {
-                    type: 'checkbox',
-                    heading: t('Automatic Restart'),
-                    param_name: 'restart',
-                    description: t('Switch the toggle if you want to restart the countdown after each expiration.'),
-                    value: {
-                        'yes': t("Yes, please"),
-                    },
-                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
-                },
-                {
-                    type: 'saved_datetime',
-                    param_name: 'saved',
-                },
-                {
-                    type: 'checkbox',
-                    heading: t('Display Options'),
-                    param_name: 'display',
-                    value: {
-                        'days': t("Show Remaining Days"),
-                        'hours': t("Show Remaining Hours"),
-                        'minutes': t("Show Remaining Minutes"),
-                        'seconds': t("Show Remaining Seconds"),
-                    },
-                },
-            ],
-            show_settings_on_create: true,
-            frontend_render: true,
-            showed: function($, p, fp) {
-                
-                this.baseclass.prototype.showed.apply(this, arguments);
-                var element = this;
-                this.add_css('counteverest/css/normalize.css', 'countEverest' in $.fn, function() {
-                });
-                this.add_css('css/counteverest-main.css', 'countEverest' in $.fn, function() {
-                });
-                this.add_js_list({
-                    paths: ['counteverest/js/vendor/jquery.counteverest.min.js', 'datetimepicker/jquery.datetimepicker.js'],
-                    loaded: 'countEverest' in $.fn && 'datetimepicker' in $.fn,
-                    callback: function() {
-                        var options = {};
-                        switch (element.attrs['countdown_style']) {
-                            case 'style2':
-                                var $example = $(element.dom_element),
-                                        $ceDays = $example.find('.ce-days'),
-                                        $ceHours = $example.find('.ce-hours'),
-                                        $ceMinutes = $example.find('.ce-minutes'),
-                                        $ceSeconds = $example.find('.ce-seconds'),
-                                        $daysFill = $example.find('.bar-days').find('.fill'),
-                                        $hoursFill = $example.find('.bar-hours').find('.fill'),
-                                        $minutesFill = $example.find('.bar-minutes').find('.fill'),
-                                        $secondsFill = $example.find('.bar-seconds').find('.fill'),
-                                        now = new Date(),
-                                        then = new Date(now.getTime() + (14 * 24 * 60 * 60 * 1000));
-                                function setBar($el, value, max) {
-                                    var barWidth = 100 - (100 / max * value);
-                                    $el.width(barWidth + '%');
-                                }
-                                options = {
-                                    onChange: function() {
-                                        setBar($daysFill, this.days, 365);
-                                        setBar($hoursFill, this.hours, 24);
-                                        setBar($minutesFill, this.minutes, 60);
-                                        setBar($secondsFill, this.seconds, 60);
-                                    }
-                                }
-                                break;
-                            case 'style6':
-                                function countEverestFlipAnimate($el, data) {
-                                    $el.each(function(index) {
-                                        var $this = $(this),
-                                                $flipFront = $this.find('.ce-flip-front'),
-                                                $flipBack = $this.find('.ce-flip-back'),
-                                                field = $flipBack.text(),
-                                                fieldOld = $this.attr('data-old');
-                                        if (typeof fieldOld === 'undefined') {
-                                            $this.attr('data-old', field);
-                                        }
-                                        if (field != fieldOld) {
-                                            $this.addClass('animate');
-                                            window.setTimeout(function() {
-                                                $flipFront.text(field);
-                                                $this
-                                                        .removeClass('animate')
-                                                        .attr('data-old', field);
-                                            }, 800);
-                                        }
-                                    });
-                                }
-                                if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
-                                    $('html').addClass('internet-explorer');
-                                }
-
-                                options = {
-                                    hoursWrapper: '.ce-hours .ce-flip-back',
-                                    minutesWrapper: '.ce-minutes .ce-flip-back',
-                                    secondsWrapper: '.ce-seconds .ce-flip-back',
-                                    wrapDigits: false,
-                                    onChange: function() {
-                                        countEverestFlipAnimate($(element.dom_element).find('.countdown .col>div'), this);
-                                    }
-                                }
-                                break;
-                            case 'style7':
-                                function countEverestAnimate($el) {
-                                    $el.each(function(index) {
-                                        var $this = $(this),
-                                                fieldText = $this.text(),
-                                                fieldData = $this.attr('data-value'),
-                                                fieldOld = $this.attr('data-old');
-
-                                        if (typeof fieldOld === 'undefined') {
-                                            $this.attr('data-old', fieldText);
-                                        }
-
-                                        if (fieldText != fieldData) {
-
-                                            $this
-                                                    .attr('data-value', fieldText)
-                                                    .attr('data-old', fieldData)
-                                                    .addClass('animate');
-
-                                            window.setTimeout(function() {
-                                                $this
-                                                        .removeClass('animate')
-                                                        .attr('data-old', fieldText);
-                                            }, 300);
-                                        }
-                                    });
-                                }
-                                options = {
-                                    onChange: function() {
-                                        countEverestAnimate($(element.dom_element).find(".countdown").find('.number span'));
-                                    }
-                                }
-                                break;
-                            case 'style9':
-                                function deg(v) {
-                                    return (Math.PI / 180) * v - (Math.PI / 2);
-                                }
-
-                                function drawCircle(canvas, value, max) {
-                                    var circle = canvas.getContext('2d');
-
-                                    circle.clearRect(0, 0, canvas.width, canvas.height);
-                                    circle.lineWidth = 4;
-
-                                    circle.beginPath();
-                                    circle.arc(
-                                            canvas.width / 2,
-                                            canvas.height / 2,
-                                            canvas.width / 2 - circle.lineWidth,
-                                            deg(0),
-                                            deg(360 / max * (max - value)),
-                                            false);
-                                    circle.strokeStyle = '#282828';
-                                    circle.stroke();
-
-                                    circle.beginPath();
-                                    circle.arc(
-                                            canvas.width / 2,
-                                            canvas.height / 2,
-                                            canvas.width / 2 - circle.lineWidth,
-                                            deg(0),
-                                            deg(360 / max * (max - value)),
-                                            true);
-                                    circle.strokeStyle = '#117d8b';
-                                    circle.stroke();
-                                }
-                                options = {
-                                    leftHandZeros: false,
-                                    onChange: function() {
-                                        drawCircle($(element.dom_element).find('#days').get(0), this.days, 365);
-                                        drawCircle($(element.dom_element).find('#hours').get(0), this.hours, 24);
-                                        drawCircle($(element.dom_element).find('#minutes').get(0), this.minutes, 60);
-                                        drawCircle($(element.dom_element).find('#seconds').get(0), this.seconds, 60);
-                                    }
-                                }
-                                break;
-                            case 'style10':
-                                var $countdown = $(element.dom_element).find('.countdown');
-                                var firstCalculation = true;
-                                options = {
-                                    leftHandZeros: true,
-                                    dayLabel: null,
-                                    hourLabel: null,
-                                    minuteLabel: null,
-                                    secondLabel: null,
-                                    afterCalculation: function() {
-                                        var plugin = this,
-                                                units = {
-                                                    days: this.days,
-                                                    hours: this.hours,
-                                                    minutes: this.minutes,
-                                                    seconds: this.seconds
-                                                },
-                                        //max values per unit
-                                        maxValues = {
-                                            hours: '23',
-                                            minutes: '59',
-                                            seconds: '59'
-                                        },
-                                        actClass = 'active',
-                                                befClass = 'before';
-
-                                        //build necessary elements
-                                        if (firstCalculation == true) {
-                                            firstCalculation = false;
-
-                                            //build necessary markup
-                                            $countdown.find('.unit-wrap div').each(function() {
-                                                var $this = $(this),
-                                                        className = $this.attr('class'),
-                                                        value = units[className],
-                                                        sub = '',
-                                                        dig = '';
-
-                                                //build markup per unit digit
-                                                for (var x = 0; x < 10; x++) {
-                                                    sub += [
-                                                        '<div class="digits-inner">',
-                                                        '<div class="flip-wrap">',
-                                                        '<div class="up">',
-                                                        '<div class="shadow"></div>',
-                                                        '<div class="inn">' + x + '</div>',
-                                                        '</div>',
-                                                        '<div class="down">',
-                                                        '<div class="shadow"></div>',
-                                                        '<div class="inn">' + x + '</div>',
-                                                        '</div>',
-                                                        '</div>',
-                                                        '</div>'
-                                                    ].join('');
-                                                }
-
-                                                //build markup for number
-                                                for (var i = 0; i < value.length; i++) {
-                                                    dig += '<div class="digits">' + sub + '</div>';
-                                                }
-                                                $this.append(dig);
-                                            });
-                                        }
-
-                                        //iterate through units
-                                        $.each(units, function(unit) {
-                                            var digitCount = $countdown.find('.' + unit + ' .digits').length,
-                                                    maxValueUnit = maxValues[unit],
-                                                    maxValueDigit,
-                                                    value = plugin.strPad(this, digitCount, '0');
-
-                                            //iterate through digits of an unit
-                                            for (var i = value.length - 1; i >= 0; i--) {
-                                                var $digitsWrap = $countdown.find('.' + unit + ' .digits:eq(' + (i) + ')'),
-                                                        $digits = $digitsWrap.find('div.digits-inner');
-
-                                                //use defined max value for digit or simply 9
-                                                if (maxValueUnit) {
-                                                    maxValueDigit = (maxValueUnit[i] == 0) ? 9 : maxValueUnit[i];
-                                                } else {
-                                                    maxValueDigit = 9;
-                                                }
-
-                                                //which numbers get the active and before class
-                                                var activeIndex = parseInt(value[i]),
-                                                        beforeIndex = (activeIndex == maxValueDigit) ? 0 : activeIndex + 1;
-
-                                                //check if value change is needed
-                                                if ($digits.eq(beforeIndex).hasClass(actClass)) {
-                                                    $digits.parent().addClass('play');
-                                                }
-
-                                                //remove all classes
-                                                $digits
-                                                        .removeClass(actClass)
-                                                        .removeClass(befClass);
-
-                                                //set classes
-                                                $digits.eq(activeIndex).addClass(actClass);
-                                                $digits.eq(beforeIndex).addClass(befClass);
-                                            }
-                                        });
-                                    }
-                                }
-                                break;
-                        }
-                        switch (element.attrs['counter_scope']) {
-                            case 'date':
-                                var d = Date.parseDate(element.attrs['date'], 'd.m.Y');
-                                if (d != null)
-                                    $(element.dom_element).countEverest($.extend(options, {
-                                        day: d.getDate(),
-                                        month: d.getMonth() + 1,
-                                        year: d.getFullYear(),
-                                    }));
-                                break;
-                            case 'date_time':
-                                var d = Date.parseDate(element.attrs['date_time'], 'd.m.Y H');
-                                if (d != null)
-                                    $(element.dom_element).countEverest($.extend(options, {
-                                        day: d.getDate(),
-                                        month: d.getMonth() + 1,
-                                        year: d.getFullYear(),
-                                        hour: d.getHours()
-                                    }));
-                                break;
-                            case 'repeating':
-                                var d = new Date();
-                                d.setHours(element.attrs['time']);
-                                if (d != null)
-                                    $(element.dom_element).countEverest($.extend(options, {
-                                        day: d.getDate(),
-                                        month: d.getMonth() + 1,
-                                        year: d.getFullYear(),
-                                        hour: d.getHours(),
-                                        onComplete: function() {
-                                            if (element.attrs['referrer'] != '') {
-                                                window.location.replace(element.attrs['referrer']);
-                                            }
-                                        }
-                                    }));
-                                break;
-                            case 'resetting':
-                                if (element.attrs['saved'] != '') {
-                                    var saved = new Date(element.attrs['saved']);
-                                    var interval = (Math.round(element.attrs['reset_hours']) * 60 * 60 + Math.round(element.attrs['reset_minutes']) * 60 + Math.round(element.attrs['reset_seconds'])) * 1000;
-                                    if (element.attrs['restart'] == 'yes') {
-                                        var current = new Date();
-                                        var elapsed = current.getTime() - saved.getTime();
-                                        var k = elapsed / interval;
-                                        elapsed = elapsed - Math.floor(k) * interval;
-                                        var delta = interval - elapsed;
-                                        var d = new Date(current.getTime() + delta);
-                                        $(element.dom_element).countEverest($.extend(options, {
-                                            day: d.getDate(),
-                                            month: d.getMonth() + 1,
-                                            year: d.getFullYear(),
-                                            hour: d.getHours(),
-                                            minute: d.getMinutes(),
-                                            second: d.getSeconds(),
-                                            onComplete: function() {
-                                                if (element.attrs['referrer'] != '') {
-                                                    window.location.replace(element.attrs['referrer']);
-                                                }
-                                            }
-                                        }));
-                                    } else {
-                                        var d = new Date(saved.getTime() + interval);
-                                        $(element.dom_element).countEverest($.extend(options, {
-                                            day: d.getDate(),
-                                            month: d.getMonth() + 1,
-                                            year: d.getFullYear(),
-                                            hour: d.getHours(),
-                                            minute: d.getMinutes(),
-                                            second: d.getSeconds(),
-                                            onComplete: function() {
-                                                if (element.attrs['referrer'] != '') {
-                                                    window.location.replace(element.attrs['referrer']);
-                                                }
-                                            }
-                                        }));
-                                    }
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }});
-            },
-            render: function($, p, fp) {
-                
-                this.dom_element = $('<div class="az-element az-countdown ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
-                var countdown = $('<div class="countdown"></div>').appendTo(this.dom_element);
-                switch (this.attrs['countdown_style']) {
-                    case 'style1':
-                        $(this.dom_element).addClass('example--1');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<div class="col"><span class="ce-days"></span> <span class="ce-days-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<div class="col"><span class="ce-hours"></span> <span class="ce-hours-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<div class="col"><span class="ce-minutes"></span> <span class="ce-minutes-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<div class="col"><span class="ce-seconds"></span> <span class="ce-seconds-label"></span></div>');
-                        break;
-                    case 'style2':
-                        $(this.dom_element).addClass('example--2');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<div class="bar bar-days"><div class="fill"></div></div><span class="ce-days"></span> <span class="ce-days-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<div class="bar bar-hours"><div class="fill"></div></div><span class="ce-hours"></span> <span class="ce-hours-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<div class="bar bar-minutes"><div class="fill"></div></div><span class="ce-minutes"></span> <span class="ce-minutes-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<div class="bar bar-seconds"><div class="fill"></div></div><span class="ce-seconds"></span> <span class="ce-seconds-label"></span>');
-                        break;
-                    case 'style3':
-                        $(this.dom_element).addClass('example--3');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<span class="number ce-hours"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<span class="number ce-minutes"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<span class="number ce-seconds"></span>');
-                        break;
-                    case 'style4':
-                        $(this.dom_element).addClass('example--4');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<span class="ce-days"></span> <span class="ce-days-label"></span>');
-                        break;
-                    case 'style5':
-                        $(this.dom_element).addClass('example--5');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<span class="ce-minutes"></span>:');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<span class="ce-seconds"></span>');
-                        break;
-                    case 'style6':
-                        $(this.dom_element).addClass('example--6');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<div class="col"><div class="ce-hours"><div class="ce-flip-wrap"><div class="ce-flip-front"></div><div class="ce-flip-back"></div></div></div><span class="ce-hours-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<div class="col"><div class="ce-minutes"><div class="ce-flip-wrap"><div class="ce-flip-front"></div><div class="ce-flip-back"></div></div></div><span class="ce-minutes-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<div class="col"><div class="ce-seconds"><div class="ce-flip-wrap"><div class="ce-flip-front"></div><div class="ce-flip-back"></div></div></div><span class="ce-seconds-label"></span></div>');
-                        break;
-                    case 'style7':
-                        $(this.dom_element).addClass('example--7');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<span class="number ce-hours"></span> :');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<span class="number ce-minutes"></span> :');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<span class="number ce-seconds"></span>');
-                        break;
-                    case 'style8':
-                        $(this.dom_element).addClass('example--8');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<span class="ce-days"></span> <span class="ce-days-label"></span>');
-                        break;
-                    case 'style9':
-                        $(this.dom_element).addClass('example--9');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<div class="circle"><canvas id="days" width="408" height="408"></canvas><div class="circle__values"><span class="ce-digit ce-days"></span><span class="ce-label ce-days-label"></span></div></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<div class="circle"><canvas id="hours" width="408" height="408"></canvas><div class="circle__values"><span class="ce-digit ce-hours"></span><span class="ce-label ce-hours-label"></span></div></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<div class="circle"><canvas id="minutes" width="408" height="408"></canvas><div class="circle__values"><span class="ce-digit ce-minutes"></span><span class="ce-label ce-minutes-label"></span></div></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<div class="circle"><canvas id="seconds" width="408" height="408"></canvas><div class="circle__values"><span class="ce-digit ce-seconds"></span><span class="ce-label ce-seconds-label"></span></div></div>');
-                        break;
-                    case 'style10':
-                        $(this.dom_element).addClass('example--10');
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<div class="unit-wrap"><div class="days"></div><span class="ce-days-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<div class="unit-wrap"><div class="hours"></div><span class="ce-hours-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<div class="unit-wrap"><div class="minutes"></div><span class="ce-minutes-label"></span></div>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<div class="unit-wrap"><div class="seconds"></div><span class="ce-seconds-label"></span></div>');
-                        break;
-                    default:
-                        if (_.indexOf(this.attrs['display'].split(','), 'days') >= 0)
-                            $(countdown).append('<span class="ce-days"></span> <span class="ce-days-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'hours') >= 0)
-                            $(countdown).append('<span class="ce-hours"></span> <span class="ce-hours-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'minutes') >= 0)
-                            $(countdown).append('<span class="ce-minutes"></span> <span class="ce-minutes-label"></span>');
-                        if (_.indexOf(this.attrs['display'].split(','), 'seconds') >= 0)
-                            $(countdown).append('<span class="ce-seconds"></span> <span class="ce-seconds-label"></span>');
-                        break;
-                }
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1893,7 +1366,7 @@
             show_settings_on_create: true,
             frontend_render: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 this.add_css('css/jquery.circliful.css', 'circliful' in $.fn, function() {
@@ -1909,7 +1382,7 @@
                     }});
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-circle-counter ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div id="' + this.id + '" data-dimension="' + this.attrs['dimension']
                         + '" data-text="' + this.attrs['text']
                         + '" data-info="' + this.attrs['info']
@@ -1990,7 +1463,7 @@
             ],
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 this.add_js_list({
@@ -2009,7 +1482,6 @@
                                 }});
                         }, {offset: '100%', triggerOnce: true});
                         $(document).trigger('scroll');
-
 //                $(element.dom_element).waypoint({
 //                    handler: function() {
 //                    }
@@ -2017,7 +1489,7 @@
                     }});
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-counter"><div id="' + this.id + '" class="' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['start'] + '</div></div>');
                 $(this.dom_element).find('#' + this.id).css('font-size', this.attrs['fontsize'] + 'px');
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -2046,7 +1518,7 @@
                 }
             },
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 if (this.children.length == 0 && this.attrs['images_with_tags'] != '') {
                     var shortcode = '[az_grid]';
@@ -2070,14 +1542,210 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-wizard az-tagged-images-grid ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
+        {
+            base: 'az_countdown',
+            name: t('Countdown Timer'),
+            icon: 'fa fa-clock-o',
+            description: t('Place countdown element'),
+            params: [
+                {
+                    type: 'dropdown',
+                    heading: t('Date / Time Limitations'),
+                    param_name: 'counter_scope',
+                    description: t('Select the countdown scope in terms of date and time.'),
+                    value: {
+                        'date': t('Specify Date Only'),
+                        'date_time': t('Specify Date and Time'),
+                        'repeating': t('Specifiy Time Only (repeating on every day)'),
+                        'resetting': t('Resetting Counter (set interval up to 24 hours)'),
+                    },
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Date'),
+                    param_name: 'date',
+                    datepicker: true,
+                    description: t('Select the date to which you want to count down to.'),
+                    formatDate: 'd.m.Y',
+                    dependency: {'element': 'counter_scope', 'value': ['date']},
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Date / Time'),
+                    param_name: 'date_time',
+                    timepicker: true,
+                    datepicker: true,
+                    description: t('Select the date and time to which you want to count down to.'),
+                    formatDate: 'd.m.Y',
+                    formatTime: 'H',
+                    dependency: {'element': 'counter_scope', 'value': ['date_time']},
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Time'),
+                    param_name: 'time',
+                    timepicker: true,
+                    description: t('Select the time on the day above to which you want to count down to.'),
+                    formatTime: 'H',
+                    dependency: {'element': 'counter_scope', 'value': ['repeating']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Hours'),
+                    param_name: 'reset_hours',
+                    max: 24,
+                    description: t('Define the number of hours until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Minutes'),
+                    param_name: 'reset_minutes',
+                    max: 60,
+                    description: t('Define the number of minutes until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Seconds'),
+                    param_name: 'reset_seconds',
+                    max: 60,
+                    description: t('Define the number of seconds until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'link',
+                    heading: t('Page Referrer'),
+                    param_name: 'referrer',
+                    description: t('Provide an optional link to another site/page to be opened after countdown expires.'),
+                    dependency: {'element': 'counter_scope', 'value': ['repeating', 'resetting']},
+                },
+                {
+                    type: 'checkbox',
+                    heading: t('Automatic Restart'),
+                    param_name: 'restart',
+                    description: t('Switch the toggle if you want to restart the countdown after each expiration.'),
+                    value: {
+                        'yes': t("Yes, please"),
+                    },
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'saved_datetime',
+                    param_name: 'saved',
+                },
+                {
+                    type: 'checkbox',
+                    heading: t('Display Options'),
+                    param_name: 'display',
+                    value: {
+                        'days': t("Show Remaining Days"),
+                        'hours': t("Show Remaining Hours"),
+                        'minutes': t("Show Remaining Minutes"),
+                        'seconds': t("Show Remaining Seconds"),
+                    },
+                },
+            ],
+            show_settings_on_create: true,
+            frontend_render: true,
+            showed: function($, p, fp) {
+                this.baseclass.prototype.showed.apply(this, arguments);
+                var element = this;
+                function get_html(event) {
+                    var html = '';
+                    if (_.indexOf(element.attrs['display'].split(','), 'days') >= 0)
+                        html += event.strftime('<span class="az-days">%-D</span> ' + t('days') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'hours') >= 0)
+                        html += event.strftime('<span class="az-hours">%-H</span> ' + t('hours') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'minutes') >= 0)
+                        html += event.strftime('<span class="az-minutes">%M</span> ' + t('min') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'seconds') >= 0)
+                        html += event.strftime('<span class="az-seconds">%S</span> ' + t('sec') + ' ');
+                    return html;
+                }
+                this.add_js_list({
+                    paths: ['jquery.countdown/jquery.countdown.min.js', 'datetimepicker/jquery.datetimepicker.js'],
+                    loaded: 'countdown' in $.fn && 'datetimepicker' in $.fn,
+                    callback: function() {
+                        var options = {};
+                        switch (element.attrs['counter_scope']) {
+                            case 'date':
+                                var d = Date.parseDate(element.attrs['date'], 'd.m.Y');
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate()).on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    });
+                                }
+                                break;
+                            case 'date_time':
+                                var d = Date.parseDate(element.attrs['date_time'], 'd.m.Y H');
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':00:00').on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    });
+                                }
+                                break;
+                            case 'repeating':
+                                var d = new Date();
+                                d.setHours(element.attrs['time']);
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':00:00').on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    }).on('finish.countdown', function(event) {
+                                        if (element.attrs['referrer'] != '') {
+                                            window.location.replace(element.attrs['referrer']);
+                                        }
+                                    });
+                                }
+                                break;
+                            case 'resetting':
+                                if (element.attrs['saved'] != '') {
+                                    var saved = new Date(element.attrs['saved']);
+                                    var interval = (Math.round(element.attrs['reset_hours']) * 60 * 60 + Math.round(element.attrs['reset_minutes']) * 60 + Math.round(element.attrs['reset_seconds'])) * 1000;
+                                    if (element.attrs['restart'] == 'yes') {
+                                        var current = new Date();
+                                        var elapsed = current.getTime() - saved.getTime();
+                                        var k = elapsed / interval;
+                                        elapsed = elapsed - Math.floor(k) * interval;
+                                        var delta = interval - elapsed;
+                                        var d = new Date(current.getTime() + delta);
+                                        $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()).on('update.countdown', function(event) {
+                                            $(this).html(get_html(event));
+                                        }).on('finish.countdown', function(event) {
+                                            if (element.attrs['referrer'] != '') {
+                                                window.location.replace(element.attrs['referrer']);
+                                            }
+                                        });
+                                    } else {
+                                        var d = new Date(saved.getTime() + interval);
+                                        $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()).on('update.countdown', function(event) {
+                                            $(this).html(get_html(event));
+                                        }).on('finish.countdown', function(event) {
+                                            if (element.attrs['referrer'] != '') {
+                                                window.location.replace(element.attrs['referrer']);
+                                            }
+                                        });
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }});
+            },
+            render: function($, p, fp) {
+                this.dom_element = $('<div class="az-element az-countdown ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+                $('<div class="countdown"></div>').appendTo(this.dom_element);
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
     ];
-
     if ('azexo_elements' in window) {
         window.azexo_elements = window.azexo_elements.concat(azexo_elements);
     } else {
@@ -2101,17 +1769,17 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                var select = '<select name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" class="' + p + 'form-control" ' + required + '>';
+                var select = '<select name="' + this.attrs['name'] + '" class="' + p + 'form-control" ' + required + '>';
                 select += '<option value="">' + t('Please select') + '</option>';
                 var options = this.attrs['options'].split("\n");
                 for (var i = 0; i < options.length; i++) {
                     select += '<option value="' + options[i] + '">' + options[i] + '</option>';
                 }
                 select += '/<select>';
-                this.dom_element = $('<div class="az-element az-dropdown ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" ><label>' + this.attrs['name'] + '</label><div>' + select + '</div></div>');
+                this.dom_element = $('<div class="az-element az-dropdown ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" ><label>' + this.attrs['title'] + '</label><div>' + select + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -2125,20 +1793,20 @@
                     type: 'html',
                     heading: t('Options'),
                     param_name: 'options',
-                    description: t('Separated by new line.'),
+                    description: t('Name|Title separated by new line.'),
                 },
             ],
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var inputs = '';
                 var options = this.attrs['options'].split("\n");
                 for (var i = 0; i < options.length; i++) {
-                    inputs += '<div class="' + p + 'checkbox"><label><input name="' + btoa(encodeURIComponent(options[i])) + '" type="checkbox" value="' + options[i] + '">' + options[i] + '</label></div>';
+                    inputs += '<div class="' + p + 'checkbox"><label><input name="' + options[i].split("|")[0] + '" type="checkbox" value="' + options[i].split("|")[0] + '">' + options[i].split("|")[1] + '</label></div>';
                 }
-                this.dom_element = $('<div class="az-element az-checkbox ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['name'] + '</label><div>' + inputs + '</div></div>');
+                this.dom_element = $('<div class="az-element az-checkbox ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['title'] + '</label><div>' + inputs + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -2152,10 +1820,29 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-textfield ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" placeholder="' + this.attrs['name'] + '" ' + required + '></div></div>');
+                this.dom_element = $('<div class="az-element az-textfield ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" placeholder="' + this.attrs['title'] + '" ' + required + '></div></div>');
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
+        {
+            base: 'az_hidden',
+            name: t('Hidden data'),
+            icon: 'fa fa-ticket',
+            description: t('Hidden text field'),
+            params: [
+                {
+                    type: 'textfield',
+                    heading: t('Data'),
+                    param_name: 'data',
+                },
+            ],
+            hidden: true,
+            show_settings_on_create: true,
+            render: function($, p, fp) {
+                this.dom_element = $('<input name="' + this.attrs['name'] + '" type="hidden" value="' + this.attrs['data'] + '" >');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -2193,33 +1880,23 @@
             hidden: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+                var element = this;
                 this.baseclass.prototype.showed.apply(this, arguments);
                 function nouislider(slider, min, max, value, step, target) {
-                    azexo_add_css('nouislider/jquery.nouislider.css', function() {
+                    element.add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
                     });
-                    azexo_add_js({
-                        path: 'nouislider/jquery.nouislider.min.js',
+                    element.add_js({
+                        path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
                         callback: function() {
                             $(slider).noUiSlider({
-                                range: {
-                                    min: parseFloat(min),
-                                    max: parseFloat(max)
-                                },
-                                start: (value == '') ? NaN : parseFloat(value),
-                                handles: 1,
+                                start: [(value == '' || isNaN(parseFloat(value)) || value == 'NaN') ? min : parseFloat(value)],
                                 step: parseFloat(step),
-                                behaviour: "extend-tap",
-                                serialization: {
-                                    lower: [$.Link({
-                                            target: target
-                                        })],
+                                range: {
+                                    min: [parseFloat(min)],
+                                    max: [parseFloat(max)]
                                 },
-                                slide: function() {
-                                },
-                                set: function() {
-                                }
-                            }).change(function() {
+                            }).on('change', function() {
+                                $(target).val($(slider).val());
                             });
                         }
                     });
@@ -2227,10 +1904,10 @@
                 nouislider($(this.dom_element).find('.slider'), this.attrs['minimum'], this.attrs['maximum'], '', this.attrs['step'], $(this.dom_element).find('input'));
             },
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-number ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + ' placeholder="' + this.attrs['name'] + '"></div><div class="slider"></div></div>');
+                this.dom_element = $('<div class="az-element az-number ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" ' + required + ' placeholder="' + this.attrs['title'] + '"></div><div class="slider"></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -2253,10 +1930,10 @@
             show_settings_on_create: true,
             frontend_render: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
-                this.add_css('datetimepicker/jquery.datetimepicker.css', function() {
+                this.add_css('datetimepicker/jquery.datetimepicker.css', 'datetimepicker' in $.fn, function() {
                 });
                 this.add_js({
                     path: 'datetimepicker/jquery.datetimepicker.js',
@@ -2279,9 +1956,9 @@
                 });
             },
             render: function($, p, fp) {
-                
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-date ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['name'] + '</label><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + '></div></div>');
+                this.dom_element = $('<div class="az-element az-date ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['title'] + '</label><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" ' + required + '></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -2295,9 +1972,9 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-textarea ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" " placeholder="' + this.attrs['name'] + '" ' + required + '></textarea></div></div>');
+                this.dom_element = $('<div class="az-element az-textarea ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + this.attrs['name'] + '" " placeholder="' + this.attrs['title'] + '" ' + required + '></textarea></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },

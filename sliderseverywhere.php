@@ -110,17 +110,19 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('function', $this->name, array('sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
+        
         if (!Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') != $this->getLiveEditToken()) {
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
+
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
 
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.min.css');
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
-            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_admin.css');
+            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_add.css');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
         }
@@ -199,8 +201,8 @@ class sliderseverywhere extends Module {
 
     public function hookDisplayFooter($params) {
         if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken() && Tools::getIsset('id_employee') && Tools::getIsset('id_shop')) {
-            $this->context->controller->addCSS($this->getPathUri() . 'views/css/inspector.css', 'all');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/inspector.js');
+            //        $this->context->controller->addCSS($this->getPathUri() . 'views/css/inspector.css', 'all');
+            //      $this->context->controller->addJS($this->getPathUri() . 'views/js/inspector.js');
         }
 
         return $this->load_hook_sliders(__FUNCTION__);

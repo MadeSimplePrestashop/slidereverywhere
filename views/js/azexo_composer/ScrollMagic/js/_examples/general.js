@@ -236,7 +236,7 @@ $(document).ready(function () {
 		$(this).data("code", $parent.clone());
 	})
 
-	// build SliderBuilderObject
+	// build sliders
 	$("div.slider+input")
 		.prop("disabled", true)
 		.on("change", function () {

@@ -60,7 +60,7 @@ The markup structure for FlexSlider has been limited to a "ul.slide li" pattern 
 Previously called "slideDirection" in v1.8 and below.
 
 ### reverse: *{new}*
-`reverse` will reverse the animation direction of the slider. Meaning, horizontal SliderBuilderObject can move from right to left, and vertical SliderBuilderObject can move bottom to top.
+`reverse` will reverse the animation direction of the slider. Meaning, horizontal sliders can move from right to left, and vertical sliders can move bottom to top.
 
 ### smoothHeight: *{new}*
 `smoothHeight` allows for smooth height transitions between slides. This property currently works for the fade and horizontal slide animation. The property has no effect on horizontal sliding carousels, however.
@@ -80,15 +80,15 @@ Previously called "animationDuration" in v1.8 and below.
 *Hint: Use conditionals to enable/disable the use of CSS3 on desktops and mobile devices. Mobile devices, in my experience, do not share many of the translate3d bugs seen on desktop browsers.*
 
 ### touch: *{new}*
-`touch` allows users to exclude touch swipe functionality from their SliderBuilderObject.
+`touch` allows users to exclude touch swipe functionality from their sliders.
 
 ### keyboard: *{changed}*
 Previously called "keyboardNav" in v1.8 and below.
 
 ### multipleKeyboard *{new}*
-`multipleKeyboard` allows users to override the default plugin keyboard behavior, enabling keyboard control of more than one slider on the page. This means that all visible SliderBuilderObject will animate, at the same time, via keyboard input.
+`multipleKeyboard` allows users to override the default plugin keyboard behavior, enabling keyboard control of more than one slider on the page. This means that all visible sliders will animate, at the same time, via keyboard input.
 
-*Hint: You can use `multipleKeyboard` to allow keyboard navigation on pages where multiple SliderBuilderObject are present, but only one is visible.*
+*Hint: You can use `multipleKeyboard` to allow keyboard navigation on pages where multiple sliders are present, but only one is visible.*
 
 ### mousewheel: *{updated}*
 `mousewheel` now requires the jQuery Mousewheel plugin. There are a few reasons for this, but primarily because there is no need for FlexSlider itself to reinvent the awkward complexity of mousewheel interactivity that is handled perfectly by the Mousewheel plugin.

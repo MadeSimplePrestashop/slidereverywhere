@@ -103,7 +103,7 @@ class AdminSlidesController extends ModuleAdminController {
                 'settings' => $this->l('Settings'),
                 'image' => $this->l('Image'),
                 'video' => $this->l('Video'),
-                'buildertab' => $this->l('Builder')
+                'buildertab' => $this->l('Builder (beta)')
             ),
             'input' => array(
                 array(
