@@ -73,7 +73,6 @@ class AdminSlidesController extends ModuleAdminController {
     public function renderForm() {
 
         $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.css');
-        $this->addJS($this->module->getPathUri() . 'views/js/init_extractor.js');
         $par = self::$parent_definition['primary'];
 
         if (!$obj = $this->loadObject(true))
@@ -88,18 +87,9 @@ class AdminSlidesController extends ModuleAdminController {
         if ($obj->id)
             $params[Slides::$definition['primary']] = $obj->id;
         $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
-        $exist = false;
-        $zipclass = true;
-        if (is_dir(_PS_ROOT_DIR_ . '/modules/sliderseverywhere/views/js/azexo_composer'))
-            $exist = true;
-        else
-        if (!class_exists('ZipArchive'))
-            $zipclass = false;
 
-        $loader = __PS_BASE_URI__ . 'modules/' . $this->module->name . '/img/ajax-loader.gif';
-        $this->context->smarty->assign(array('loader' => $loader, 'extractor_path' => $this->module->getPathUri() . 'views/js', 'extractor_url' => $this->module->getPathUri() . 'slide-builder-extractor.php', 'builder_url' => $builder_url, 'slide' => $obj, 'exist' => $exist, 'zipclass' => $zipclass));
-
-        $builder_value = $this->context->smarty->fetch(_PS_ROOT_DIR_ . '/modules/' . $this->module->name . '/views/templates/admin/extract.tpl');
+        $this->context->smarty->assign(array('builder_url' => $builder_url, 'slide' => $obj));
+        $builder_value = $this->context->smarty->fetch(_PS_ROOT_DIR_ . '/modules/' . $this->module->name . '/views/templates/admin/builder.tpl');
 
 
         $this->fields_value = array('builder' => $builder_value);
