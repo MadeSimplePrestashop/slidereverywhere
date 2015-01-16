@@ -4,8 +4,7 @@ window.azexo_editor = true;
 window.azexo_online = false;
 window.azexo_exporter = false;
 $(function () {
-    $('#example').html(decodeURIComponent(window.opener.$('#builder').val()).replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ''));
-    console.log($((decodeURIComponent(window.opener.$('#builder').val())).replace(/\+/g, ' ')).find('style'));
+    $('#example').html(decodeURIComponent(window.opener.$('#builder').val()).replace(/\+/g, ' '));
 })
 $(document).ready(function () {
 

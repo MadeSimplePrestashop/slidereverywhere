@@ -73,6 +73,7 @@ class AdminSlidesController extends ModuleAdminController {
     public function renderForm() {
 
         $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.css');
+        $this->addJS($this->module->getPathUri() . 'views/js/init_extractor.js');
         $par = self::$parent_definition['primary'];
 
         if (!$obj = $this->loadObject(true))
@@ -87,10 +88,19 @@ class AdminSlidesController extends ModuleAdminController {
         if ($obj->id)
             $params[Slides::$definition['primary']] = $obj->id;
         $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
+        $exist = false;
+        $zipclass = true;
+        if (is_dir(_PS_ROOT_DIR_ . '/modules/sliderseverywhere/views/js/azexo_composer'))
+            $exist = true;
+        else
+        if (!class_exists('ZipArchive'))
+            $zipclass = false;
 
-        $default_code = '<div id="b2" class="az-element az-row row" style="" data-az-id="b2" data-azb="az_row" data-azat-device="sm" data-azcnt="true"><div class="az-element az-ctnr az-column  col-sm-12" style="" data-az-id="b3" data-azb="az_column" data-azat-width="1/1" data-azcnt="true"><div class="az-element az-layers " data-az-id="b4" data-azb="az_layers" ></div></div></div>';
-        $builder_value = '<input type="hidden" value="' . (isset($obj) && isset($obj->builder) && empty($obj->builder) == false ? $obj->builder : urlencode($default_code)) . '" name="builder" id="builder" /><a href="' . $builder_url . '"  target="_blank"><button type="button"  class="btn btn-default">' . $this->l('Open builder in new window') . '</button></a>';
-        $builder_value .= '<br /><br /> <small>' . $this->l('Preview, just preview. Not fully functionalited. Border is not included.)') . '</small> <br /><br /><div class="az-container-case"><div id="az-preview" class="az-container">' . (isset($obj) && isset($obj->builder) && empty($obj->builder) == false ? urldecode($obj->builder) : '') . '</div></div>';
+        $loader = __PS_BASE_URI__ . 'modules/' . $this->module->name . '/img/ajax-loader.gif';
+        $this->context->smarty->assign(array('loader' => $loader, 'extractor_path' => $this->module->getPathUri() . 'views/js', 'extractor_url' => $this->module->getPathUri() . 'slide-builder-extractor.php', 'builder_url' => $builder_url, 'slide' => $obj, 'exist' => $exist, 'zipclass' => $zipclass));
+
+        $builder_value = $this->context->smarty->fetch(_PS_ROOT_DIR_ . '/modules/' . $this->module->name . '/views/templates/admin/extract.tpl');
+
 
         $this->fields_value = array('builder' => $builder_value);
         $this->fields_form = array(
@@ -138,7 +148,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'tab' => 'image',
                     'type' => 'text',
                     'label' => $this->l('Url'),
-                    'hint' => $this->l('Associate    url (optional)'),
+                    'hint' => $this->l('Associate url (optional)'),
                     'lang' => true,
                     'name' => 'url'
                 ),
@@ -218,25 +228,28 @@ class AdminSlidesController extends ModuleAdminController {
 
 
         $this->page_header_toolbar_btn['save'] = array(
-            'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();',
+            'href' => 'javascript:$("#' . $this->table . '_form button:submit").click();
+',
             'desc' => $this->l('Save')
         );
         $this->page_header_toolbar_btn['save-and-stay'] = array(
             'short' => 'SaveAndStay',
-            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitStay");$("#' . $this->table . '_form button:submit").click();',
+            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitStay");
+$("#' . $this->table . '_form button:submit").click();
+',
             'desc' => $this->l('Save and stay'),
             'force_desc' => true,
         );
         $this->page_header_toolbar_btn['delete'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . '=' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . ' = ' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
             'icon' => 'process-icon-cancel',
             'desc' => $this->l('Back to slides list'),
         );
 
 //back button
         $this->content.= '<script>
-         $(document).ready(function(){
-            $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back();})
+$(document).ready(function(){
+$(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back();})
         })
                 </script>';
 

@@ -7068,8 +7068,11 @@
                     $('<button title="' + title("Save container") + '" class="control save-container ' + p + 'btn ' + p + 'btn-success ' + p + 'glyphicon ' + p + 'glyphicon-save" > </button>').appendTo(this.controls).click({object: this}, this.click_save_container);
                       var element = this;
                 //edited kuzmany.biz
-                $('.save-builder,.save-return-builder').click({object: this}, function(){
+                $('.save-builder,.save-return-builder,.return-builder').click({object: this}, function(){
 //                    var html = element.get_container_html();
+                    if($(this).hasClass('return-builder'))
+                        return window.close();
+                        
                     var html = (((element.get_container_html()).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')).replace(/<link\b[^>]*>/gi,''));
                     window.opener.$('#builder').val(encodeURIComponent(html));
                     window.opener.$('#az-preview').html(html);
@@ -7802,7 +7805,7 @@
                 }
         );
     }
-    register_element('az_scroll_menu', false, ScrollMenuElement);
+    //register_element('az_scroll_menu', false, ScrollMenuElement); edited kuzmany.biz
     mixin(ScrollMenuElement.prototype, {
         name: t('Scroll Menu'),
         icon: 'fa fa-sitemap',
@@ -8150,6 +8153,23 @@
 //
     function create_azexo_elements() {
         if ('azexo_elements' in window) {
+             //edited kuzmany.biz
+    var i = 0;
+    for (var id in window.azexo_elements) {
+       if(window.azexo_elements[id-i]['base'] == 'az_jumbotron' 
+       || window.azexo_elements[id-i]['base'] == 'az_panel'
+       || window.azexo_elements[id-i]['base'] == 'az_gallery'
+       || window.azexo_elements[id-i]['base'] == 'az_images_carousel'
+       || window.azexo_elements[id-i]['base'] == 'az_separator'
+       || window.azexo_elements[id-i]['base'] == 'az_scroll_menu'
+               ){
+           //window.azexo_elements[id] = null;
+           console.log(i);
+            window.azexo_elements.splice(id-i,1);
+            i++;
+        }
+    }
+    console.log(window.azexo_elements);
             for (var i = 0; i < window.azexo_elements.length; i++) {
                 var element = window.azexo_elements[i];
                 var ExternalElement = function(parent, position) {

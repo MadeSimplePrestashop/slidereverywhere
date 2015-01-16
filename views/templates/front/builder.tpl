@@ -7,6 +7,10 @@
             <i class="glyphicon glyphicon-floppy-remove"></i>
             {l s='Save and return' mod='sliderseverywhere'}
         </button>
+        <button type="button" class="btn btn-default return-builder btn-sm ">
+            <i class="glyphicon glyphicon-remove"></i>
+            {l s='Cancel and return' mod='sliderseverywhere'}
+        </button>
     </div>
 
     <button type="button" class="btn btn-default btn-sm  add-to-layer">

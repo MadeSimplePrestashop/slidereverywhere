@@ -4,10 +4,7 @@ border-bottom-right-radius: 0;
 border-top-left-radius: 0;
 border-bottom-left-radius: 0;
 }
-
-
-.modal {z-index:100000}
-.modal-backdrop  {z-index:10000}
+.modal {z-index:10000}
 
 body > .container > .az-container { margin-top : 34px; margin-bottom : 100px; }
 .az-row > .controls {visibility:hidden !important}
@@ -16,35 +13,13 @@ body > .container > .az-container { margin-top : 34px; margin-bottom : 100px; }
 .azexo-editor > div > div .az-element:not(.az-row)after {border:1px solid #ccc; margin-top:0;  }
 .az-empty {display:none !important}
 .azexo-editor .az-row:hover .az-ctnr:after  {outline:0}
-.azexo-editor > div div  > .az-element:not(.az-row):after {
-    content: ' ';
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: grey;
-    opacity: 0.2;
-}
-.av-tabs li:first-child {display:none}
-.ab-content div:first-child {display:none}
-.azexo-editor .az-element > .controls {display:none}
-.azexo-editor > .controls   {display:none !important}
-.azexo-editor .az-element.form-group > .controls, .azexo-editor .az-element > .controls {
-    display: none !important;
-}
-.js-animation {display:none !important}
-.azexo-editor .az-layers .az-element > .controls {display:initial !important;top: 100%;margin-top: 10px;}
-div.az-element.az-ctnr.az-column.col-sm-12 > div.az-element.az-layers {border:1px solid #ccc !important}
-div.az-element.az-ctnr.az-column.col-sm-12 > div.az-element.az-layers > div.controls.btn-group {display:none !important}
 .az-button-menu {margin-bottom:15px}
-.az-button-menu button {border-radius: 0;}
 .a-container-case {
     top: -70px;
     position: relative;
 }
 #az-editor-tab-2 > div:nth-child(1) > div > select > option:nth-child(5) { display: none!important }
 div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable,div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable > div.az-element.az-layers, .azexo-editor.azexo.az-container { margin-top:0 !important }
+
+
+#center_column > div.az-container-case > div > div.controls.btn-group,#center_column > div.az-container-case > div > div.az-element.az-row.row.ui-sortable > div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable > div.az-element.az-layers > div.controls.btn-group.btn-group-xs {display:none;}

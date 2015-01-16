@@ -19,7 +19,6 @@ class sliderseverywhere extends Module {
     public $hooks = array('displayTop', 'displayHome', 'displayLeftColumn', 'displayLeftColumnProduct',
         'displayRightColumn', 'displayRightColumnProduct', 'displayFooter', 'displayFooterProduct',
         'displayTopColumn', 'displayHomeTabContent', 'displayProductTab', 'displayShoppingCartFooter', 'displayBanner');
-
     public function __construct() {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
@@ -27,7 +26,6 @@ class sliderseverywhere extends Module {
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
-
         parent::__construct();
 
         $this->displayName = $this->l('Sliders Everywhere');
@@ -110,22 +108,29 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('function', $this->name, array('sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
-        
-        if (!Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') != $this->getLiveEditToken()) {
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken())
+            $this->azexo_init(true);
+    }
 
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
+    public function azexo_init($admin = false) {
+        // just for slide builder
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
 
-            $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.min.css');
-            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
+        $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.css');
+        $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
+
+        if ($admin) {
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_admin.js');
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_add.css');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
         }
+
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
     }
 
     /**
@@ -170,6 +175,9 @@ class sliderseverywhere extends Module {
         $html = '';
         foreach ($ids as $slider)
             $html .= Sliders::get_slider(array('id' => $slider));
+
+        if (Cache::retrieve('azexo_init'))
+            $this->azexo_init();
 
         return $html;
     }

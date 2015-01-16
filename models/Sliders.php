@@ -153,12 +153,16 @@ class Sliders extends ObjectModel {
                 $slider->options->video = true;
                 $slider->options->useCSS = false;
             }
+
+            if ($slide['builder'])
+                Cache::store('azexo_init', 1);
         }
 
         Context::getContext()->smarty->smarty->assign(array(
             'slider' => $slider,
             'slides' => $slides
         ));
+
         return Context::getContext()->smarty->fetch(
                         dirname(__FILE__) . '/../views/templates/hook/slider.tpl');
     }

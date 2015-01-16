@@ -31,26 +31,4 @@ class sliderseverywherebuilderModuleFrontController extends ModuleFrontControlle
         }
     }
 
-    public function setMedia() {
-        parent::setMedia();
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->module->getLiveEditToken()) {
-            
-            $this->addCSS(dirname(__FILE__) . '/../../views/js/bootstrap/bootstrap.min.css');
-            $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.css');
-            $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer_add.css');
-            
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/underscore-min.js');
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/js/smoothscroll.js');
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
-            
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/init_admin.js');
-            
-            
-            $this->addJS(dirname(__FILE__) . '/../../views/js/jquery-ui.min.js');
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_param_types.js');
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_elements.js');
-            $this->addJS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.js');
-        }
-    }
-
 }
