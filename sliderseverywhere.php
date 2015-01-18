@@ -19,10 +19,11 @@ class sliderseverywhere extends Module {
     public $hooks = array('displayTop', 'displayHome', 'displayLeftColumn', 'displayLeftColumnProduct',
         'displayRightColumn', 'displayRightColumnProduct', 'displayFooter', 'displayFooterProduct',
         'displayTopColumn', 'displayHomeTabContent', 'displayProductTab', 'displayShoppingCartFooter', 'displayBanner');
+
     public function __construct() {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
-        $this->version = '1.1.1';
+        $this->version = '1.2';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
@@ -57,6 +58,10 @@ class sliderseverywhere extends Module {
             $lang_array[(int) $language['id_lang']] = 'Slides';
         }
         $this->installAdminTab($lang_array, 'AdminSlides', $id_parent);
+
+        if (function_exists('curl_init') == false)
+            $this->warning = $this->l('To be able to use this module, please activate cURL (PHP extension).');
+
         return true;
     }
 
@@ -115,19 +120,21 @@ class sliderseverywhere extends Module {
     public function azexo_init($admin = false) {
         // just for slide builder
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
 
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
         $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
-        $this->context->controller->addCSS($this->getPathUri() . 'views/js/bootstrap/bootstrap.css');
         $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
+        $this->context->controller->addCSS($this->getPathUri() . 'views/css/bootstrap/bootstrap.css');
+        $this->context->controller->addCSS($this->getPathUri() . 'views/css/chardinjs.css');
 
         if ($admin) {
             $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_admin.js');
+            $this->context->controller->addJS($this->getPathUri() . 'views/js/chardinjs.min.js');
             $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_add.css');
-        }
+        }else
+              $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
 
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
         $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');

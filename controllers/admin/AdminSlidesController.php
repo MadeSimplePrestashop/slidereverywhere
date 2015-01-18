@@ -87,8 +87,8 @@ class AdminSlidesController extends ModuleAdminController {
         if ($obj->id)
             $params[Slides::$definition['primary']] = $obj->id;
         $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
-
-        $this->context->smarty->assign(array('builder_url' => $builder_url, 'slide' => $obj));
+        $slides = Slides::getAll();
+        $this->context->smarty->assign(array('builder_url' => $builder_url, 'slide' => $obj,'slides'=>$slides));
         $builder_value = $this->context->smarty->fetch(_PS_ROOT_DIR_ . '/modules/' . $this->module->name . '/views/templates/admin/builder.tpl');
 
 
@@ -231,7 +231,7 @@ $("#' . $this->table . '_form button:submit").click();
             'force_desc' => true,
         );
         $this->page_header_toolbar_btn['delete'] = array(
-            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . ' = ' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
+            'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . '=' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
             'icon' => 'process-icon-cancel',
             'desc' => $this->l('Back to slides list'),
         );

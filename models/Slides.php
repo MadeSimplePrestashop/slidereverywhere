@@ -70,6 +70,7 @@ class Slides extends ObjectModel {
 
     public function update($null_values = false) {
         $this->handle_image();
+        $null_values = false;
         parent::update();
     }
 
@@ -147,7 +148,6 @@ class Slides extends ObjectModel {
     }
 
     public function handle_image() {
-        $par = self::$parent_definition['primary'];
         if (isset($_FILES['image']) && isset($_FILES['image']['tmp_name']) && !empty($_FILES['image']['tmp_name'])) {
             //dir 
             $dir = self::get_image_path(Tools::getValue(self::$parent_definition['primary']));

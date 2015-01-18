@@ -1,4 +1,5 @@
-<div class="az-button-menu"><div class="pull-right">
+<div class="az-button-menu clearfix">
+    <div class="pull-right" data-intro="{l s="DON'T FORGET ON THESE ACTIONS" mod="sliderseverywhere"}" data-position="top">
         <button type="button" class="btn btn-default save-builder btn-sm ">
             <i class="glyphicon glyphicon-floppy-saved"></i>
             {l s='Save' mod='sliderseverywhere'}
@@ -11,22 +12,26 @@
             <i class="glyphicon glyphicon-remove"></i>
             {l s='Cancel and return' mod='sliderseverywhere'}
         </button>
+
     </div>
-
-    <button type="button" class="btn btn-default btn-sm  add-to-layer">
-        <i class="glyphicon glyphicon-plus"></i>
-        {l s="Insert content " mod="sliderseverywhere"}
-    </button>
-    <button type="button" class="btn btn-default btn-sm edit-layer">
-        <i class="glyphicon glyphicon-edit"></i>
-        {l s="Edit layer" mod="sliderseverywhere"}
-    </button>
-
+    <div class="pull-left"  data-position="bottom">
+        
+        <button type="button" class="btn btn-default btn-sm help-layer{if !$slide->builder|default} help-layer-load{/if}">
+            <i class="glyphicon glyphicon-question-sign"></i>
+        </button>
+        &nbsp;
+        <button data-intro="{l s="CONTINUE HERE" mod="sliderseverywhere"}"  type="button" class="btn btn-default btn-sm  add-to-layer">
+            <i class="glyphicon glyphicon-plus"></i>
+            {l s="Insert content " mod="sliderseverywhere"}
+        </button>
+        <button  type="button" class="btn btn-default btn-sm edit-layer " data-intro="{l s="START HERE" mod="sliderseverywhere"}" data-position="top">
+            <i class="glyphicon glyphicon-edit"></i>
+            {l s="Edit layer" mod="sliderseverywhere"}
+        </button>
+    </div>
 </div>
-    
+        <div class="az-style"></div>
 <div class="az-container-case">
-    <textarea name="example" id="example" cols="30" rows="10">
-    </textarea>
-
+    <textarea name="example" id="example" cols="30" rows="10"></textarea>
 </div>
 

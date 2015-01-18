@@ -2,7 +2,7 @@ window.azexo_baseurl = '../modules/sliderseverywhere/views/js/azexo_composer/';
 window.azexo_prefix = '';
 window.azexo_editor = false;
 window.azexo_online = false;
-window.azexo_exporter = false;
+//window.azexo_exporter = false;
 
 $(document).ready(function () {
     $('.edit-layer').on('click', '', function () {
