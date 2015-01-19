@@ -28,10 +28,14 @@
             <i class="glyphicon glyphicon-edit"></i>
             {l s="Edit layer" mod="sliderseverywhere"}
         </button>
+        <button  type="button" class="btn btn-default btn-sm switch-options" data-intro="{l s="TURN ON/OFF ELEMENTS BUTTONS" mod="sliderseverywhere"}" data-position="bottom">
+            <i class="glyphicon glyphicon-eye-close"></i>
+            {l s="Turn on/off control buttons" mod="sliderseverywhere"}
+        </button>
     </div>
 </div>
         <div class="az-style"></div>
 <div class="az-container-case">
-    <textarea name="example" id="example" cols="30" rows="10"></textarea>
+    <textarea name="builder" id="builder" cols="30" rows="10"></textarea>
 </div>
 

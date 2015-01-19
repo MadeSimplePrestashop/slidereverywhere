@@ -35,7 +35,7 @@ class sliderseverywhere extends Module {
 
     public function install() {
 
-        if (!parent::install() || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
+        if (!parent::install()  || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
             return false;
 
         foreach ($this->hooks as $hook)
@@ -66,7 +66,7 @@ class sliderseverywhere extends Module {
     }
 
     public function uninstall() {
-        if (!parent::uninstall() || !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
+        if (!parent::uninstall() ||  !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
         )
             return false;
 
@@ -82,6 +82,7 @@ class sliderseverywhere extends Module {
     }
 
     public function getContent() {
+
         Tools::redirectAdmin('index.php?controller=AdminSliders&token=' . Tools::getAdminTokenLite('AdminSliders'));
     }
 
@@ -105,39 +106,22 @@ class sliderseverywhere extends Module {
             $this->hookHeader($params);
     }
 
+
     public function hookHeader($params) {
-        $this->context->controller->addCSS($this->getPathUri() . 'views/css/jquery.bxslider.css');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery.fitvids.js');
+        $this->context->controller->addCSS($this->getPathUri() . 'css/jquery.bxslider.css');
+        $this->context->controller->addJS($this->getPathUri() . 'js/jquery.fitvids.js');
         $this->context->controller->addJqueryPlugin(array('bxslider'));
         if (!isset($this->context->smarty->registered_plugins['function'][$this->name]))
-            $this->context->smarty->registerPlugin('function', $this->name, array('sliders', 'get_slider'));
+            $this->context->smarty->registerPlugin('function', $this->name, array('Sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
         if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken())
-            $this->azexo_init(true);
-    }
-
-    public function azexo_init($admin = false) {
-        // just for slide builder
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/underscore-min.js');
-
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/js/smoothscroll.js');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/jquery-ui.min.js');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/jquery-waypoints/waypoints.min.js');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_param_types.js');
-        $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.css');
-        $this->context->controller->addCSS($this->getPathUri() . 'views/css/bootstrap/bootstrap.css');
-        $this->context->controller->addCSS($this->getPathUri() . 'views/css/chardinjs.css');
-
-        if ($admin) {
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_admin.js');
-            $this->context->controller->addJS($this->getPathUri() . 'views/js/chardinjs.min.js');
-            $this->context->controller->addCSS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer_add.css');
-        }else
-              $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/init_frontend.js');
-
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_elements.js');
-        $this->context->controller->addJS($this->getPathUri() . 'views/js/azexo_composer/azexo_composer.js');
+            Sliders::azexo_init(true);
+        else {
+            $slides = Slides::getAll();
+            if (count($slides) > 0)
+                Sliders::azexo_init();
+        }
     }
 
     /**
@@ -175,6 +159,8 @@ class sliderseverywhere extends Module {
      * @return type
      */
     private function load_hook_sliders($hook_func) {
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken())
+            return;
         $hook = lcfirst(str_replace('hook', '', $hook_func));
         $ids = $this->find_ids_from_hooks($hook);
         if (!$ids)
@@ -182,9 +168,6 @@ class sliderseverywhere extends Module {
         $html = '';
         foreach ($ids as $slider)
             $html .= Sliders::get_slider(array('id' => $slider));
-
-        if (Cache::retrieve('azexo_init'))
-            $this->azexo_init();
 
         return $html;
     }
@@ -215,10 +198,6 @@ class sliderseverywhere extends Module {
     }
 
     public function hookDisplayFooter($params) {
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken() && Tools::getIsset('id_employee') && Tools::getIsset('id_shop')) {
-            //        $this->context->controller->addCSS($this->getPathUri() . 'views/css/inspector.css', 'all');
-            //      $this->context->controller->addJS($this->getPathUri() . 'views/js/inspector.js');
-        }
 
         return $this->load_hook_sliders(__FUNCTION__);
     }

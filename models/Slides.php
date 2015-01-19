@@ -70,8 +70,7 @@ class Slides extends ObjectModel {
 
     public function update($null_values = false) {
         $this->handle_image();
-        $null_values = false;
-        parent::update();
+        parent::update($null_values);
     }
 
     public function add($autodate = true, $null_values = false) {
