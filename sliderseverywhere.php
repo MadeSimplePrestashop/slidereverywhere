@@ -119,7 +119,7 @@ class sliderseverywhere extends Module {
             Sliders::azexo_init(true);
         else {
             $slides = Slides::getAll();
-            if (count($slides) > 0)
+            if (count($slides) > 0 && Dispatcher::getInstance()->getController() != 'AdminSlides')
                 Sliders::azexo_init();
         }
     }
