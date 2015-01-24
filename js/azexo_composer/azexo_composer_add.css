@@ -20,6 +20,4 @@ body > .container > .az-container { margin-top : 34px; margin-bottom : 100px; }
 }
 #az-editor-tab-2 > div:nth-child(1) > div > select > option:nth-child(5) { display: none!important }
 div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable,div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable > div.az-element.az-layers, .azexo-editor.azexo.az-container { margin-top:0 !important }
-
-
 #center_column > div.az-container-case > div > div.controls.btn-group,#center_column > div.az-container-case > div > div.az-element.az-row.row.ui-sortable > div.az-element.az-ctnr.az-column.col-sm-12.ui-sortable > div.az-element.az-layers > div.controls.btn-group.btn-group-xs {display:none;}

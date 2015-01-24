@@ -3852,16 +3852,17 @@
                 },
                 dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
             }),
-            make_param_type({
-                type: 'checkbox',
-                heading: t('Infinite?'),
-                param_name: 'an_infinite',
-                tab: t('Animation'),
-                value: {
-                    'yes': t("Yes, please"),
-                },
-                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
-            }),
+            //edited kuzmany.biz
+//            make_param_type({
+//                type: 'checkbox',
+//                heading: t('Infinite?'),
+//                param_name: 'an_infinite',
+//                tab: t('Animation'),
+//                value: {
+//                    'yes': t("Yes, please"),
+//                },
+//                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
+//            }),
             make_param_type({
                 type: 'dropdown',
                 heading: t('By letters?'),
@@ -3886,16 +3887,16 @@
                 value: '1000',
                 dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
             }),
-//            make_param_type({
-//                type: 'integer_slider',
-//                heading: t('In-delay'),
-//                param_name: 'an_in_delay',
-//                tab: t('Animation'),
-//                max: '10000',
-//                description: t('In milliseconds.'),
-//                value: '0',
-//                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
-//            }),
+            make_param_type({
+                type: 'integer_slider',
+                heading: t('In-delay'),
+                param_name: 'an_in_delay',
+                tab: t('Animation'),
+                max: '10000',
+                description: t('In milliseconds.'),
+                value: '0',
+                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
+            }),
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Out-delay'),

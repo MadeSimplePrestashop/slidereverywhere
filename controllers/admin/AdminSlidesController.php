@@ -304,11 +304,11 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             'icon' => 'process-icon-edit',
             'desc' => $this->l('Edit slider'),
         );
-        $this->page_header_toolbar_btn['edit'] = array(
-            'href' => 'javascript:$("#previewslider").toggle(); slidereverywhere.reloadSlider();',
-            'icon' => 'process-icon-preview',
-            'desc' => $this->l('Preview toggle'),
-        );
+//        $this->page_header_toolbar_btn['edit'] = array(
+//            'href' => 'javascript:$("#previewslider").toggle(); slidereverywhere.reloadSlider();',
+//            'icon' => 'process-icon-preview',
+//            'desc' => $this->l('Preview toggle'),
+//        );
         $this->page_header_toolbar_btn['save'] = array(
             'href' => $this->context->link->getAdminLink('AdminSliders', true),
             'icon' => 'process-icon-back',
