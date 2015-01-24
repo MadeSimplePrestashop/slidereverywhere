@@ -26,6 +26,7 @@ class AdminSlidesController extends ModuleAdminController {
         $this->className = 'Slides';
 
         $this->addRowAction('edit');
+        $this->addRowAction('duplicate');
         $this->addRowAction('delete');
 
         $this->bulk_actions = array(
@@ -44,6 +45,8 @@ class AdminSlidesController extends ModuleAdminController {
     }
 
     public function initContent() {
+              if (Tools::getIsset('duplicate' . $this->table))
+            Slides::duplicate();
         parent::initContent();
     }
 
@@ -362,6 +365,8 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             return ImageManager::thumbnail($this->get_image_path($row[self::$parent_definition['primary']]) . $echo, 'thumb_' . $echo, 50);
         elseif (isset($row['video']) && $row['video'])
             return $this->l('video');
+        elseif (isset($row['builder']) && $row['builder'])
+            return $this->l('builder');
     }
 
 }

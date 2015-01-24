@@ -85,7 +85,14 @@ class Slides extends ObjectModel {
         parent::delete();
         $par = self::$parent_definition['primary'];
         $this->cleanPositions($this->$par);
-        @unlink(self::get_image_path($this->$par) . $this->image);
+        $all = self::getAll(array($par => $this->$par));
+        $delete = true;
+        foreach ($all as $a)
+            if ($a['image'] == $this->image)
+                $delete = false;
+
+        if ($delete)
+            @unlink(self::get_image_path($this->$par) . $this->image);
     }
 
     public function updatePosition($way, $position) {
@@ -168,6 +175,17 @@ class Slides extends ObjectModel {
 
             $this->image = $file_name;
         }
+    }
+
+    public static function duplicate() {
+        $context = Context::getContext();
+        $slide = new Slides(Tools::getValue(self::$definition['primary']));
+        if (!is_object($slide))
+            return;
+        unset($slide->id);
+        $slide->save();
+        $par = Sliders::$definition['primary'];
+        Tools::redirectAdmin($context->link->getAdminLink('AdminSlides') . '&' . $par . '=' . $slide->$par);
     }
 
 }
