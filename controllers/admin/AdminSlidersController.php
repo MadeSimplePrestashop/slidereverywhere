@@ -120,15 +120,15 @@ class AdminSlidersController extends ModuleAdminController {
                         'query' => array(
                             array(
                                 'id' => 'fade',
-                                'name' => $this->l('Fade')
+                                'name' => $this->l('Fade (works with builder)')
                             ),
                             array(
                                 'id' => 'horizontal',
-                                'name' => $this->l('Horizontal')
+                                'name' => $this->l('Horizontal (does not work with builder)')
                             ),
                             array(
                                 'id' => 'vertical',
-                                'name' => $this->l('Vertical')
+                                'name' => $this->l('Vertical (does not work with builder)')
                             )
                         ),
                         'id' => 'id',
@@ -720,12 +720,12 @@ class AdminSlidersController extends ModuleAdminController {
             'force_desc' => true,
         );
         if ($obj->id) {
-            $this->page_header_toolbar_btn['save-and-preview'] = array(
-                'short' => 'SaveAndStay',
-                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
-                'desc' => $this->l('Save and preview'),
-                'force_desc' => true,
-            );
+//            $this->page_header_toolbar_btn['save-and-preview'] = array(
+//                'short' => 'SaveAndStay',
+//                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
+//                'desc' => $this->l('Save and preview'),
+//                'force_desc' => true,
+//            );
         } else {
             $this->page_header_toolbar_btn['save-and-preview'] = array(
                 'short' => 'SaveAndStay',

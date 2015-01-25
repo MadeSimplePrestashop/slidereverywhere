@@ -346,10 +346,12 @@
             azexo_add_js({
                 path: '../azexo_elements/elements.js',
                 callback: function() {
-                    for (var name in azexo_template_elements) {
-                        azexo_template_elements[name].html = decodeURIComponent(atob(azexo_template_elements[name].html));
+                    if ('azexo_template_elements' in window) {
+                        for (var name in azexo_template_elements) {
+                            azexo_template_elements[name].html = decodeURIComponent(atob(azexo_template_elements[name].html));
+                        }
+                        callback(azexo_template_elements);
                     }
-                    callback(azexo_template_elements);
                 }
             });
         }
@@ -3964,11 +3966,12 @@
                         element.animated = true;
                     } else {
                         $(element.dom_element).css('opacity', '');
-                        $(element.dom_element).removeClass('animated');
-                        $(element.dom_element).removeClass(element.attrs['an_in']);
-                        $(element.dom_element).removeClass(element.attrs['an_out']);
+                        //$(element.dom_element).removeClass('animated');
+                      //  $(element.dom_element).removeClass(element.attrs['an_in']);
+//                      //  $(element.dom_element).removeClass(element.attrs['an_out']);
                         element.animation_in = false;
                         element.animation_out = false;
+                        
                         $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
                         $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
                         $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
@@ -3978,8 +3981,16 @@
                         if (element.attrs['an_infinite'] == 'yes') {
                             $(element.dom_element).addClass('infinite');
                         }
+                        //edite kuzmany
+                        if (parseInt(element.attrs['an_in_delay']) > 0) 
+                            $(element.dom_element).css('animation-delay', element.attrs['an_in_delay'] + 'ms');
+                        if (element.attrs['an_hidden'] == 'before_in') 
+                            $(element.dom_element).addClass('azexo_opacity');
+                        
                         $(element.dom_element).addClass(element.attrs['an_in']);
                         element.animation_in = true;
+                        $(element.dom_element).addClass('animated2');
+                        $(element.dom_element).data('class',$(element.dom_element).attr('class'));
                     }
                 } else {
                     element.animation_letters();
@@ -3993,9 +4004,11 @@
             }, Math.round(element.attrs['an_in_delay']));
         },
         start_in_animation: function() {
+            
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
                 if (element.attrs['an_in'] != '' || element.attrs['an_js_in'] != '') {
+                    
                     if (element.animated) {
                         if (element.animation_out) {
                             //still out-animate
@@ -4007,8 +4020,10 @@
                                 if (!element.hidden_after_in) {
                                     element.set_in_timeout();
                                 }
+                                
                             }
                         }
+                        
                     } else {
                         //no animate, no plan
                         element.set_in_timeout();
@@ -4034,9 +4049,9 @@
                         element.animated = true;
                     } else {
                         $(element.dom_element).css('opacity', '');
-                        $(element.dom_element).removeClass('animated');
-                        $(element.dom_element).removeClass(element.attrs['an_in']);
-                        $(element.dom_element).removeClass(element.attrs['an_out']);
+                   //     $(element.dom_element).removeClass('animated');
+                     //   $(element.dom_element).removeClass(element.attrs['an_in']);
+                       // $(element.dom_element).removeClass(element.attrs['an_out']);
                         element.animation_in = false;
                         element.animation_out = false;
                         $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
@@ -4109,12 +4124,12 @@
                     $(this.dom_element).css('-webkit-animation-duration', '');
                     $(this.dom_element).css('animation-fill-mode', '');
                     $(this.dom_element).css('-webkit-animation-fill-mode', '');
-                    $(this.dom_element).removeClass('animated');
+                    //$(this.dom_element).removeClass('animated');
                     this.animated = false;
-                    $(this.dom_element).removeClass('infinite');
+                   // $(this.dom_element).removeClass('infinite');
                     if (this.attrs['an_fill_mode'] == '') {
-                        $(this.dom_element).removeClass(this.attrs['an_in']);
-                        $(this.dom_element).removeClass(this.attrs['an_out']);
+                       // $(this.dom_element).removeClass(this.attrs['an_in']);
+                        //$(this.dom_element).removeClass(this.attrs['an_out']);
                         this.animation_in = false;
                         this.animation_out = false;
                     }
@@ -4185,7 +4200,7 @@
             if (this.attrs['an_start'] == 'trigger') {
                 this.start_in_animation();
             } else {
-                AnimatedElement.baseclass.prototype.trigger_start_in_animation.apply(this, arguments);
+              AnimatedElement.baseclass.prototype.trigger_start_in_animation.apply(this, arguments);
             }
         },
         trigger_start_out_animation: function() {
@@ -7354,7 +7369,7 @@
                         
                     var html = (((element.get_container_html()).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')).replace(/<link\b[^>]*>/gi,''));
                     window.opener.$('#builder').val(encodeURIComponent(html));
-                    window.opener.$('#az-preview').html(html);
+                    //window.opener.$('#az-preview').html(html);
                     if($(this).hasClass('save-return-builder'))
                         window.close();
                 });
@@ -7986,6 +8001,7 @@
                 path: 'jquery-waypoints/waypoints.min.js',
                 loaded: 'waypoint' in $.fn,
                 callback: function() {
+                    console.log('ttt');
                     $(element.dom_element).waypoint(function(direction) {
                         if (!element.rendered) {
                             element.rendered = true;

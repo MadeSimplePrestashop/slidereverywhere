@@ -26,8 +26,9 @@ $(document).ready(function () {
         e.preventDefault();
         $('body').chardinJs('start');
     })
-    if (window.opener.$('#builder').data('help') == '1')
+    if (window.opener.$('#builder').data('help') == '1'){
         $('.help-layer').click();
+    }
 
     //edite layer
     //$('.owl-item:eq('+$( '.owl-page').index($('.active'))+')').find('.az-layers:first').children('.controls').find('.edit').click();

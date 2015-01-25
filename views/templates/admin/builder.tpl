@@ -27,5 +27,5 @@
 <a target="_blank" href="{$builder_url|escape:'UTF-8'}" >
     <button type="button"  class="btn btn-default">{l s='Open builder in new window' mod='sliderseverywhere'}</button>
 </a>
-<br /><br />
-<small>{l s='Just preview. Open buider in new window for full functionality' mod='sliderseverywhere'}</small> <br /><br /><div class="az-container-case"><div id="az-preview" class="az-container">{if isset($slide) && isset($slide->builder) && empty($slide->builder) == false}{$slide->builder|urldecode|escape:'UTF-8'}{/if}</div></div>
+{*<br /><br />*}
+{*<small>{l s='Just preview. Open buider in new window for full functionality' mod='sliderseverywhere'}</small> <br /><br /><div class="az-container-case"><div id="az-preview" class="az-container">{if isset($slide) && isset($slide->builder) && empty($slide->builder) == false}{$slide->builder|urldecode|escape:'UTF-8'}{/if}</div></div>*}
