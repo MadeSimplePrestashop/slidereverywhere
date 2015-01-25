@@ -3666,11 +3666,11 @@
         "bounceInLeft": t('bounceInLeft'),
         "bounceInRight": t('bounceInRight'),
         "bounceInUp": t('bounceInUp'),
-        "bounceOut": t('bounceOut'),
-        "bounceOutDown": t('bounceOutDown'),
-        "bounceOutLeft": t('bounceOutLeft'),
-        "bounceOutRight": t('bounceOutRight'),
-        "bounceOutUp": t('bounceOutUp'),
+//        "bounceOut": t('bounceOut'),
+//        "bounceOutDown": t('bounceOutDown'),
+//        "bounceOutLeft": t('bounceOutLeft'),
+//        "bounceOutRight": t('bounceOutRight'),
+//        "bounceOutUp": t('bounceOutUp'),
         "fadeIn": t('fadeIn'),
         "fadeInDown": t('fadeInDown'),
         "fadeInDownBig": t('fadeInDownBig'),
@@ -3680,53 +3680,53 @@
         "fadeInRightBig": t('fadeInRightBig'),
         "fadeInUp": t('fadeInUp'),
         "fadeInUpBig": t('fadeInUpBig'),
-        "fadeOut": t('fadeOut'),
-        "fadeOutDown": t('fadeOutDown'),
-        "fadeOutDownBig": t('fadeOutDownBig'),
-        "fadeOutLeft": t('fadeOutLeft'),
-        "fadeOutLeftBig": t('fadeOutLeftBig'),
-        "fadeOutRight": t('fadeOutRight'),
-        "fadeOutRightBig": t('fadeOutRightBig'),
-        "fadeOutUp": t('fadeOutUp'),
-        "fadeOutUpBig": t('fadeOutUpBig'),
+//        "fadeOut": t('fadeOut'),
+//        "fadeOutDown": t('fadeOutDown'),
+//        "fadeOutDownBig": t('fadeOutDownBig'),
+//        "fadeOutLeft": t('fadeOutLeft'),
+//        "fadeOutLeftBig": t('fadeOutLeftBig'),
+//        "fadeOutRight": t('fadeOutRight'),
+//        "fadeOutRightBig": t('fadeOutRightBig'),
+//        "fadeOutUp": t('fadeOutUp'),
+//        "fadeOutUpBig": t('fadeOutUpBig'),
         "flip": t('flip'),
         "flipInX": t('flipInX'),
         "flipInY": t('flipInY'),
-        "flipOutX": t('flipOutX'),
-        "flipOutY": t('flipOutY'),
+//        "flipOutX": t('flipOutX'),
+//        "flipOutY": t('flipOutY'),
         "lightSpeedIn": t('lightSpeedIn'),
-        "lightSpeedOut": t('lightSpeedOut'),
+//        "lightSpeedOut": t('lightSpeedOut'),
         "rotateIn": t('rotateIn'),
         "rotateInDownLeft": t('rotateInDownLeft'),
         "rotateInDownRight": t('rotateInDownRight'),
         "rotateInUpLeft": t('rotateInUpLeft'),
         "rotateInUpRight": t('rotateInUpRight'),
-        "rotateOut": t('rotateOut'),
-        "rotateOutDownLeft": t('rotateOutDownLeft'),
-        "rotateOutDownRight": t('rotateOutDownRight'),
-        "rotateOutUpLeft": t('rotateOutUpLeft'),
-        "rotateOutUpRight": t('rotateOutUpRight'),
+//        "rotateOut": t('rotateOut'),
+//        "rotateOutDownLeft": t('rotateOutDownLeft'),
+//        "rotateOutDownRight": t('rotateOutDownRight'),
+//        "rotateOutUpLeft": t('rotateOutUpLeft'),
+//        "rotateOutUpRight": t('rotateOutUpRight'),
         "slideInDown": t('slideInDown'),
         "slideInLeft": t('slideInLeft'),
         "slideInRight": t('slideInRight'),
-        "slideOutLeft": t('slideOutLeft'),
-        "slideOutRight": t('slideOutRight'),
-        "slideOutUp": t('slideOutUp'),
+//        "slideOutLeft": t('slideOutLeft'),
+//        "slideOutRight": t('slideOutRight'),
+//        "slideOutUp": t('slideOutUp'),
         "slideInUp": t('slideInUp'),
-        "slideOutDown": t('slideOutDown'),
+//        "slideOutDown": t('slideOutDown'),
         "hinge": t('hinge'),
         "rollIn": t('rollIn'),
-        "rollOut": t('rollOut'),
+//        "rollOut": t('rollOut'),
         "zoomIn": t('zoomIn'),
         "zoomInDown": t('zoomInDown'),
         "zoomInLeft": t('zoomInLeft'),
         "zoomInRight": t('zoomInRight'),
         "zoomInUp": t('zoomInUp'),
-        "zoomOut": t('zoomOut'),
-        "zoomOutDown": t('zoomOutDown'),
-        "zoomOutLeft": t('zoomOutLeft'),
-        "zoomOutRight": t('zoomOutRight'),
-        "zoomOutUp": t('zoomOutUp'),
+//        "zoomOut": t('zoomOut'),
+//        "zoomOutDown": t('zoomOutDown'),
+//        "zoomOutLeft": t('zoomOutLeft'),
+//        "zoomOutRight": t('zoomOutRight'),
+//        "zoomOutUp": t('zoomOutUp'),
     };
     function AnimatedElement(parent, position) {
         AnimatedElement.baseclass.apply(this, arguments);
@@ -7362,7 +7362,7 @@
                     $('<button title="' + title("Save container") + '" class="control save-container ' + p + 'btn ' + p + 'btn-success ' + p + 'glyphicon ' + p + 'glyphicon-save" > </button>').appendTo(this.controls).click({object: this}, this.click_save_container);
                      var element = this;
                 //edited kuzmany.biz
-                $('.save-builder,.save-return-builder,.return-builder').click({object: this}, function(){
+                $('.save-builder,.save-return-builder,.return-builder,.save-reload-builder').click({object: this}, function(){
 //                    var html = element.get_container_html();
                     if($(this).hasClass('return-builder'))
                         return window.close();
@@ -7372,6 +7372,8 @@
                     //window.opener.$('#az-preview').html(html);
                     if($(this).hasClass('save-return-builder'))
                         window.close();
+                    if($(this).hasClass('save-reload-builder'))
+                        window.location.reload();
                 });
                 }
             }
