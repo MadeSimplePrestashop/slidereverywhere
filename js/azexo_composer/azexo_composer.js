@@ -3432,7 +3432,6 @@
     onReadyFirst(function() {
         azexo_load();
         if ('azexo_exporter' in window){
-            console.log('test');
             enable_exporter();
         }
         $.holdReady(false);
@@ -3652,7 +3651,7 @@
 //
     var azexo_animations = {
         "": t('No animation'),
-        "js": t('JS animation'),
+// kuzmany        "js": t('JS animation'), 
         "bounce": t('bounce'),
         "flash": t('flash'),
         "pulse": t('pulse'),
@@ -3666,11 +3665,11 @@
         "bounceInLeft": t('bounceInLeft'),
         "bounceInRight": t('bounceInRight'),
         "bounceInUp": t('bounceInUp'),
-        "bounceOut": t('bounceOut'),
-        "bounceOutDown": t('bounceOutDown'),
-        "bounceOutLeft": t('bounceOutLeft'),
-        "bounceOutRight": t('bounceOutRight'),
-        "bounceOutUp": t('bounceOutUp'),
+//        "bounceOut": t('bounceOut'),
+//        "bounceOutDown": t('bounceOutDown'),
+//        "bounceOutLeft": t('bounceOutLeft'),
+//        "bounceOutRight": t('bounceOutRight'),
+//        "bounceOutUp": t('bounceOutUp'),
         "fadeIn": t('fadeIn'),
         "fadeInDown": t('fadeInDown'),
         "fadeInDownBig": t('fadeInDownBig'),
@@ -3680,53 +3679,53 @@
         "fadeInRightBig": t('fadeInRightBig'),
         "fadeInUp": t('fadeInUp'),
         "fadeInUpBig": t('fadeInUpBig'),
-        "fadeOut": t('fadeOut'),
-        "fadeOutDown": t('fadeOutDown'),
-        "fadeOutDownBig": t('fadeOutDownBig'),
-        "fadeOutLeft": t('fadeOutLeft'),
-        "fadeOutLeftBig": t('fadeOutLeftBig'),
-        "fadeOutRight": t('fadeOutRight'),
-        "fadeOutRightBig": t('fadeOutRightBig'),
-        "fadeOutUp": t('fadeOutUp'),
-        "fadeOutUpBig": t('fadeOutUpBig'),
+//        "fadeOut": t('fadeOut'),
+//        "fadeOutDown": t('fadeOutDown'),
+//        "fadeOutDownBig": t('fadeOutDownBig'),
+//        "fadeOutLeft": t('fadeOutLeft'),
+//        "fadeOutLeftBig": t('fadeOutLeftBig'),
+//        "fadeOutRight": t('fadeOutRight'),
+//        "fadeOutRightBig": t('fadeOutRightBig'),
+//        "fadeOutUp": t('fadeOutUp'),
+//        "fadeOutUpBig": t('fadeOutUpBig'),
         "flip": t('flip'),
         "flipInX": t('flipInX'),
         "flipInY": t('flipInY'),
-        "flipOutX": t('flipOutX'),
-        "flipOutY": t('flipOutY'),
+//        "flipOutX": t('flipOutX'),
+//        "flipOutY": t('flipOutY'),
         "lightSpeedIn": t('lightSpeedIn'),
-        "lightSpeedOut": t('lightSpeedOut'),
+//        "lightSpeedOut": t('lightSpeedOut'),
         "rotateIn": t('rotateIn'),
         "rotateInDownLeft": t('rotateInDownLeft'),
         "rotateInDownRight": t('rotateInDownRight'),
         "rotateInUpLeft": t('rotateInUpLeft'),
         "rotateInUpRight": t('rotateInUpRight'),
-        "rotateOut": t('rotateOut'),
-        "rotateOutDownLeft": t('rotateOutDownLeft'),
-        "rotateOutDownRight": t('rotateOutDownRight'),
-        "rotateOutUpLeft": t('rotateOutUpLeft'),
-        "rotateOutUpRight": t('rotateOutUpRight'),
+//        "rotateOut": t('rotateOut'),
+//        "rotateOutDownLeft": t('rotateOutDownLeft'),
+//        "rotateOutDownRight": t('rotateOutDownRight'),
+//        "rotateOutUpLeft": t('rotateOutUpLeft'),
+//        "rotateOutUpRight": t('rotateOutUpRight'),
         "slideInDown": t('slideInDown'),
         "slideInLeft": t('slideInLeft'),
         "slideInRight": t('slideInRight'),
-        "slideOutLeft": t('slideOutLeft'),
-        "slideOutRight": t('slideOutRight'),
-        "slideOutUp": t('slideOutUp'),
+//        "slideOutLeft": t('slideOutLeft'),
+//        "slideOutRight": t('slideOutRight'),
+//        "slideOutUp": t('slideOutUp'),
         "slideInUp": t('slideInUp'),
-        "slideOutDown": t('slideOutDown'),
+//        "slideOutDown": t('slideOutDown'),
         "hinge": t('hinge'),
         "rollIn": t('rollIn'),
-        "rollOut": t('rollOut'),
+//        "rollOut": t('rollOut'),
         "zoomIn": t('zoomIn'),
         "zoomInDown": t('zoomInDown'),
         "zoomInLeft": t('zoomInLeft'),
         "zoomInRight": t('zoomInRight'),
         "zoomInUp": t('zoomInUp'),
-        "zoomOut": t('zoomOut'),
-        "zoomOutDown": t('zoomOutDown'),
-        "zoomOutLeft": t('zoomOutLeft'),
-        "zoomOutRight": t('zoomOutRight'),
-        "zoomOutUp": t('zoomOutUp'),
+//        "zoomOut": t('zoomOut'),
+//        "zoomOutDown": t('zoomOutDown'),
+//        "zoomOutLeft": t('zoomOutLeft'),
+//        "zoomOutRight": t('zoomOutRight'),
+//        "zoomOutUp": t('zoomOutUp'),
     };
     function AnimatedElement(parent, position) {
         AnimatedElement.baseclass.apply(this, arguments);
@@ -3850,32 +3849,32 @@
                 tab: t('Animation'),
                 value: {
                     'before_in': t("Before in-animation"),
-                    'after_in': t("After in-animation"),
+                  //  'after_in': t("After in-animation"),
                 },
                 dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
             }),
             //edited kuzmany.biz
-//            make_param_type({
-//                type: 'checkbox',
-//                heading: t('Infinite?'),
-//                param_name: 'an_infinite',
-//                tab: t('Animation'),
-//                value: {
-//                    'yes': t("Yes, please"),
-//                },
-//                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
-//            }),
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Infinite?'),
+                param_name: 'an_infinite',
+                tab: t('Animation'),
+                value: {
+                    'yes': t("Yes, please"),
+                },
+                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
+            }),
             make_param_type({
                 type: 'dropdown',
                 heading: t('By letters?'),
                 param_name: 'an_letters',
                 tab: t('Animation'),
                 value: {
-                    '': t("No"),
-                    'sequence': t("Sequence"),
-                    'reverse': t("Reverse"),
-                    'sync': t("Sync"),
-                    'shuffle': t("Shuffle"),
+                    '': t("Doesn't support now."),
+//                    'sequence': t("Sequence"),
+//                    'reverse': t("Reverse"),
+//                    'sync': t("Sync"),
+//                    'shuffle': t("Shuffle"),
                 },
                 dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
             }),
@@ -3920,21 +3919,22 @@
                 value: '1',
                 dependency: {'element': 'an_start', 'value': ['hover', 'click']},
             }),
-            make_param_type({
-                type: 'dropdown',
-                heading: t('Animation fill mode'),
-                param_name: 'an_fill_mode',
-                tab: t('Animation'),
-                value: {
-                    '': t('Default'),
-                    forwards: t('Forwards'),
-                    backwards: t('Backwards'),
-                    both: t('Both'),
-                    none: t('None'),
-                },
-                description: t('"FORWARDS" - after the animation ends (determined by animation-iteration-count), the animation will apply the property values for the time the animation ended; "BACKWARDS" - The animation will apply the property values defined in the keyframe that will start the first iteration of the animation, during the period defined by animation-delay. These are either the values of the from keyframe (when animation-direction is "normal" or "alternate") or those of the to keyframe (when animation-direction is "reverse" or "alternate-reverse"); "BOTH" - the animation will follow the rules for both forwards and backwards. That is, it will extend the animation properties in both directions; "NONE" - The animation will not apply any styles to the target before or after it is executing.'),
-                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
-            }),
+            // edited kuzmany
+//            make_param_type({
+//                type: 'dropdown',
+//                heading: t('Animation fill mode'),
+//                param_name: 'an_fill_mode',
+//                tab: t('Animation'),
+//                value: {
+//                    '': t('Default'),
+//                    forwards: t('Forwards'),
+//                    backwards: t('Backwards'),
+//                    both: t('Both'),
+//                    none: t('None'),
+//                },
+//                description: t('"FORWARDS" - after the animation ends (determined by animation-iteration-count), the animation will apply the property values for the time the animation ended; "BACKWARDS" - The animation will apply the property values defined in the keyframe that will start the first iteration of the animation, during the period defined by animation-delay. These are either the values of the from keyframe (when animation-direction is "normal" or "alternate") or those of the to keyframe (when animation-direction is "reverse" or "alternate-reverse"); "BOTH" - the animation will follow the rules for both forwards and backwards. That is, it will extend the animation properties in both directions; "NONE" - The animation will not apply any styles to the target before or after it is executing.'),
+//                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
+//            }),
             make_param_type({
                 type: 'textfield',
                 heading: t('Name for animations'),
@@ -4909,67 +4909,68 @@
             var element = this;
             if (window.azexo_editor) {
                 AnimatedElement.baseclass.prototype.show_controls.apply(this, arguments);
-                $('<button title="' + title("Scroll animations") + '" class="control scroll-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
-
-                    $('#az-js-animation-modal').remove();
-                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
-                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
-                    var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
-                    $(modal).find('.' + p + 'modal-body').append(tabs);
-                    var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>');
-                    $(tabs).find('#script').append(form);
-                    $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
-
-                    element.show_js_animations_editor(form, true, function() {
-                    });
-
-                    $('<div class="' + p + 'form-group"><label>' + t("Choose a wizard") + '</label>' + get_select({'vparalax': 'Vertical paralax for child element'}, 'wizard', '') + '</div><div id="wizard-form"></div>').appendTo($(tabs).find('#wizards'));
-                    $(tabs).find('#wizards [name="wizard"]').change(function() {
-                        $(tabs).find('#wizard-form').empty();
-                        switch ($(this).val()) {
-                            case 'vparalax':
-                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', '') + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
-                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Shift") + '</label><div><input class="' + p + 'form-control" name="shift" type="text" value="1000"></div><p class="' + p + 'help-block">' + t("Number of pixels before/after original position when animation start/stop.") + '</p></div>');
-                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Speed") + '</label><div><input class="' + p + 'form-control" name="speed" type="text" value="1"></div><p class="' + p + 'help-block">' + t("Speed ratio. Where 1 mean speed which is equal to viewport speed.") + '</p></div>');
-                                $('<button title="' + title("Create script") + '" class="create-script ' + p + 'btn ' + p + 'btn-default">' + t("Create script") + '</button>').appendTo($(tabs).find('#wizard-form')).click(function() {
-                                    var shift = parseInt($(tabs).find('#wizard-form [name="shift"]').val());
-                                    var speed = parseFloat($(tabs).find('#wizard-form [name="speed"]').val());
-
-                                    var target = $(tabs).find('#wizard-form [name="target"]').val();
-                                    var target_element = azexo_elements.elements_instances_by_an_name[target];
-                                    if ($(element.dom_element).find(target_element.dom_element).length > 0) {
-                                        var tween = {target: target, duration: 1, from: {css: {transform: 'translateY(' + (shift * speed).toString() + 'px)'}}, to: {css: {transform: 'translateY(' + (-shift * speed).toString() + 'px)'}}, ease: 'Linear.easeNone', delay: '0'};
-                                        var step = {tweens: [tween]};
-                                        var top = $(target_element.dom_element).offset().top - $(element.dom_element).offset().top;
-                                        var scene = {duration: 2 * shift, offset: top - shift, triggerHook: 'onCenter', timeline: [step], repeat: '0', repeatDelay: '0'};
-                                        element.add_scene_to_animations_editor(scene);
-                                        $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
-                                    } else {
-                                        $(tabs).find('#wizard-form').prepend(get_alert(t('Animated target element must be child of the current element.')));
-                                    }
-                                });
-                                break;
-                            default:
-                                break;
-                        }
-                    });
-
-                    $('#az-js-animation-modal').find('.save').click(function() {
-                        $(form).find('.tree [name="an_name"]')
-                        if ($(form).find('.tree [name="an_name"]').val() == '') {
-                            $(form).find('.tree .an-name').addClass('has-error');
-                            return false;
-                        }
-                        element.an_name = $(form).find('.tree [name="an_name"]').val();
-                        element.save_js_animations(true);
-                        $('#az-js-animation-modal')[fp + 'modal']('hide');
-                        $(document).trigger("azexo_edited_element", element.id);
-                        return false;
-                    });
-                    $('#az-js-animation-modal')[fp + 'modal']('show');
-                    return false;
-                });
+// edited            kuzmany
+//                    $('<button title="' + title("Scroll animations") + '" class="control scroll-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
+//
+//                    $('#az-js-animation-modal').remove();
+//                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
+//                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+//                    var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+//                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
+//                    $(modal).find('.' + p + 'modal-body').append(tabs);
+//                    var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>');
+//                    $(tabs).find('#script').append(form);
+//                    $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+//
+//                    element.show_js_animations_editor(form, true, function() {
+//                    });
+//
+//                    $('<div class="' + p + 'form-group"><label>' + t("Choose a wizard") + '</label>' + get_select({'vparalax': 'Vertical paralax for child element'}, 'wizard', '') + '</div><div id="wizard-form"></div>').appendTo($(tabs).find('#wizards'));
+//                    $(tabs).find('#wizards [name="wizard"]').change(function() {
+//                        $(tabs).find('#wizard-form').empty();
+//                        switch ($(this).val()) {
+//                            case 'vparalax':
+//                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', '') + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
+//                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Shift") + '</label><div><input class="' + p + 'form-control" name="shift" type="text" value="1000"></div><p class="' + p + 'help-block">' + t("Number of pixels before/after original position when animation start/stop.") + '</p></div>');
+//                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Speed") + '</label><div><input class="' + p + 'form-control" name="speed" type="text" value="1"></div><p class="' + p + 'help-block">' + t("Speed ratio. Where 1 mean speed which is equal to viewport speed.") + '</p></div>');
+//                                $('<button title="' + title("Create script") + '" class="create-script ' + p + 'btn ' + p + 'btn-default">' + t("Create script") + '</button>').appendTo($(tabs).find('#wizard-form')).click(function() {
+//                                    var shift = parseInt($(tabs).find('#wizard-form [name="shift"]').val());
+//                                    var speed = parseFloat($(tabs).find('#wizard-form [name="speed"]').val());
+//
+//                                    var target = $(tabs).find('#wizard-form [name="target"]').val();
+//                                    var target_element = azexo_elements.elements_instances_by_an_name[target];
+//                                    if ($(element.dom_element).find(target_element.dom_element).length > 0) {
+//                                        var tween = {target: target, duration: 1, from: {css: {transform: 'translateY(' + (shift * speed).toString() + 'px)'}}, to: {css: {transform: 'translateY(' + (-shift * speed).toString() + 'px)'}}, ease: 'Linear.easeNone', delay: '0'};
+//                                        var step = {tweens: [tween]};
+//                                        var top = $(target_element.dom_element).offset().top - $(element.dom_element).offset().top;
+//                                        var scene = {duration: 2 * shift, offset: top - shift, triggerHook: 'onCenter', timeline: [step], repeat: '0', repeatDelay: '0'};
+//                                        element.add_scene_to_animations_editor(scene);
+//                                        $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+//                                    } else {
+//                                        $(tabs).find('#wizard-form').prepend(get_alert(t('Animated target element must be child of the current element.')));
+//                                    }
+//                                });
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                    });
+//
+//                    $('#az-js-animation-modal').find('.save').click(function() {
+//                        $(form).find('.tree [name="an_name"]')
+//                        if ($(form).find('.tree [name="an_name"]').val() == '') {
+//                            $(form).find('.tree .an-name').addClass('has-error');
+//                            return false;
+//                        }
+//                        element.an_name = $(form).find('.tree [name="an_name"]').val();
+//                        element.save_js_animations(true);
+//                        $('#az-js-animation-modal')[fp + 'modal']('hide');
+//                        $(document).trigger("azexo_edited_element", element.id);
+//                        return false;
+//                    });
+//                    $('#az-js-animation-modal')[fp + 'modal']('show');
+//                    return false;
+//                });
             }
         },
         make_timeline: function(scene, complete) {
@@ -7362,7 +7363,7 @@
                     $('<button title="' + title("Save container") + '" class="control save-container ' + p + 'btn ' + p + 'btn-success ' + p + 'glyphicon ' + p + 'glyphicon-save" > </button>').appendTo(this.controls).click({object: this}, this.click_save_container);
                      var element = this;
                 //edited kuzmany.biz
-                $('.save-builder,.save-return-builder,.return-builder').click({object: this}, function(){
+                $('.save-builder,.save-return-builder,.return-builder,.save-reload-builder').click({object: this}, function(){
 //                    var html = element.get_container_html();
                     if($(this).hasClass('return-builder'))
                         return window.close();
@@ -7372,6 +7373,8 @@
                     //window.opener.$('#az-preview').html(html);
                     if($(this).hasClass('save-return-builder'))
                         window.close();
+                    if($(this).hasClass('save-reload-builder'))
+                        window.location.reload();
                 });
                 }
             }
@@ -8001,7 +8004,6 @@
                 path: 'jquery-waypoints/waypoints.min.js',
                 loaded: 'waypoint' in $.fn,
                 callback: function() {
-                    console.log('ttt');
                     $(element.dom_element).waypoint(function(direction) {
                         if (!element.rendered) {
                             element.rendered = true;

@@ -34,7 +34,7 @@
             easing: '{$slider->options->easing_css|escape:'html':'UTF-8'}',{/if}
                     onSlideBefore: function(slideElement) {
                      $(slideElement).find('.azexo_opacity').each(function(){
-                        var delay = $(this).css('animation-delay');
+                        var delay = parseFloat($(this).css('animation-delay'))*1000;
                         $(this).css('opacity',0).delay(delay).fadeTo('slow',1);
                     })
                     },

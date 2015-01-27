@@ -10,6 +10,7 @@ $(function () {
     else
         $('.az-style').html('');
     $('#builder').html(decodeURIComponent(window.opener.$('#builder').val()).replace(/\+/g, ' ').replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ''));
+    
 })
 $(document).ready(function () {
 
@@ -21,6 +22,13 @@ $(document).ready(function () {
     })
     $('.switch-options').on('click', '', function () {
         $('.toggle-editor').click();
+    })
+    $('.refresh-animations').on('click', '', function () {
+        $('.az-container-case').fadeOut(1).fadeIn(1);
+          $('.az-container-case').find('.azexo_opacity').each(function(){
+                        var delay = parseFloat($(this).css('animation-delay'))*1000;
+                        $(this).fadeOut(1).delay(delay).fadeIn(1);
+                    })
     })
     $('.help-layer').on('click', function (e) {
         e.preventDefault();

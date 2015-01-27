@@ -8,10 +8,10 @@
             <i class="glyphicon glyphicon-floppy-remove"></i>
             {l s='Save and return' mod='sliderseverywhere'}
         </button>
-        <button type="button" class="btn btn-default save-reload-builder btn-sm ">
+        {*<button type="button" class="btn btn-default save-reload-builder btn-sm ">
             <i class="glyphicon glyphicon-floppy-open"></i>
             {l s='Save and reload' mod='sliderseverywhere'}
-        </button>
+        </button>*}
         <button type="button" class="btn btn-default return-builder btn-sm ">
             <i class="glyphicon glyphicon-remove"></i>
             {l s='Close' mod='sliderseverywhere'}
@@ -35,6 +35,10 @@
         <button  type="button" class="btn btn-default btn-sm switch-options" data-intro="{l s="TURN ON/OFF ELEMENTS BUTTONS" mod="sliderseverywhere"}" data-position="bottom">
             <i class="glyphicon glyphicon-eye-close"></i>
             {l s="Turn on/off control buttons" mod="sliderseverywhere"}
+        </button>
+        <button  type="button" class="btn btn-default btn-sm refresh-animations" data-intro="{l s="REFRESH ANIMATIONS" mod="sliderseverywhere"}" data-position="bottom">
+            <i class="glyphicon glyphicon-refresh"></i>
+            {l s="Refresh animations" mod="sliderseverywhere"}
         </button>
     </div>
 </div>

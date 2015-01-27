@@ -9,7 +9,7 @@ Release Notes
 ####################################
 
 Added slide duplication
-Small improvements
+Builder improvement
 
 --------------------------------
 ####################################
