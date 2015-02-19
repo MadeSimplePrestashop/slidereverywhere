@@ -23,7 +23,7 @@ class sliderseverywhere extends Module {
     public function __construct() {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
-        $this->version = '1.2.1';
+        $this->version = '1.2.3';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
@@ -102,8 +102,10 @@ class sliderseverywhere extends Module {
     }
 
     public function hookDisplayBackOfficeHeader($params) {
-        if (Dispatcher::getInstance()->getController() == 'AdminSlides')
+        if (Dispatcher::getInstance()->getController() == 'AdminSlides'){
+            $this->context->controller->addJquery();
             $this->hookHeader($params);
+        }
     }
 
 

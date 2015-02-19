@@ -104,7 +104,7 @@ class AdminSlidesController extends ModuleAdminController {
             ),
             'tabs' => array(
                 'settings' => $this->l('Settings'),
-                'image' => $this->l('Image'),
+                'imagetab' => $this->l('Image'),
                 'video' => $this->l('Video'),
                 'buildertab' => $this->l('Builder (beta)')
             ),
@@ -114,7 +114,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => self::$parent_definition['primary']
                 ),
                 array(
-                    'tab' => 'image',
+                    'tab' => 'imagetab',
                     'type' => 'file',
                     'label' => $this->l('Image'),
                     'name' => 'image',
@@ -130,7 +130,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => 'video',
                 ),
                 array(
-                    'tab' => 'image',
+                    'tab' => 'imagetab',
                     'type' => 'text',
                     'label' => $this->l('Caption'),
                     'hint' => $this->l('Short description for slide'),
@@ -138,7 +138,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => 'caption'
                 ),
                 array(
-                    'tab' => 'image',
+                    'tab' => 'imagetab',
                     'type' => 'text',
                     'label' => $this->l('Url'),
                     'hint' => $this->l('Associate url (optional)'),
@@ -146,7 +146,7 @@ class AdminSlidesController extends ModuleAdminController {
                     'name' => 'url'
                 ),
                 'target' => array(
-                    'tab' => 'image',
+                    'tab' => 'imagetab',
                     'type' => 'select',
                     'label' => $this->l('Target'),
                     'name' => 'target',

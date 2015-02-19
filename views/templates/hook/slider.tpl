@@ -32,12 +32,12 @@
             easing: '{$slider->options->easing_jquery|escape:'html':'UTF-8'}',{/if}
             {if $slider->options->easing_css && $slider->options->useCSS}
             easing: '{$slider->options->easing_css|escape:'html':'UTF-8'}',{/if}
-                    onSlideBefore: function(slideElement) {
-                     $(slideElement).find('.azexo_opacity').each(function(){
-                        var delay = parseFloat($(this).css('animation-delay'))*1000;
-                        $(this).css('opacity',0).delay(delay).fadeTo('slow',1);
-                    })
-                    },
+            onSlideBefore: function(slideElement) {
+            $(slideElement).find('.azexo_opacity').each(function(){
+            var delay = parseFloat($(this).css('animation-delay')) * 1000;
+                    $(this).css('opacity', 0).delay(delay).fadeTo('slow', 1);
+            })
+            },
             })
             })
             </script>
@@ -46,17 +46,17 @@
                     <ul class="bxslider{$bxcounter|intval}">
                         {foreach from=$slides item='slide' name='slider'}
                             <li>
-                                {if $slide.builder}
-                                    <div class="az-container">
-                                        {$slide.builder|urldecode|escape:'UTF-8'}
-                                    </div>
-                                {elseif $slide.video}
+                                {if $slide.video}
                                     {$slide.video|escape:'UTF-8' }
                                 {elseif $slide.image}
                                     {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}
                                         <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image)|escape:'htmlall':'UTF-8'}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />
                                         {if $slide.url}</a>{/if}
-                                    {/if}
+                                    {elseif $slide.builder}
+                                    <div class="az-container">
+                                        {$slide.builder|urldecode|escape:'UTF-8'}
+                                    </div>
+                                {/if}
                             </li>
                         {/foreach}
                     </ul>
