@@ -35,7 +35,7 @@ class sliderseverywhere extends Module {
 
     public function install() {
 
-        if (!parent::install()  || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
+        if (!parent::install() || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
             return false;
 
         foreach ($this->hooks as $hook)
@@ -66,7 +66,7 @@ class sliderseverywhere extends Module {
     }
 
     public function uninstall() {
-        if (!parent::uninstall() ||  !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
+        if (!parent::uninstall() || !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
         )
             return false;
 
@@ -102,12 +102,11 @@ class sliderseverywhere extends Module {
     }
 
     public function hookDisplayBackOfficeHeader($params) {
-        if (Dispatcher::getInstance()->getController() == 'AdminSlides'){
+        if (Dispatcher::getInstance()->getController() == 'AdminSlides') {
             $this->context->controller->addJquery();
             $this->hookHeader($params);
         }
     }
-
 
     public function hookHeader($params) {
         $this->context->controller->addCSS($this->getPathUri() . 'css/jquery.bxslider.css');
@@ -124,6 +123,16 @@ class sliderseverywhere extends Module {
             if (count($slides) > 0 && Dispatcher::getInstance()->getController() != 'AdminSlides')
                 Sliders::azexo_init();
         }
+
+        $html = '';
+        if (Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee')) {
+            $this->context->controller->addCSS($this->getPathUri() . '/css/inspector.css', 'all');
+            //$this->context->controller->addJS($this->getPathUri() . '/js/firebug/build/firebug-lite.js');
+            $html = '<script type="text/javascript" src="' . $this->_path . 'js/firebug/build/firebug-lite.js#startOpened"></script>';
+            $this->context->controller->addJS($this->getPathUri() . '/js/inspector.js');
+        }
+
+        return $html;
     }
 
     /**
@@ -161,8 +170,6 @@ class sliderseverywhere extends Module {
      * @return type
      */
     private function load_hook_sliders($hook_func) {
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken())
-            return;
         $hook = lcfirst(str_replace('hook', '', $hook_func));
         $ids = $this->find_ids_from_hooks($hook);
         if (!$ids)
@@ -227,11 +234,4 @@ class sliderseverywhere extends Module {
     public function hookDisplayBanner($params) {
         return $this->load_hook_sliders(__FUNCTION__);
     }
-
-    public function getLiveEditToken() {
-        return Tools::getAdminToken($this->name . (int) Tab::getIdFromClassName($this->name)
-                        . (is_object(Context::getContext()->employee) ? (int) Context::getContext()->employee->id :
-                                Tools::getValue('id_employee')));
-    }
-
 }

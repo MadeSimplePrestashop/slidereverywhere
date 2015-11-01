@@ -83,7 +83,6 @@ class AdminSlidersController extends ModuleAdminController {
         $root_category = Category::getRootCategory();
         $root_category = array('id_category' => $root_category->id, 'name' => $root_category->name);
         array_unshift($easing, array('name' => ''));
-
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
@@ -614,9 +613,28 @@ class AdminSlidersController extends ModuleAdminController {
                 'name' => 'submit',
             )
         );
+
+        $positions = array();
+        $href =  $this->context->shop->getBaseUrl() . '?se_live_edit_token=' . Sliders::getLiveEditToken() . '&id_employee=' . $this->context->employee->id;
+        $positions[] = '<div class="col-sm-4">
+            <input  type="hidden" value="' . isset($obj->position) . '" name="positions" id="positions">';
+
+        $positions[] = '<a onclick="if(!confirm(\'' . $this->l('Web page opens in a mode for direct selection position through the web site element picker. Do you want continue?') . '\')) return false"  target="_blank" data-href="' . $href . '" id="select_position"><button   type="button" class="btn btn-default" >' . $this->l('select web site element') . '</button></a>';
+        $positions[] = '</div>';
+        $this->fields_value = array('positions' => implode('', $positions));
+        $this->fields_form['input'][] = array(
+            'tab' => 'display',
+            'type' => 'free',
+            'name' => 'positions',
+            'label' => $this->l('Website position picker')
+        );
+        
+        $this->addJS(dirname(__FILE__) . '/../../js/admin.js');
+
         $query = array();
         foreach ($this->module->hooks as $hook)
             $query[]['name'] = $hook;
+
         $this->fields_form['input'][] = array(
             'tab' => 'display',
             'type' => 'select',
@@ -634,21 +652,6 @@ class AdminSlidersController extends ModuleAdminController {
             , 'default_value' => $options->hooks
         );
 
-        $this->fields_form['input'][] = array(
-            array(
-                'id' => '',
-                'tab' => 'display',
-                'type' => 'textbutton',
-                'label' => 'Position on web',
-                'name' => 'element',
-                'button' => array(
-                    'label' => 'Select website element',
-                    'attributes' => array(
-                        'onclick' => 'alert(\'something done\');'
-                    )
-                )
-            )
-        );
 
         $this->fields_form['input'][] = array(
             'tab' => 'display',

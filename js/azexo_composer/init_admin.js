@@ -32,7 +32,7 @@ $(document).ready(function () {
     })
     $('.help-layer').on('click', function (e) {
         e.preventDefault();
-        $('body').chardinJs('start');
+       // $('body').chardinJs('start');
     })
     if (window.opener.$('#builder').data('help') == '1'){
         $('.help-layer').click();

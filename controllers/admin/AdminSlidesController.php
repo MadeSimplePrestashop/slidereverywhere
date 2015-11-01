@@ -86,7 +86,7 @@ class AdminSlidesController extends ModuleAdminController {
         } else
             $image = '';
 
-        $params = array('live_edit_token' => $this->module->getLiveEditToken(), 'id_employee' => $this->context->employee->id);
+        $params = array('live_edit_token' => Sliders::getLiveEditToken(), 'id_employee' => $this->context->employee->id);
         if ($obj->id)
             $params[Slides::$definition['primary']] = $obj->id;
         $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);

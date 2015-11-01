@@ -18,7 +18,7 @@ class sliderseverywherebuilderModuleFrontController extends ModuleFrontControlle
      */
     public function initContent() {
         parent::initContent();
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->module->getLiveEditToken()) {
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == Sliders::getLiveEditToken()) {
 //            $id_slide = Tools::getValue(Slides::$definition['primary']);
 //            if ($id_slide) {
 //                $slide = new Slides($id_slide);
