@@ -119,15 +119,15 @@ class AdminSlidersController extends ModuleAdminController {
                         'query' => array(
                             array(
                                 'id' => 'fade',
-                                'name' => $this->l('Fade (works with builder)')
+                                'name' => $this->l('Fade')
                             ),
                             array(
                                 'id' => 'horizontal',
-                                'name' => $this->l('Horizontal (does not work with builder)')
+                                'name' => $this->l('Horizontal')
                             ),
                             array(
                                 'id' => 'vertical',
-                                'name' => $this->l('Vertical (does not work with builder)')
+                                'name' => $this->l('Vertical')
                             )
                         ),
                         'id' => 'id',

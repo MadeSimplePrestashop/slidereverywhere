@@ -322,26 +322,6 @@ class Sliders extends ObjectModel {
         return (Db::getInstance()->executeS($sql));
     }
 
-    public static function azexo_init($admin = false) {
-        // just for slide builder
-        Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/underscore-min.js');
-        Context::getContext()->controller->addCSS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/azexo_composer.css');
-
-        if ($admin) {
-
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/js/smoothscroll.js');
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/jquery-ui.min.js');
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/jquery-waypoints/waypoints.min.js');
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/azexo_param_types.min.js');
-            Context::getContext()->controller->addCSS(_PS_MODULE_DIR_ . 'sliderseverywhere/css/bootstrap/bootstrap.css');
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/init_admin.js');
-            Context::getContext()->controller->addCSS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/azexo_composer_add.css');
-        } else
-            Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/init_frontend.js');
-
-        Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/azexo_elements.min.js');
-        Context::getContext()->controller->addJS(_PS_MODULE_DIR_ . 'sliderseverywhere/js/azexo_composer/azexo_composer.min.modified.js');
-    }
 
     public static function getLiveEditToken() {
         return Tools::getAdminToken('sliderseverywhere' . (int) Tab::getIdFromClassName('sliderseverywhere')

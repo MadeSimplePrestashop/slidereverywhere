@@ -116,12 +116,10 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('function', $this->name, array('Sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken())
-            Sliders::azexo_init(true);
-        else {
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken()){
+            
+        }else {
             $slides = Slides::getAll();
-            if (count($slides) > 0 && Dispatcher::getInstance()->getController() != 'AdminSlides')
-                Sliders::azexo_init();
         }
 
         $html = '';

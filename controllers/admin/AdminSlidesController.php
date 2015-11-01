@@ -45,7 +45,7 @@ class AdminSlidesController extends ModuleAdminController {
     }
 
     public function initContent() {
-              if (Tools::getIsset('duplicate' . $this->table))
+        if (Tools::getIsset('duplicate' . $this->table))
             Slides::duplicate();
         parent::initContent();
     }
@@ -75,7 +75,6 @@ class AdminSlidesController extends ModuleAdminController {
 
     public function renderForm() {
 
-        $this->addCSS(dirname(__FILE__) . '/../../views/js/azexo_composer/azexo_composer.css');
         $par = self::$parent_definition['primary'];
 
         if (!$obj = $this->loadObject(true))
@@ -89,13 +88,7 @@ class AdminSlidesController extends ModuleAdminController {
         $params = array('live_edit_token' => Sliders::getLiveEditToken(), 'id_employee' => $this->context->employee->id);
         if ($obj->id)
             $params[Slides::$definition['primary']] = $obj->id;
-        $builder_url = $this->context->link->getModuleLink('sliderseverywhere', 'builder', $params);
-        $slides = Slides::getAll();
-        $this->context->smarty->assign(array('builder_url' => $builder_url, 'slide' => $obj,'slides'=>$slides));
-        $builder_value = $this->context->smarty->fetch(_PS_ROOT_DIR_ . '/modules/' . $this->module->name . '/views/templates/admin/builder.tpl');
 
-
-        $this->fields_value = array('builder' => $builder_value);
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
@@ -105,8 +98,7 @@ class AdminSlidesController extends ModuleAdminController {
             'tabs' => array(
                 'settings' => $this->l('Settings'),
                 'imagetab' => $this->l('Image'),
-                'video' => $this->l('Video'),
-                'buildertab' => $this->l('Builder (beta)')
+                'video' => $this->l('Video')
             ),
             'input' => array(
                 array(
@@ -177,11 +169,6 @@ class AdminSlidesController extends ModuleAdminController {
                         'id' => 'id',
                         'name' => 'name',
                     )
-                ),
-                array(
-                    'tab' => 'buildertab',
-                    'type' => 'free',
-                    'name' => 'builder',
                 ),
                 array(
                     'tab' => 'settings',
@@ -365,8 +352,6 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             return ImageManager::thumbnail($this->get_image_path($row[self::$parent_definition['primary']]) . $echo, 'thumb_' . $echo, 50);
         elseif (isset($row['video']) && $row['video'])
             return $this->l('video');
-        elseif (isset($row['builder']) && $row['builder'])
-            return $this->l('builder');
     }
 
 }
