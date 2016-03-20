@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Module Sliders Everywhere 
  * 
@@ -14,13 +13,15 @@ if (!defined('_PS_VERSION_'))
 require_once(dirname(__FILE__) . '/models/Sliders.php');
 require_once(dirname(__FILE__) . '/models/Slides.php');
 
-class sliderseverywhere extends Module {
+class sliderseverywhere extends Module
+{
 
     public $hooks = array('displayTop', 'displayHome', 'displayLeftColumn', 'displayLeftColumnProduct',
         'displayRightColumn', 'displayRightColumnProduct', 'displayFooter', 'displayFooterProduct',
         'displayTopColumn', 'displayHomeTabContent', 'displayProductTab', 'displayShoppingCartFooter', 'displayBanner');
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
         $this->version = '1.2.3';
@@ -33,7 +34,8 @@ class sliderseverywhere extends Module {
         $this->description = $this->l('Make sliders easy and put it whereever you want.');
     }
 
-    public function install() {
+    public function install()
+    {
 
         if (!parent::install() || !$this->registerHook('displayHeader') || !$this->registerHook('displayBackOfficeHeader'))
             return false;
@@ -65,7 +67,8 @@ class sliderseverywhere extends Module {
         return true;
     }
 
-    public function uninstall() {
+    public function uninstall()
+    {
         if (!parent::uninstall() || !$this->unregisterHook('displayHeader') || !$this->unregisterHook('displayBackOfficeHeader')
         )
             return false;
@@ -81,12 +84,14 @@ class sliderseverywhere extends Module {
         return true;
     }
 
-    public function getContent() {
+    public function getContent()
+    {
 
         Tools::redirectAdmin('index.php?controller=AdminSliders&token=' . Tools::getAdminTokenLite('AdminSliders'));
     }
 
-    private function installAdminTab($name, $className, $parent) {
+    private function installAdminTab($name, $className, $parent)
+    {
         $tab = new Tab();
         $tab->name = $name;
         $tab->class_name = $className;
@@ -96,19 +101,22 @@ class sliderseverywhere extends Module {
         return $tab;
     }
 
-    private function uninstallAdminTab($className) {
+    private function uninstallAdminTab($className)
+    {
         $tab = new Tab((int) Tab::getIdFromClassName($className));
         $tab->delete();
     }
 
-    public function hookDisplayBackOfficeHeader($params) {
+    public function hookDisplayBackOfficeHeader($params)
+    {
         if (Dispatcher::getInstance()->getController() == 'AdminSlides') {
             $this->context->controller->addJquery();
             $this->hookHeader($params);
         }
     }
 
-    public function hookHeader($params) {
+    public function hookHeader($params)
+    {
         $this->context->controller->addCSS($this->getPathUri() . 'css/jquery.bxslider.css');
         $this->context->controller->addJS($this->getPathUri() . 'js/jquery.fitvids.js');
         $this->context->controller->addJqueryPlugin(array('bxslider'));
@@ -116,9 +124,9 @@ class sliderseverywhere extends Module {
             $this->context->smarty->registerPlugin('function', $this->name, array('Sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken()){
+        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken()) {
             
-        }else {
+        } else {
             $slides = Slides::getAll();
         }
 
@@ -138,7 +146,8 @@ class sliderseverywhere extends Module {
      * @param type $hook
      * @return type
      */
-    private function find_ids_from_hooks($hook) {
+    private function find_ids_from_hooks($hook)
+    {
         $sliders = Cache::retrieve(__CLASS__ . __FUNCTION__);
         if ($sliders == -1)
             return array();
@@ -167,7 +176,8 @@ class sliderseverywhere extends Module {
      * @param type $hook_func
      * @return type
      */
-    private function load_hook_sliders($hook_func) {
+    private function load_hook_sliders($hook_func)
+    {
         $hook = lcfirst(str_replace('hook', '', $hook_func));
         $ids = $this->find_ids_from_hooks($hook);
         if (!$ids)
@@ -180,56 +190,69 @@ class sliderseverywhere extends Module {
     }
 
     // hooks
-    public function hookDisplayTop($params) {
+    public function hookDisplayTop($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayHome($params) {
+    public function hookDisplayHome($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayLeftColumn($params) {
+    public function hookDisplayLeftColumn($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayLeftColumnProduct($params) {
+    public function hookDisplayLeftColumnProduct($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayRightColumn($params) {
+    public function hookDisplayRightColumn($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayRightColumnProduct($params) {
+    public function hookDisplayRightColumnProduct($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayFooter($params) {
+    public function hookDisplayFooter($params)
+    {
 
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayFooterProduct($params) {
+    public function hookDisplayFooterProduct($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayTopColumn($params) {
+    public function hookDisplayTopColumn($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayHomeTabContent($params) {
+    public function hookDisplayHomeTabContent($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayProductTab($params) {
+    public function hookDisplayProductTab($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayShoppingCartFooter($params) {
+    public function hookDisplayShoppingCartFooter($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
-    public function hookDisplayBanner($params) {
+    public function hookDisplayBanner($params)
+    {
         return $this->load_hook_sliders(__FUNCTION__);
     }
 }
