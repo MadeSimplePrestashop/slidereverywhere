@@ -242,9 +242,9 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             $this->page_header_toolbar_btn['save'] = array(
                 'href' => $this->context->link->getAdminLink('AdminSliders', true),
                 'icon' => 'process-icon-cancel',
-                'desc' => $this->l('Back to sliders list'),
+                'desc' => $this->l('Back to sliders'),
             );
-            $this->errors[] = Tools::displayError('Can\'t identify slider. Please <a href="' . $this->context->link->getAdminLink('AdminSliders', true) . '">go back</a> to sliders.', false);
+            $this->errors[] = Tools::displayError('Select or create <a href="' . $this->context->link->getAdminLink('AdminSliders', true) . '">slider</a>, please.', false);
             return parent::renderList();
         }
 
@@ -298,8 +298,8 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
 //        );
         $this->page_header_toolbar_btn['save'] = array(
             'href' => $this->context->link->getAdminLink('AdminSliders', true),
-            'icon' => 'process-icon-back',
-            'desc' => $this->l('Back to sliders list'),
+            'icon' => 'process-icon-cancel',
+            'desc' => $this->l('Back to sliders'),
         );
 
         $this->toolbar_btn['new'] = array(

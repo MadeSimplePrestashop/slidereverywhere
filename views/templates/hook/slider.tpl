@@ -36,6 +36,17 @@
             onSlideBefore: function(slideElement) {
             },
             })
+                {if $slider->options->element}
+                    {if $slider->options->insert == 'after'}
+            $('.{$slider->alias|escape:'html':'UTF-8'}').insertAfter($('{$slider->options->element}'));
+                    {elseif $slider->options->insert == 'before'}
+            $('.{$slider->alias|escape:'html':'UTF-8'}').insertBefore($('{$slider->options->element}'));
+                    {elseif $slider->options->insert == 'prepend'}
+            $('.{$slider->alias|escape:'html':'UTF-8'}').prependTo($('{$slider->options->element}'));
+                    {elseif $slider->options->insert == 'append'}
+            $('.{$slider->alias|escape:'html':'UTF-8'}').appendTo($('{$slider->options->element}'));
+                    {/if}
+                {/if}
             })
             </script>
             {if $slides}

@@ -1,4 +1,13 @@
-#inspector-tools {text-align:center;position:fixed; top: 0;left:0; background:rgba(0,0,0,0.6); width:100%; padding:5px 0;  z-index:100000}
-#inspector-tools select, #inspector-tools input {padding:5px 10px; margin-right:2px }
-#inspector-tools input.text {background:#fff; border:0 none; width:auto;}
-#inspector-tools input.submit{background:#000; color:#fff; font-weight:bold;  border:0 none;width:18%;}
+#inspector-note {position:fixed;top: 0;width:100%;z-index: 10000;background: #01801C;color:#fff;text-align:center;font-weight:bold;padding:7px;line-height:1em;}
+#inspector-tools {text-align:center;position:fixed;top: 1%;left: 5%;background: rgb(45, 45, 45);width: 90%;padding: 10px;z-index:100000;color: #fff;border: 1px solid #aaa;border-radius: 3px;}
+#inspector-tools label {color:#fff}
+#inspector-tools select, #inspector-tools input {padding: 7px;width: 100%;border-radius: 3px;background: #ddd;}
+#inspector-tools input.text {border:0 none;border-radius: 3px;}
+#inspector-tools input.submitinspector,#inspector-tools input.cancelinspector{padding: 7px 15px;background: #01801C;color:#fff;font-weight:bold;border:0 none;border-radius:3px;}
+#inspector-tools input.cancelinspector {background: #B90000;}
+.inspector-select {
+    outline: rgb(255, 0, 0) solid 4px;
+    position: relative;
+    z-index: 10000;
+    background: rgba(106, 89, 158, 0.45);
+}

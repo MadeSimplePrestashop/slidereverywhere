@@ -48,9 +48,9 @@ class sliderseverywhere extends Module
         // Sliders
         $this->context->controller->getLanguages();
         $lang_array = array();
-        $id_parent = Tab::getIdFromClassName('AdminParentModules');
+        $id_parent = 0;
         foreach ($this->context->controller->_languages as $language) {
-            $lang_array[(int) $language['id_lang']] = $this->displayName;
+            $lang_array[(int) $language['id_lang']] = 'Sliders';
         }
         $tab = $this->installAdminTab($lang_array, 'AdminSliders', $id_parent);
         $id_parent = $tab->id;
@@ -86,7 +86,6 @@ class sliderseverywhere extends Module
 
     public function getContent()
     {
-
         Tools::redirectAdmin('index.php?controller=AdminSliders&token=' . Tools::getAdminTokenLite('AdminSliders'));
     }
 
@@ -130,15 +129,10 @@ class sliderseverywhere extends Module
             $slides = Slides::getAll();
         }
 
-        $html = '';
         if (Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee')) {
             $this->context->controller->addCSS($this->getPathUri() . '/css/inspector.css', 'all');
-            //$this->context->controller->addJS($this->getPathUri() . '/js/firebug/build/firebug-lite.js');
-            $html = '<script type="text/javascript" src="' . $this->_path . 'js/firebug/build/firebug-lite.js#startOpened"></script>';
             $this->context->controller->addJS($this->getPathUri() . '/js/inspector.js');
         }
-
-        return $html;
     }
 
     /**
@@ -162,11 +156,14 @@ class sliderseverywhere extends Module
         $ids = array();
         foreach ($sliders as $slider) {
             $options = Tools::jsonDecode($slider['options']);
-            if (!is_array($options->hooks))
-                continue;
-            if (!in_array($hook, $options->hooks))
-                continue;
-            $ids[] = $slider[Sliders::$definition['primary']];
+            if ($hook == 'byelement' && trim($options->element)) {
+                $ids[] = $slider[Sliders::$definition['primary']];
+            } else {
+                if ($options->element || !is_array($options->hooks) || !in_array($hook, $options->hooks)) {
+                    continue;
+                }
+                $ids[] = $slider[Sliders::$definition['primary']];
+            }
         }
         return $ids;
     }
@@ -183,9 +180,9 @@ class sliderseverywhere extends Module
         if (!$ids)
             return;
         $html = '';
-        foreach ($ids as $slider)
+        foreach ($ids as $slider){
             $html .= Sliders::get_slider(array('id' => $slider));
-
+        }
         return $html;
     }
 
@@ -220,10 +217,45 @@ class sliderseverywhere extends Module
         return $this->load_hook_sliders(__FUNCTION__);
     }
 
+    private function is_inspector()
+    {
+        return Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee') ? true : false;
+    }
+
+    private function clean_up_url($url)
+    {
+        $url = $_SERVER['REQUEST_URI'];
+        $url = preg_replace('/&?se_live_edit_token=[^&]*/', '', $url);
+        $url = preg_replace('/&?id_employee=[^&]*/', '', $url);
+        if (substr($url, -1) == '?')
+            $url = substr($url, 0, -1);
+
+        return $url;
+    }
+
+    private function clean_up_params()
+    {
+        $get_params = $_GET;
+        $block_param = array('se_live_edit_token', 'id_employee');
+        foreach ($get_params as $key => $get_param) {
+            if (in_array($get_param, $block_param)) {
+                unset($get_params[$key]);
+            }
+        }
+        return $get_params;
+    }
+
     public function hookDisplayFooter($params)
     {
-
-        return $this->load_hook_sliders(__FUNCTION__);
+        $html = $this->load_hook_sliders(__FUNCTION__) . $this->load_hook_sliders('hookByelement');
+        if ($this->is_inspector()) {
+            $this->context->smarty->assign(array(
+                'thisurl' => urldecode(base64_encode(serialize($this->clean_up_params()))),
+                'thiscontroller' => Tools::getValue('controller')
+            ));
+            $html.= $this->display(__FILE__, 'views/templates/hook/inspector.tpl');
+        }
+        return $html;
     }
 
     public function hookDisplayFooterProduct($params)

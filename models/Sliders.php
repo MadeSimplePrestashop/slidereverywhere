@@ -8,18 +8,21 @@
  * @license 	kuzmany.biz/prestashop
  * Reminder: You own a single production license. It would only be installed on one online store (or multistore)
  */
-class Sliders extends ObjectModel {
+class Sliders extends ObjectModel
+{
 
     public $id_sliderseverywhere;
     public $alias;
     public $options;
 
-    public function __construct($id = null, $id_lang = null, $id_shop = null) {
+    public function __construct($id = null, $id_lang = null, $id_shop = null)
+    {
         self::_init();
         parent::__construct($id, $id_lang, $id_shop);
     }
 
-    private static function _init() {
+    private static function _init()
+    {
         if (Shop::isFeatureActive())
             Shop::addTableAssociation(self::$definition['table'], array('type' => 'shop'));
     }
@@ -36,7 +39,8 @@ class Sliders extends ObjectModel {
         )
     );
 
-    public static function getAll($parms = array()) {
+    public static function getAll($parms = array())
+    {
         self::_init();
         $sql = new DbQuery();
         $sql->select('*');
@@ -49,7 +53,8 @@ class Sliders extends ObjectModel {
         return Db::getInstance()->executeS($sql);
     }
 
-    private function transform_options() {
+    private function transform_options()
+    {
         if (!Tools::getIsset('submitUpdate' . self::$definition['table']) && !Tools::getIsset('submitAdd' . self::$definition['table']))
             return false;
         $parms = array();
@@ -58,7 +63,8 @@ class Sliders extends ObjectModel {
         return Tools::jsonEncode($parms);
     }
 
-    public function update($null_values = false) {
+    public function update($null_values = false)
+    {
         $this->alias = Tools::strtolower(str_replace(' ', '', Tools::replaceAccentedChars($this->alias)));
         $options = $this->transform_options();
         if ($options != false)
@@ -77,21 +83,24 @@ class Sliders extends ObjectModel {
         }
     }
 
-    public function add($autodate = true, $null_values = false) {
+    public function add($autodate = true, $null_values = false)
+    {
         $options = $this->transform_options();
         if ($options != false)
             $this->options = $options;
         parent::add($autodate, $null_values);
     }
 
-    public static function findIdByAlias($alias) {
+    public static function findIdByAlias($alias)
+    {
         $sql = 'SELECT ' . self::$definition['primary'] . '
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '`
 			WHERE `alias` = \'' . (string) $alias . '\'';
         return (Db::getInstance()->getValue($sql));
     }
 
-    public static function load_slider($id) {
+    public static function load_slider($id)
+    {
 // find children
         $parms = array();
         $parms[self::$definition['primary']] = $id;
@@ -99,25 +108,25 @@ class Sliders extends ObjectModel {
         $slides = Slides::getAll($parms);
         if (empty($slides))
             return;
-
         //echo ImageManagr::resize($source_path . $slide['image'], _PS_TMP_IMG_DIR_. '/web_' . $slide['image'],300,200);
         $slider = new Sliders($id, null, Context::getContext()->shop->id);
         $slider->options = Tools::jsonDecode($slider->options);
+
 
         $view = array();
         if (Dispatcher::getInstance()->getController() != 'AdminSlides') {
             (isset($slider->options->categories) && empty($slider->options->categories) == false ? array_push($view, 'category') : '');
             (isset($slider->options->cms) && empty($slider->options->cms) == false ? array_push($view, 'cms') : '');
+            (isset($slider->options->controllers) && empty($slider->options->controllers) == false ? $view = array_merge(array_values($view), array_values($slider->options->controllers)) : '');
+            (isset($slider->options->products) && empty($slider->options->products) == false ? array_push($view, 'product') : '');
         }
-
         if (empty($view) == false) {
-            if (!in_array(Dispatcher::getInstance()->getController(), $view))
+            if (!in_array(Dispatcher::getInstance()->getController(), $view)) {
                 return;
-
-            if (Dispatcher::getInstance()->getController() == 'category')
-                if (in_array(Tools::getValue('id_category'), $slider->options->categories) == false)
-                    return;
-
+            }
+            if (Dispatcher::getInstance()->getController() == 'category' && in_array(Tools::getValue('id_category'), $slider->options->categories) == false) {
+                return;
+            }
             if (Dispatcher::getInstance()->getController() == 'cms') {
                 $categories = array();
                 $cms = array();
@@ -131,7 +140,6 @@ class Sliders extends ObjectModel {
                     return;
             }
         }
-
         foreach ($slides as $key => $slide) {
             if ($slide['image']) {
                 $source_path = Slides::get_image_path($id);
@@ -160,10 +168,11 @@ class Sliders extends ObjectModel {
         ));
 
         return Context::getContext()->smarty->fetch(
-                        dirname(__FILE__) . '/../views/templates/hook/slider.tpl');
+                dirname(__FILE__) . '/../views/templates/hook/slider.tpl');
     }
 
-    public function delete() {
+    public function delete()
+    {
         parent::delete();
         $slides = Slides::getAll(array(self::$definition['primary'] => $this->id));
         if ($slides) {
@@ -175,7 +184,8 @@ class Sliders extends ObjectModel {
     }
 
 // smarty
-    public static function get_slider($params) {
+    public static function get_slider($params)
+    {
         $id = '';
         if (isset($params['alias'])) {
             $alias = $params['alias'];
@@ -185,7 +195,6 @@ class Sliders extends ObjectModel {
 
         if (empty($id))
             return;
-
         $result = self::load_slider($id);
 
         if (isset($params['assign'])) {
@@ -195,7 +204,8 @@ class Sliders extends ObjectModel {
         return $result;
     }
 
-    public static function truefalse($truefalse, $assign = null) {
+    public static function truefalse($truefalse, $assign = null)
+    {
 
         if ($truefalse)
             $result = 'true';
@@ -209,7 +219,8 @@ class Sliders extends ObjectModel {
         return $result;
     }
 
-    public static function duplicate() {
+    public static function duplicate()
+    {
         $slider = new Sliders(Tools::getValue(self::$definition['primary']));
         if (!is_object($slider))
             return;
@@ -232,16 +243,18 @@ class Sliders extends ObjectModel {
         }
     }
 
-    public static function get_option_fields() {
+    public static function get_option_fields()
+    {
         return array('mode', 'captions', 'autoControls', 'auto', 'infiniteLoop', 'hideControlOnEnd',
             'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
             'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
-            'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms', 'hooks', 'pause', 'autoHover', 'autoStart', 'controls');
+            'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms', 'hooks', 'pause', 'autoHover', 'autoStart', 'controls',
+            'element', 'controllers', 'products', 'position', 'insert');
     }
-
     /* Get all CMS blocks */
 
-    public static function getAllCMSStructure($id_shop = false) {
+    public static function getAllCMSStructure($id_shop = false)
+    {
         $categories = self::getCMSCategories();
         $id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
         $all = array();
@@ -261,7 +274,8 @@ class Sliders extends ObjectModel {
         return $all;
     }
 
-    public static function getCMSPages($id_cms_category, $id_shop = false) {
+    public static function getCMSPages($id_cms_category, $id_shop = false)
+    {
         $id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
 
         $sql = 'SELECT c.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
@@ -279,7 +293,8 @@ class Sliders extends ObjectModel {
         return Db::getInstance()->executeS($sql);
     }
 
-    public static function getCMSCategories($recursive = false, $parent = 0) {
+    public static function getCMSCategories($recursive = false, $parent = 0)
+    {
         if ($recursive === false) {
             $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
 					FROM `' . _DB_PREFIX_ . 'cms_category` bcp
@@ -314,7 +329,8 @@ class Sliders extends ObjectModel {
     }
 
     //depraced from 1.1
-    public static function get_hooks_by_id($id) {
+    public static function get_hooks_by_id($id)
+    {
         $sql = 'SELECT hook
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '_hook`
 			WHERE `' . self::$definition['primary'] . '` = ' . $id;
@@ -322,13 +338,12 @@ class Sliders extends ObjectModel {
         return (Db::getInstance()->executeS($sql));
     }
 
-
-    public static function getLiveEditToken() {
+    public static function getLiveEditToken()
+    {
         return Tools::getAdminToken('sliderseverywhere' . (int) Tab::getIdFromClassName('sliderseverywhere')
-                        . (is_object(Context::getContext()->employee) ? (int) Context::getContext()->employee->id :
-                                Tools::getValue('id_employee')));
+                . (is_object(Context::getContext()->employee) ? (int) Context::getContext()->employee->id :
+                    Tools::getValue('id_employee')));
     }
-
 }
 
 ?>
