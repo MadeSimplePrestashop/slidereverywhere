@@ -307,8 +307,8 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             'desc' => $this->l('Add slide')
         );
 
-        $this->content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(self::$parent_definition['primary']))) . '</div>';
-        $this->content.= '<script>
+        $this->_content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(self::$parent_definition['primary']))) . '</div>';
+        $this->_content.= '<script>
          $(document).ready(function(){
          if(location.hash == "#preview")
             $("#previewslider").show(); slidereverywhere.reloadSlider();

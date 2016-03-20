@@ -10,6 +10,7 @@
                     controls: {$slider->options->controls|truefalse},
                     autoStart: {$slider->options->autoStart|truefalse},
                     autoControls: {$slider->options->autoControls|truefalse},
+                    autoHover: {$slider->options->autoHover|truefalse},
                     infiniteLoop: {$slider->options->infiniteLoop|truefalse},
                     hideControlOnEnd: {$slider->options->hideControlOnEnd|truefalse},
                     adaptiveHeight: {$slider->options->adaptiveHeight|truefalse},

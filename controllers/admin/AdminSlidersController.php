@@ -619,7 +619,7 @@ class AdminSlidersController extends ModuleAdminController {
         $positions[] = '<div class="col-sm-4">
             <input  type="hidden" value="' . isset($obj->position) . '" name="positions" id="positions">';
 
-        $positions[] = '<a onclick="if(!confirm(\'' . $this->l('Web page opens in a mode for direct selection position through the web site element picker. Do you want continue?') . '\')) return false"  target="_blank" data-href="' . $href . '" id="select_position"><button   type="button" class="btn btn-default" >' . $this->l('select web site element') . '</button></a>';
+        $positions[] = '<a onclick="if(!confirm(\'' . $this->l('Web page opens in a mode for direct selection position through the web site element picker. Do you want continue?') . '\')) return false"  target="_blank" href="' . $href . '" id="select_position"><button   type="button" class="btn btn-default" >' . $this->l('select web site element') . '</button></a>';
         $positions[] = '</div>';
         $this->fields_value = array('positions' => implode('', $positions));
         $this->fields_form['input'][] = array(
