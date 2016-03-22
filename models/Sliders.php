@@ -127,6 +127,10 @@ class Sliders extends ObjectModel
             if (Dispatcher::getInstance()->getController() == 'category' && in_array(Tools::getValue('id_category'), $slider->options->categories) == false) {
                 return;
             }
+            if (Dispatcher::getInstance()->getController() == 'product' && !empty($slider->options->products) && (!Tools::getIsset('id_product') || !in_array(Tools::getValue('id_product'), $slider->options->products))) {
+                return;
+            }
+echo 'tester';
             if (Dispatcher::getInstance()->getController() == 'cms') {
                 $categories = array();
                 $cms = array();

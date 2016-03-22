@@ -8,7 +8,8 @@
  * @license 	kuzmany.biz/prestashop
  * Reminder: You own a single production license. It would only be installed on one online store (or multistore)
  */
-class Slides extends ObjectModel {
+class Slides extends ObjectModel
+{
 
     public $id_sliderseverywhere_slides;
     public $id_sliderseverywhere;
@@ -22,13 +23,15 @@ class Slides extends ObjectModel {
     public $active;
     private static $parent_definition;
 
-    public function __construct($id = null, $id_lang = null, $id_shop = null) {
+    public function __construct($id = null, $id_lang = null, $id_shop = null)
+    {
         self::$parent_definition = Sliders::$definition; // prevent php 5.3 bug
         self::_init();
         parent::__construct($id, $id_lang, $id_shop);
     }
 
-    private static function _init() {
+    private static function _init()
+    {
         if (Shop::isFeatureActive())
             Shop::addTableAssociation(self::$definition['table'], array('type' => 'shop'));
     }
@@ -53,7 +56,8 @@ class Slides extends ObjectModel {
         )
     );
 
-    public static function getAll($parms = array()) {
+    public static function getAll($parms = array())
+    {
         self::_init();
         $sql = new DbQuery();
         $sql->select('*');
@@ -68,12 +72,14 @@ class Slides extends ObjectModel {
         return Db::getInstance()->executeS($sql);
     }
 
-    public function update($null_values = false) {
+    public function update($null_values = false)
+    {
         $this->handle_image();
         parent::update($null_values);
     }
 
-    public function add($autodate = true, $null_values = false) {
+    public function add($autodate = true, $null_values = false)
+    {
         $par = self::$parent_definition['primary'];
         $last_position = self::getLastPosition($this->$par);
         $this->position = $last_position + 1;
@@ -81,7 +87,8 @@ class Slides extends ObjectModel {
         parent::add($autodate, $null_values);
     }
 
-    public function delete() {
+    public function delete()
+    {
         parent::delete();
         $par = self::$parent_definition['primary'];
         $this->cleanPositions($this->$par);
@@ -95,7 +102,8 @@ class Slides extends ObjectModel {
             @unlink(self::get_image_path($this->$par) . $this->image);
     }
 
-    public function updatePosition($way, $position) {
+    public function updatePosition($way, $position)
+    {
         $sql = 'SELECT cp.`' . self::$definition['primary'] . '`, cp.`position`, cp.`' . self::$parent_definition['primary'] . '` 
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '` cp 
 			WHERE cp.`' . self::$parent_definition['primary'] . '` = ' . (int) $this->id_sliderseverywhere . ' AND cp.' . self::$definition['primary'] . ' = ' . (int) $this->id . ' 
@@ -122,7 +130,8 @@ class Slides extends ObjectModel {
         return false;
     }
 
-    public static function cleanPositions($ident) {
+    public static function cleanPositions($ident)
+    {
         $sql = 'SELECT `' . self::$definition['primary'] . '` 
 			FROM `' . _DB_PREFIX_ . self::$definition ['table'] . '` 
 			WHERE `' . self::$parent_definition['primary'] . '` = ' . (int) $ident . ' 
@@ -139,21 +148,24 @@ class Slides extends ObjectModel {
         return true;
     }
 
-    public static function getLastPosition($ident) {
+    public static function getLastPosition($ident)
+    {
         $sql = 'SELECT MAX(position) 
 			FROM `' . _DB_PREFIX_ . self::$definition['table'] . '`
 			WHERE `' . self::$parent_definition['primary'] . '` = ' . (int) $ident;
         return (Db::getInstance()->getValue($sql));
     }
 
-    public static function get_image_path($id_dir = null) {
+    public static function get_image_path($id_dir = null)
+    {
         if ($id_dir == null)
             return dirname(__FILE__) . '/../img/';
         else
             return dirname(__FILE__) . '/../img/' . $id_dir . '/';
     }
 
-    public function handle_image() {
+    public function handle_image()
+    {
         if (isset($_FILES['image']) && isset($_FILES['image']['tmp_name']) && !empty($_FILES['image']['tmp_name'])) {
             //dir 
             $dir = self::get_image_path(Tools::getValue(self::$parent_definition['primary']));
@@ -177,7 +189,8 @@ class Slides extends ObjectModel {
         }
     }
 
-    public static function duplicate() {
+    public static function duplicate()
+    {
         $context = Context::getContext();
         $slide = new Slides(Tools::getValue(self::$definition['primary']));
         if (!is_object($slide))
@@ -187,7 +200,6 @@ class Slides extends ObjectModel {
         $par = Sliders::$definition['primary'];
         Tools::redirectAdmin($context->link->getAdminLink('AdminSlides') . '&' . $par . '=' . $slide->$par);
     }
-
 }
 
 ?>

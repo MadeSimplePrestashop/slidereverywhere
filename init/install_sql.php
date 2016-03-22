@@ -7,7 +7,6 @@
  * @license 	kuzmany.biz/prestashop
  * Reminder: You own a single production license. It would only be installed on one online store (or multistore)
  */
-
 $sql = array();
 $sql[] = '
 CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere` (
@@ -26,12 +25,12 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_hook` (
 
 
 $sql[] = ''
-        . 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_shop` (
+    . 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_shop` (
       `id_sliderseverywhere` int(10)  NOT NULL,
       `id_shop` int(3) unsigned NOT NULL,
       PRIMARY KEY (`id_sliderseverywhere`, `id_shop`)
     ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
-        . '';
+    . '';
 
 
 $sql[] = '
@@ -57,16 +56,15 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_slides_lang` (
 ) ENGINE = ' . _MYSQL_ENGINE_ . '  ';
 
 $sql[] = ''
-        . 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_slides_shop` (
+    . 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_slides_shop` (
       `id_sliderseverywhere_slides` int(10)  NOT NULL,
       `id_shop` int(3) unsigned NOT NULL,
       PRIMARY KEY (`id_sliderseverywhere_slides`, `id_shop`)
     ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
-        . '';
+    . '';
 
 foreach ($sql as $s) {
     if (!Db::getInstance()->Execute($s)) {
         return false;
     }
 }
-?>

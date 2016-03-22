@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Module Sliders Everywhere 
  * 
@@ -21,4 +20,3 @@ foreach ($sql as $s) {
         return false;
     }
 }
-?>

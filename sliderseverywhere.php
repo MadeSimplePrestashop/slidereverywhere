@@ -24,7 +24,7 @@ class sliderseverywhere extends Module
     {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
-        $this->version = '1.2.3';
+        $this->version = '1.3.0';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
@@ -44,16 +44,23 @@ class sliderseverywhere extends Module
             $this->registerHook($hook);
 
         include_once(dirname(__FILE__) . '/init/install_sql.php');
+   
 
-        // Sliders
+         //tabs
         $this->context->controller->getLanguages();
         $lang_array = array();
         $id_parent = 0;
         foreach ($this->context->controller->_languages as $language) {
-            $lang_array[(int) $language['id_lang']] = 'Sliders';
+            $lang_array[(int) $language['id_lang']] = $this->displayName;
         }
         $tab = $this->installAdminTab($lang_array, 'AdminSliders', $id_parent);
         $id_parent = $tab->id;
+        //slides
+        $lang_array = array();
+        foreach ($this->context->controller->_languages as $language) {
+            $lang_array[(int) $language['id_lang']] = 'Sliders';
+        }
+        $this->installAdminTab($lang_array, 'AdminSliders', $id_parent);
         //slides
         $lang_array = array();
         foreach ($this->context->controller->_languages as $language) {
@@ -76,7 +83,7 @@ class sliderseverywhere extends Module
         foreach ($this->hooks as $hook)
             $this->unregisterHook($hook);
 
-        include_once(dirname(__FILE__) . '/init/uninstall_sql.php');
+        //  include_once(dirname(__FILE__) . '/init/uninstall_sql.php');
 
         $this->uninstallAdminTab('AdminSliders');
         $this->uninstallAdminTab('AdminSlides');
@@ -89,7 +96,7 @@ class sliderseverywhere extends Module
         Tools::redirectAdmin('index.php?controller=AdminSliders&token=' . Tools::getAdminTokenLite('AdminSliders'));
     }
 
-    private function installAdminTab($name, $className, $parent)
+    public function installAdminTab($name, $className, $parent)
     {
         $tab = new Tab();
         $tab->name = $name;
@@ -108,30 +115,25 @@ class sliderseverywhere extends Module
 
     public function hookDisplayBackOfficeHeader($params)
     {
-        if (Dispatcher::getInstance()->getController() == 'AdminSlides') {
-            $this->context->controller->addJquery();
-            $this->hookHeader($params);
+        if (in_array(Dispatcher::getInstance()->getController(), array('AdminSliders', 'AdminSlides'))) {
+            $this->context->controller->addJS($this->_path . '/views/js/admin.js');
+            $this->context->controller->addCSS($this->_path . '/views/css/admin.css');
         }
     }
 
     public function hookHeader($params)
     {
-        $this->context->controller->addCSS($this->getPathUri() . 'css/jquery.bxslider.css');
-        $this->context->controller->addJS($this->getPathUri() . 'js/jquery.fitvids.js');
+        $this->context->controller->addJS($this->_path . '/views/js/jquery.fitvids.js');
+        $this->context->controller->addCSS($this->_path . '/views/css/jquery.bxslider.css');
         $this->context->controller->addJqueryPlugin(array('bxslider'));
         if (!isset($this->context->smarty->registered_plugins['function'][$this->name]))
             $this->context->smarty->registerPlugin('function', $this->name, array('Sliders', 'get_slider'));
         if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
-        if (Tools::getValue('live_edit_token') && Tools::getValue('live_edit_token') == $this->getLiveEditToken()) {
-            
-        } else {
-            $slides = Slides::getAll();
-        }
 
         if (Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee')) {
-            $this->context->controller->addCSS($this->getPathUri() . '/css/inspector.css', 'all');
-            $this->context->controller->addJS($this->getPathUri() . '/js/inspector.js');
+            $this->context->controller->addJS($this->_path . '/views/js/inspector.js');
+            $this->context->controller->addCSS($this->_path . '/views/css/inspector.css');
         }
     }
 
@@ -180,7 +182,7 @@ class sliderseverywhere extends Module
         if (!$ids)
             return;
         $html = '';
-        foreach ($ids as $slider){
+        foreach ($ids as $slider) {
             $html .= Sliders::get_slider(array('id' => $slider));
         }
         return $html;
@@ -222,37 +224,10 @@ class sliderseverywhere extends Module
         return Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee') ? true : false;
     }
 
-    private function clean_up_url($url)
-    {
-        $url = $_SERVER['REQUEST_URI'];
-        $url = preg_replace('/&?se_live_edit_token=[^&]*/', '', $url);
-        $url = preg_replace('/&?id_employee=[^&]*/', '', $url);
-        if (substr($url, -1) == '?')
-            $url = substr($url, 0, -1);
-
-        return $url;
-    }
-
-    private function clean_up_params()
-    {
-        $get_params = $_GET;
-        $block_param = array('se_live_edit_token', 'id_employee');
-        foreach ($get_params as $key => $get_param) {
-            if (in_array($get_param, $block_param)) {
-                unset($get_params[$key]);
-            }
-        }
-        return $get_params;
-    }
-
     public function hookDisplayFooter($params)
     {
         $html = $this->load_hook_sliders(__FUNCTION__) . $this->load_hook_sliders('hookByelement');
         if ($this->is_inspector()) {
-            $this->context->smarty->assign(array(
-                'thisurl' => urldecode(base64_encode(serialize($this->clean_up_params()))),
-                'thiscontroller' => Tools::getValue('controller')
-            ));
             $html.= $this->display(__FILE__, 'views/templates/hook/inspector.tpl');
         }
         return $html;

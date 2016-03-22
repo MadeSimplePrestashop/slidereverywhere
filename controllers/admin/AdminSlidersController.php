@@ -746,10 +746,6 @@ class AdminSlidersController extends ModuleAdminController
             , 'default_value' => $options->cms
         );
 
-
-        $this->addJS(dirname(__FILE__) . '/../../js/admin.js');
-        $this->addCSS(dirname(__FILE__) . '/../../css/admin.css');
-
         $html_data = array();
         $html_data[] = '<div style="display:none"><select multiple="multiple" name="hooks[]">';
         foreach ($this->module->hooks as $hook) {
@@ -899,7 +895,7 @@ class AdminSlidersController extends ModuleAdminController
 
     private function getControllers()
     {
-        $cache_id = __CLASS__ . __FUNCTION__ . '1';
+        $cache_id = __CLASS__ . __FUNCTION__ . '11';
 
         if (Cache::getInstance()->exists($cache_id)) {
             $controllers_array = Cache::getInstance()->get($cache_id);
@@ -908,14 +904,12 @@ class AdminSlidersController extends ModuleAdminController
             // @todo do something better with controllers
             $controllers = Dispatcher::getControllers(_PS_FRONT_CONTROLLER_DIR_);
             ksort($controllers);
-
-
-            foreach ($controllers as $k => $v) {
+            foreach (array_keys($controllers) as $k) {
                 $controllers_array[]['name'] = $k;
             }
 
             $modules_controllers_type = array('front' => $this->l('Front modules controller'));
-            foreach ($modules_controllers_type as $type => $label) {
+            foreach (array_keys($modules_controllers_type) as $type) {
                 $all_modules_controllers = Dispatcher::getModuleControllers($type);
                 foreach ($all_modules_controllers as $module => $modules_controllers) {
                     foreach ($modules_controllers as $cont) {

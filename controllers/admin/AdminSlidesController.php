@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Module Sliders Everywhere
  * 
@@ -11,12 +10,14 @@
 require_once(_PS_MODULE_DIR_ . 'sliderseverywhere/models/Sliders.php');
 require_once(_PS_MODULE_DIR_ . 'sliderseverywhere/models/Slides.php');
 
-class AdminSlidesController extends ModuleAdminController {
+class AdminSlidesController extends ModuleAdminController
+{
 
     protected $position_identifier = 'id_sliderseverywhere_slides';
     protected static $parent_definition;
 
-    public function __construct() {
+    public function __construct()
+    {
 
         self::$parent_definition = Sliders::$definition;
 
@@ -40,17 +41,20 @@ class AdminSlidesController extends ModuleAdminController {
         parent::__construct();
     }
 
-    private function get_image_path($id_dir) {
+    private function get_image_path($id_dir)
+    {
         return _PS_MODULE_DIR_ . $this->module->name . '/img/' . $id_dir . '/';
     }
 
-    public function initContent() {
+    public function initContent()
+    {
         if (Tools::getIsset('duplicate' . $this->table))
             Slides::duplicate();
         parent::initContent();
     }
 
-    public function postProcess() {
+    public function postProcess()
+    {
         $obj = $this->loadObject(true);
 //reload object is bulk action
         if (Tools::getIsset('submitFilter' . $this->table) && Tools::getValue('submitFilter' . $this->table) == 0) {
@@ -73,7 +77,8 @@ class AdminSlidesController extends ModuleAdminController {
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminSlides') . '&' . self::$parent_definition['primary'] . '=' . Tools::getValue(self::$parent_definition['primary']));
     }
 
-    public function renderForm() {
+    public function renderForm()
+    {
 
         $par = self::$parent_definition['primary'];
 
@@ -223,7 +228,7 @@ $("#' . $this->table . '_form button:submit").click();
         $this->page_header_toolbar_btn['delete'] = array(
             'href' => $this->context->link->getAdminLink('AdminSlides', true) . '&' . self::$parent_definition['primary'] . '=' . ((isset($obj->id) && $obj->id) ? $obj->$par : Tools::getValue(self::$parent_definition['primary'])),
             'icon' => 'process-icon-cancel',
-            'desc' => $this->l('Back to slides list'),
+            'desc' => $this->l('Back to slides'),
         );
 
 //back button
@@ -236,7 +241,8 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
         return parent::renderForm();
     }
 
-    public function renderList() {
+    public function renderList()
+    {
 
         if (!Tools::getValue(self::$parent_definition['primary'])) {
             $this->page_header_toolbar_btn['save'] = array(
@@ -320,7 +326,8 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
         return parent::renderList();
     }
 
-    public function ajaxProcessUpdatePositions() {
+    public function ajaxProcessUpdatePositions()
+    {
         if ($this->tabAccess['edit'] === '1') {
             $id_to_move = (int) Tools::getValue('id');
             $way = (int) Tools::getValue('way');
@@ -347,11 +354,11 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
     }
 
 //render image at renderList
-    public function getImage($echo, $row) {
+    public function getImage($echo, $row)
+    {
         if (isset($row['image']) && $row['image'])
             return ImageManager::thumbnail($this->get_image_path($row[self::$parent_definition['primary']]) . $echo, 'thumb_' . $echo, 50);
         elseif (isset($row['video']) && $row['video'])
             return $this->l('video');
     }
-
 }

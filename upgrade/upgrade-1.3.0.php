@@ -12,7 +12,7 @@ if (!defined('_PS_VERSION_'))
 
 function upgrade_module_1_3_0($module)
 {
-    $languages = $module->context->controller->getLanguages();
+    $languages = Context::getContext()->controller->getLanguages();
     $langs = array();
     foreach ($languages as $lang) {
         $langs[$lang['id_lang']] = $module->displayName;
@@ -33,4 +33,6 @@ function upgrade_module_1_3_0($module)
     $tab = new Tab($id);
     $tab->id_parent = $parent_tab->id;
     $tab->update();
+    
+    return true;
 }

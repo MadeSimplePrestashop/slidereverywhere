@@ -38,13 +38,13 @@
             })
                 {if $slider->options->element}
                     {if $slider->options->insert == 'after'}
-            $('.{$slider->alias|escape:'html':'UTF-8'}').insertAfter($('{$slider->options->element}'));
+            $('.{$slider->alias|escape:'html':'UTF-8'}').insertAfter($('{$slider->options->element|escape:'html':'UTF-8'}'));
                     {elseif $slider->options->insert == 'before'}
-            $('.{$slider->alias|escape:'html':'UTF-8'}').insertBefore($('{$slider->options->element}'));
+            $('.{$slider->alias|escape:'html':'UTF-8'}').insertBefore($('{$slider->options->element|escape:'html':'UTF-8'}'));
                     {elseif $slider->options->insert == 'prepend'}
-            $('.{$slider->alias|escape:'html':'UTF-8'}').prependTo($('{$slider->options->element}'));
+            $('.{$slider->alias|escape:'html':'UTF-8'}').prependTo($('{$slider->options->element|escape:'html':'UTF-8'}'));
                     {elseif $slider->options->insert == 'append'}
-            $('.{$slider->alias|escape:'html':'UTF-8'}').appendTo($('{$slider->options->element}'));
+            $('.{$slider->alias|escape:'html':'UTF-8'}').appendTo($('{$slider->options->element|escape:'html':'UTF-8'}'));
                     {/if}
                 {/if}
             })
@@ -55,7 +55,7 @@
                         {foreach from=$slides item='slide' name='slider'}
                             <li>
                                 {if $slide.video}
-                                    {$slide.video|escape:'UTF-8' }
+                                    {html_entity_decode($slide.video|escape:'htmlall':'UTF-8')}
                                 {elseif $slide.image}
                                     {if $slide.url}<a href="{$slide.url|escape:'html':'UTF-8'}" {if $slide.target}target="{$slide.target|escape:'html':'UTF-8'}"{/if}>{/if}
                                         <img src="{$link->getMediaLink($slide.image_helper.dir|cat:$slide.image)|escape:'htmlall':'UTF-8'}" alt="{$slide.caption|escape:'htmlall':'UTF-8'}" title="{$slide.caption|escape:'htmlall':'UTF-8'}" />
@@ -67,8 +67,8 @@
                     {if $slider->options->pagerCustom}
                         <div id="bx-pager{$bxcounter|intval}" class="thumbpager">
                             {foreach from=$slides item='slide' name='slider'}
-                                <a data-slide-index="{$smarty.foreach.slider.index|intval}" href=""  >
-                                    {$slide.image_helper.thumb|escape:'UTF-8'}
+                                <a data-slide-index="{$smarty.foreach.slider.index|intval}" href="" >
+                                    {html_entity_decode($slide.image_helper.thumb|escape:'htmlall':'UTF-8')}
                                     {if $slide.image}
                                     {elseif $slide.video}
                                         <i class="icon-video"></i>
