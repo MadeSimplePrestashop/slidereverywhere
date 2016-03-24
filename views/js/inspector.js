@@ -76,7 +76,9 @@ $(document).ready(function () {
             // Get node's ID attribute, adding a '#':
             cssId = (el.id) ? ('#' + el.id) : false;
             // Get node's CSS classes, replacing spaces with '.':
-            cssClass = (el.className) ? ('.' + el.className.replace(/\s+/g, ".")) : '';
+            //cssClass = (el.className) ? ('.' + el.className.replace(/\s+/g, ".")) : '';
+            cssClass = ( el.getAttribute('class') ) ? ( '.' + el.getAttribute('class').replace(/\s+/g,".") ) : '';
+
             // Build a unique identifier for this parent node:
             if (cssId) {
                 // Matched by ID:
@@ -100,20 +102,29 @@ $(document).ready(function () {
             el = el.parentNode !== document ? el.parentNode : false;
         } // endwhile
 
-
         // Build the CSS path string from the parent tag selectors:
         for (i = 0; i < parentSelectors.length; i++) {
+            if(i==0)
+            cssPathStr += parentSelectors[i]; // + ' ' + cssPathStr;
+        else
             cssPathStr += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
 
             // If using ":nth-child()" selectors and this selector has no ID / isn't the html or body tag:
             if (useNthChild && !parentSelectors[i].match(/#/) && !parentSelectors[i].match(/^(html|body)$/)) {
 
                 // If there's no CSS class, or if the semi-complete CSS selector path matches multiple elements:
-                if (!parentSelectors[i].match(/\./) || $(cssPathStr).length > 1) {
+                if ($(cssPathStr.split(' ').join(' > ')).length > 1) {
+                    
+                    // Count element's previous siblings for ":nth-child" pseudo-selector.
+                    
+//                    for (nth = 1,
+//                        c = el;
+//                        c !== null && c.previousElementSibling;
+//                        c = c.previousElementSibling,
+//                        nth++);
 
-                    // Count element's previous siblings for ":nth-child" pseudo-selector:
-                    for (nth = 1, c = el; c.previousElementSibling; c = c.previousElementSibling, nth++)
-                        ;
+                        nth = $(cssPathStr.split(' ').join(' > ')).length;
+                    
                     // Append ":nth-child()" to CSS path:
                     cssPathStr += ":nth-child(" + nth + ")";
                 }
