@@ -68,9 +68,6 @@ class sliderseverywhere extends Module
         }
         $this->installAdminTab($lang_array, 'AdminSlides', $id_parent);
 
-        if (function_exists('curl_init') == false)
-            $this->warning = $this->l('To be able to use this module, please activate cURL (PHP extension).');
-
         return true;
     }
 
