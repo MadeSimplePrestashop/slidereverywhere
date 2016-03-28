@@ -619,10 +619,8 @@ class AdminSlidersController extends ModuleAdminController
 
         $positions = array();
         $href = $this->context->shop->getBaseUrl() . '?se_live_edit_token=' . Sliders::getLiveEditToken() . '&id_employee=' . $this->context->employee->id;
-        $positions[] = '<div class="col-sm-4">
-            <input  type="hidden" value="' . isset($obj->position) . '" name="positions" id="positions">';
-
-        $positions[] = '<a onclick="if(!confirm(\'' . $this->l('Web page opens in a mode for direct selection position through the web site element picker. Do you want continue?') . '\')) return false"  target="_blank" href="' . $href . '" id="select_position"><button   type="button" class="btn btn-default" >' . $this->l('select element from website') . '</button></a>';
+        $positions[] = '<div class="col-sm-4">';
+        $positions[] = '<a onclick="if(!confirm(\'' . $this->l('Web page will be opened in new window in mode for select website position. Do you want continue?') . '\')) return false"  target="_blank" href="' . $href . '" id="select_position"><button   type="button" class="btn btn-default" >' . $this->l('select element from website') . '</button></a>';
         $positions[] = '</div>';
         $this->fields_value['position'] = implode('', $positions);
         $this->fields_form['input'][] = array(

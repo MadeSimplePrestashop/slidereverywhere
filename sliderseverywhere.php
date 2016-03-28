@@ -45,7 +45,6 @@ class sliderseverywhere extends Module
 
         include_once(dirname(__FILE__) . '/init/install_sql.php');
    
-
          //tabs
         $this->context->controller->getLanguages();
         $lang_array = array();

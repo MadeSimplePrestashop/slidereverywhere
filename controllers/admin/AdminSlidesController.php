@@ -90,10 +90,6 @@ class AdminSlidesController extends ModuleAdminController
         } else
             $image = '';
 
-        $params = array('live_edit_token' => Sliders::getLiveEditToken(), 'id_employee' => $this->context->employee->id);
-        if ($obj->id)
-            $params[Slides::$definition['primary']] = $obj->id;
-
         $this->fields_form = array(
             'legend' => array(
                 'tinymce' => true,
