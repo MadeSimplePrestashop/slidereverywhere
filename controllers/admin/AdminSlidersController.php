@@ -646,20 +646,29 @@ class AdminSlidersController extends ModuleAdminController
             'name' => 'insert',
             'values' => array(
                 array(
+                    'id' => 'after',
                     'value' => 'after',
                     'label' => $this->l('After selected element')
                 ),
                 array(
+                    'id' => 'before',
                     'value' => 'before',
                     'label' => $this->l('Before selected element')
                 ),
                 array(
+                    'id' => 'prepend',
                     'value' => 'prepend',
                     'label' => $this->l('Prepend to selected element')
                 ),
                 array(
+                    'id' => 'append',
                     'value' => 'append',
                     'label' => $this->l('Append to selected element')
+                ),
+                array(
+                    'id' => 'replace',
+                    'value' => 'replace',
+                    'label' => $this->l('Replace selected element')
                 )
             ),
             'default_value' => $options->insert

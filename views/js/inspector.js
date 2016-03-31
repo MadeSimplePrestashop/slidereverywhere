@@ -57,9 +57,11 @@ $(document).ready(function () {
         var fullPath = 0, // Set to 1 to build ultra-specific full CSS-path, or 0 for optimised selector
                 useNthChild = 1, // Set to 1 to use ":nth-child()" pseudo-selectors to match the given element
                 cssPathStr = '',
+                cssPathStrTMP = '',
                 testPath = '',
                 parents = [],
                 parentSelectors = [],
+                parentElementSelectors = [],
                 tagName,
                 cssId,
                 cssClass,
@@ -77,7 +79,7 @@ $(document).ready(function () {
             cssId = (el.id) ? ('#' + el.id) : false;
             // Get node's CSS classes, replacing spaces with '.':
             //cssClass = (el.className) ? ('.' + el.className.replace(/\s+/g, ".")) : '';
-            cssClass = ( el.getAttribute('class') ) ? ( '.' + el.getAttribute('class').replace(/\s+/g,".") ) : '';
+            cssClass = (el.getAttribute('class')) ? ('.' + el.getAttribute('class').replace(/\s+/g, ".")) : '';
 
             // Build a unique identifier for this parent node:
             if (cssId) {
@@ -93,7 +95,8 @@ $(document).ready(function () {
             }
 
             // Add this full tag selector to the parentSelectors array:
-            parentSelectors.unshift(tagSelector)
+            parentSelectors.unshift(tagSelector);
+            parentElementSelectors.unshift(tagName);
 
             // If doing short/optimised CSS paths and this element has an ID, stop here:
             if (cssId && !fullPath)
@@ -104,36 +107,45 @@ $(document).ready(function () {
 
         // Build the CSS path string from the parent tag selectors:
         for (i = 0; i < parentSelectors.length; i++) {
-            if(i==0)
-            cssPathStr += parentSelectors[i]; // + ' ' + cssPathStr;
-        else
-            cssPathStr += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
+            if (i == 0)
+                cssPathStr += parentSelectors[i]; // + ' ' + cssPathStr;
+            else
+                cssPathStr += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
 
             // If using ":nth-child()" selectors and this selector has no ID / isn't the html or body tag:
             if (useNthChild && !parentSelectors[i].match(/#/) && !parentSelectors[i].match(/^(html|body)$/)) {
 
                 // If there's no CSS class, or if the semi-complete CSS selector path matches multiple elements:
+                console.log($(cssPathStr.split(' ').join(' > ')));
                 if ($(cssPathStr.split(' ').join(' > ')).length > 1) {
-                    
+                    if (i == 0)
+                        cssPathStrTMP += parentElementSelectors[i]; // + ' ' + cssPathStr;
+                    else
+                        cssPathStrTMP += ' ' + parentElementSelectors[i]; // + ' ' + cssPathStr;
                     // Count element's previous siblings for ":nth-child" pseudo-selector.
-                    
+
 //                    for (nth = 1,
 //                        c = el;
 //                        c !== null && c.previousElementSibling;
 //                        c = c.previousElementSibling,
-//                        nth++);
+                    //                        nth++);
 
-                        nth = $(cssPathStr.split(' ').join(' > ')).length;
-                    
+                    nth = $((cssPathStrTMP).split(' ').join(' > ')).length;
+
                     // Append ":nth-child()" to CSS path:
                     cssPathStr += ":nth-child(" + nth + ")";
+
                 }
+            } else {
+                if (i == 0)
+                    cssPathStrTMP += parentSelectors[i]; // + ' ' + cssPathStr;
+                else
+                    cssPathStrTMP += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
             }
 
         }
-
-        // Return trimmed full CSS path:
-        return cssPathStr.replace(/^[ \t]+|[ \t]+$/, '');
+        alert(cssPathStr);
+        // Return trimmed full CSS path:         return cssPathStr.replace(/^[ \t]+|[ \t]+$/, '');
     }
 
 
