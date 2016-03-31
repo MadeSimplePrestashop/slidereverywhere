@@ -44,8 +44,8 @@ class sliderseverywhere extends Module
             $this->registerHook($hook);
 
         include_once(dirname(__FILE__) . '/init/install_sql.php');
-   
-         //tabs
+
+        //tabs
         $this->context->controller->getLanguages();
         $lang_array = array();
         $id_parent = 0;
@@ -154,10 +154,10 @@ class sliderseverywhere extends Module
         $ids = array();
         foreach ($sliders as $slider) {
             $options = Tools::jsonDecode($slider['options']);
-            if ($hook == 'byelement' && trim($options->element)) {
+            if ($hook == 'byelement' && isset($options->element) && !empty($options->element)) {
                 $ids[] = $slider[Sliders::$definition['primary']];
             } else {
-                if ($options->element || !is_array($options->hooks) || !in_array($hook, $options->hooks)) {
+                if ($hook == 'byelement' ||  !isset($options->element) || !$options->element || !is_array($options->hooks) || !in_array($hook, $options->hooks)) {
                     continue;
                 }
                 $ids[] = $slider[Sliders::$definition['primary']];
