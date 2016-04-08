@@ -122,10 +122,12 @@ class sliderseverywhere extends Module
         $this->context->controller->addJS($this->_path . '/views/js/jquery.fitvids.js');
         $this->context->controller->addCSS($this->_path . '/views/css/jquery.bxslider.css');
         $this->context->controller->addJqueryPlugin(array('bxslider'));
-        if (!isset($this->context->smarty->registered_plugins['function'][$this->name]))
+        if (!isset($this->context->smarty->registered_plugins['function'][$this->name])){
             $this->context->smarty->registerPlugin('function', $this->name, array('Sliders', 'get_slider'));
-        if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse']))
+        }
+        if (!isset($this->context->smarty->registered_plugins['modifier']['truefalse'])){
             $this->context->smarty->registerPlugin('modifier', 'truefalse', array('sliders', 'truefalse'));
+        }
 
         if (Tools::getValue('se_live_edit_token') && Tools::getValue('se_live_edit_token') == Sliders::getLiveEditToken() && Tools::getIsset('id_employee')) {
             $this->context->controller->addJS($this->_path . '/views/js/inspector.js');

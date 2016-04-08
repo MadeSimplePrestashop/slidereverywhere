@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sliderseverywhere_slides` (
   `image` VARCHAR(255) NOT NULL,
   `target` VARCHAR(10) NOT NULL,
   `builder` TEXT NOT NULL,
+  `options` TEXT NOT NULL,
   `position` int(3) NOT NULL,
   `active` int(1) NOT NULL,
   PRIMARY KEY (`id_sliderseverywhere_slides`)

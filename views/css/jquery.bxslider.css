@@ -80,7 +80,7 @@
     font-family: Arial;
     font-weight: bold;
     color: #666;
-    padding-top: 20px;
+    padding-top: 10px;
 }
 
 .sliderseverywhere .bx-wrapper .bx-pager .bx-pager-item,
@@ -203,10 +203,10 @@
 }
 
 .sliderseverywhere .bx-wrapper .bx-caption span {
-    color: #fff;
-    font-family: Arial;
-    display: block;
-    padding: 10px;
+     color: #fff; 
+     font-family: Arial; 
+     display: block; 
+     padding: 10px;
 }
 
 #top_column .sliderseverywhere  {clear:both}

@@ -96,7 +96,8 @@ class AdminSlidersController extends ModuleAdminController
                 'options' => $this->l('Slider'),
                 'carousel' => $this->l('Carousel/Ticker'),
                 'pager' => $this->l('Ticker'),
-                'pager' => $this->l('Pager'),
+                'captions' => $this->l('Captions'),
+                'style' => $this->l('Style'),
                 'display' => $this->l('Display'),
             ),
             'input' => array(
@@ -137,26 +138,6 @@ class AdminSlidersController extends ModuleAdminController
                         'name' => 'name',
                     ),
                     'default_value' => isset($options->mode) ? $options->mode : ''
-                ),
-                array(
-                    'tab' => 'options',
-                    'type' => 'switch',
-                    'label' => $this->l('Captions'),
-                    'name' => 'captions',
-                    'hint' => $this->l("Include image captions. Captions are derived from the image's title attribute"),
-                    'values' => array(
-                        array(
-                            'id' => 'active_on',
-                            'value' => 1,
-                            'label' => $this->l('Enabled')
-                        ),
-                        array(
-                            'id' => 'active_off',
-                            'value' => 0,
-                            'label' => $this->l('Disabled')
-                        )
-                    ),
-                    'default_value' => isset($options->captions) ? $options->captions : ''
                 ),
                 array(
                     'tab' => 'options',
@@ -609,6 +590,133 @@ class AdminSlidersController extends ModuleAdminController
                     ),
                     'default_value' => isset($options->easing_css) ? $options->easing_css : ''
                 ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'switch',
+                    'label' => $this->l('Captions'),
+                    'name' => 'captions',
+                    'hint' => $this->l("Include image captions. Captions are derived from the image's title attribute"),
+                    'values' => array(
+                        array(
+                            'id' => 'active_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id' => 'active_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled')
+                        )
+                    ),
+                    'default_value' => isset($options->captions) ? $options->captions : ''
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'select',
+                    'label' => $this->l('Width'),
+                    'name' => 'captionWidth',
+                    'default_value' => isset($options->captionWidth) ? $options->captionWidth : 'width:auto;',
+                    'options' => array(
+                        'query' => array(
+                            array(
+                                'id' => 'width:auto;',
+                                'name' => $this->l('Auto')
+                            ),
+                            array(
+                                'id' => 'width:100%;',
+                                'name' => $this->l('Full width')
+                            ),
+                        ),
+                        'id' => 'id',
+                        'name' => 'name',
+                    ),
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'color',
+                    'label' => $this->l('Background color'),
+                    'name' => 'captionBackgroundColor',
+                    'default_value' => isset($options->captionBackgroundColor) ? $options->captionBackgroundColor : '#ffffff',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'color',
+                    'label' => $this->l('Font color'),
+                    'name' => 'captionFontColor',
+                    'default_value' => isset($options->captionFontColor) ? $options->captionFontColor : '#555555',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'text',
+                    'class' => 'fixed-width-sm',
+                    'label' => $this->l('Font size'),
+                    'name' => 'captionFontSize',
+                    'default_value' => isset($options->captionFontSize) ? $options->captionFontSize : '14px',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'select',
+                    'label' => $this->l('Position'),
+                    'name' => 'captionPosition',
+                    'default_value' => isset($options->captionPosition) ? $options->captionPosition : ' ',
+                    'options' => array(
+                        'query' => array(
+                            array(
+                                'id' => 'left:0; bottom:0; right:auto; top:auto;',
+                                'name' => $this->l('left bottom')
+                            ),
+                            array(
+                                'id' => 'left:0; top:0; bottom:auto; right:auto;',
+                                'name' => $this->l('left top')
+                            ),
+                            array(
+                                'id' => 'right:0; top:0; left:auto; bottom:auto;',
+                                'name' => $this->l('right top')
+                            ),
+                            array(
+                                'id' => 'right:0; bottom:0; top:auto; left:auto;',
+                                'name' => $this->l('right bottom')
+                            ),
+                        ),
+                        'id' => 'id',
+                        'name' => 'name',
+                    ),
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'text',
+                    'label' => $this->l('Opacity'),
+                    'name' => 'captionOpacity',
+                    'suffix' => $this->l('from 0 to 1'),
+                    'class' => 'fixed-width-sm',
+                    'default_value' => isset($options->captionOpacity) ? $options->captionOpacity : '1',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'text',
+                    'label' => $this->l('Padding'),
+                    'name' => 'captionPadding',
+                    'class' => 'fixed-width-lg',
+                    'desc' => $this->l('top right bottom left'),
+                    'default_value' => isset($options->captionPadding) ? $options->captionPadding : '0px 0px 0px 0px',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'text',
+                    'label' => $this->l('Margin'),
+                    'name' => 'captionMargin',
+                    'class' => 'fixed-width-lg',
+                    'desc' => $this->l('top right bottom left'),
+                    'default_value' => isset($options->captionMargin) ? $options->captionMargin : '0px 0px 0px 0px',
+                ),
+                array(
+                    'tab' => 'captions',
+                    'type' => 'text',
+                    'label' => $this->l('CSS style for caption'),
+                    'desc' => $this->l('For advanced user'),
+                    'name' => 'css',
+                    'default_value' => isset($options->css) ? $options->css : ''
+                )
             ),
             'submit' => array(
                 'title' => $this->l('Save'),
@@ -629,7 +737,7 @@ class AdminSlidersController extends ModuleAdminController
             'name' => 'position',
             'label' => $this->l('Website position picker')
         );
-        $this->fields_value['element'] = '<input value="' . $options->element . '" name="element" id="element" type="text">';
+        $this->fields_value['element'] = '<input value="' . (isset($options->element) ? $options->element : '' ) . '" name="element" id="element" type="text">';
         $this->fields_form['input'][] = array(
             'class' => 'element',
             'tab' => 'display',
@@ -671,7 +779,7 @@ class AdminSlidersController extends ModuleAdminController
                     'label' => $this->l('Replace selected element')
                 )
             ),
-            'default_value' => $options->insert
+            'default_value' => isset($options->insert) ? $options->insert : ''
         );
         $this->fields_form['input'][] = array(
             'type' => 'select',
@@ -685,7 +793,7 @@ class AdminSlidersController extends ModuleAdminController
                 'name' => 'name'
             ),
             'tab' => 'display',
-            'default_value' => $options->controllers
+            'default_value' => isset($options->controllers) ? $options->controllers : ''
         );
 
         $this->fields_form['input'][] = array(
@@ -700,7 +808,7 @@ class AdminSlidersController extends ModuleAdminController
                 'name' => 'name'
             ),
             'tab' => 'display',
-            'default_value' => $options->products
+            'default_value' => isset($options->products) ? $options->products : ''
         );
 
         $this->fields_form['input'][] = array(
@@ -750,13 +858,13 @@ class AdminSlidersController extends ModuleAdminController
                 'id' => 'id',
                 'name' => 'name'
             )
-            , 'default_value' => $options->cms
+            , 'default_value' => isset($options->cms) ? $options->cms : ''
         );
 
         $html_data = array();
         $html_data[] = '<div style="display:none"><select multiple="multiple" name="hooks[]">';
         foreach ($this->module->hooks as $hook) {
-            $html_data[] = '<option ' . (in_array($hook, $options->hooks) ? 'selected="selected"' : '') . ' value="' . $hook . '">' . $hook . '</option>';
+            $html_data[] = '<option ' . (isset($options->hooks) && is_array($options->hooks) && in_array($hook, $options->hooks) ? 'selected="selected"' : '') . ' value="' . $hook . '">' . $hook . '</option>';
         }
         $html_data[] = '</select></div>';
         $this->fields_form['input'][] = array(
@@ -764,6 +872,91 @@ class AdminSlidersController extends ModuleAdminController
             'type' => 'html',
             'name' => 'html_data_hooks',
             'html_content' => implode('', $html_data)
+        );
+
+        $this->fields_form['input'][] = array(
+            'tab' => 'style',
+            'type' => 'text',
+            'label' => 'Border width',
+            'name' => 'sliderBorderWidth',
+            'class' => 'input fixed-width-sm',
+            'default_value' => isset($options->sliderBorderWidth) ? $options->sliderBorderWidth : '5px',
+        );
+
+        $this->fields_form['input'][] = array(
+            'tab' => 'style',
+            'type' => 'select',
+            'label' => $this->l('Border Style'),
+            'name' => 'sliderBorderStyle',
+            'options' => array(
+                'query' => array(
+                    array(
+                        'value' => 'none',
+                        'label' => $this->l('None')
+                    ),
+                    array(
+                        'value' => 'hidden',
+                        'label' => $this->l('Hidden')
+                    ),
+                    array(
+                        'value' => 'dotted',
+                        'label' => $this->l('Dotted')
+                    ),
+                    array(
+                        'value' => 'solid',
+                        'label' => $this->l('Solid')
+                    ),
+                    array(
+                        'value' => 'double',
+                        'label' => $this->l('double')
+                    ),
+                    array(
+                        'value' => 'groove',
+                        'label' => $this->l('Groove')
+                    ),
+                    array(
+                        'value' => 'ridge',
+                        'label' => $this->l('Ridge')
+                    ),
+                    array(
+                        'value' => 'inset',
+                        'label' => $this->l('Inset')
+                    ),
+                    array(
+                        'value' => 'outset',
+                        'label' => $this->l('Outset')
+                    )
+                ),
+                'id' => 'value',
+                'name' => 'label'
+            ),
+            'default_value' => isset($options->sliderBorderStyle) ? $options->sliderBorderStyle : 'solid',
+        );
+
+
+        $this->fields_form['input'][] = array(
+            'tab' => 'style',
+            'type' => 'color',
+            'label' => $this->l('Border color'),
+            'name' => 'sliderBorderColor',
+            'default_value' => isset($options->sliderBorderColor) ? $options->sliderBorderColor : '#ffffff',
+        );
+
+        $this->fields_form['input'][] = array(
+            'tab' => 'style',
+            'type' => 'color',
+            'label' => $this->l('Background color'),
+            'name' => 'sliderBackgroundColor',
+            'default_value' => isset($options->sliderBackgroundColor) ? $options->sliderBackgroundColor : '#ffffff',
+        );
+
+        $this->fields_form['input'][] = array(
+            'tab' => 'style',
+            'type' => 'text',
+            'label' => 'Inline CSS style',
+            'name' => 'sliderCSS',
+            'desc' => $this->l('For advanced user'),
+            'default_value' => isset($options->sliderCSS) ? $options->sliderCSS : 'box-shadow: 0 0 5px #ccc;',
         );
 
 //        $query = array();
@@ -808,21 +1001,13 @@ class AdminSlidersController extends ModuleAdminController
             'desc' => $this->l('Save and stay'),
             'force_desc' => true,
         );
-        if ($obj->id) {
-//            $this->page_header_toolbar_btn['save-and-preview'] = array(
-//                'short' => 'SaveAndStay',
-//                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
-//                'desc' => $this->l('Save and preview'),
-//                'force_desc' => true,
-//            );
-        } else {
-            $this->page_header_toolbar_btn['save-and-preview'] = array(
-                'short' => 'SaveAndStay',
-                'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
-                'desc' => $this->l('Save and add slides'),
-                'force_desc' => true,
-            );
-        }
+
+//        $this->page_header_toolbar_btn['save-and-preview'] = array(
+//            'short' => 'SaveAndStay',
+//            'href' => 'javascript:$("#' . $this->table . '_form").attr("action", $("#' . $this->table . '_form").attr("action")+"&submitPreview");$("#' . $this->table . '_form button:submit").click();',
+//            'desc' => $this->l('Save and add slides'),
+//            'force_desc' => true,
+//        );
 
 
         $this->page_header_toolbar_btn['new'] = array(

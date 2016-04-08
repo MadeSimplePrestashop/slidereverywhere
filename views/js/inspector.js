@@ -9,7 +9,6 @@ function get(name)
         return results[1];
 }
 
-
 $(document).ready(function () {
 
     $('.cancelinspector').click(function () {
@@ -18,7 +17,6 @@ $(document).ready(function () {
         $('#inspector-tools').slideUp('slow');
     })
     $('.submitinspector').click(function () {
-        //$('#inspector-tools form').serialize()
         window.opener.document.getElementById('element').value = $("#inspector-text").val();
         window.close();
     })
@@ -32,7 +30,7 @@ $(document).ready(function () {
     {
         var href = $(this).attr('href');
         var search = this.search;
-        var href_add = 'se_live_edit_token=' + get('se_live_edit_token')
+        var href_add = 'dc_live_edit_token=' + get('dc_live_edit_token')
                 + '&id_employee=' + get('id_employee');
         var baseDir_ = baseDir.replace('https', 'http');
         if (typeof (href) != 'undefined' && href.substr(0, 1) != '#' && href.replace('https', 'http').substr(0, baseDir_.length) == baseDir_)
@@ -57,7 +55,6 @@ $(document).ready(function () {
         var fullPath = 0, // Set to 1 to build ultra-specific full CSS-path, or 0 for optimised selector
                 useNthChild = 1, // Set to 1 to use ":nth-child()" pseudo-selectors to match the given element
                 cssPathStr = '',
-                cssPathStrTMP = '',
                 testPath = '',
                 parents = [],
                 parentSelectors = [],
@@ -87,6 +84,9 @@ $(document).ready(function () {
                 tagSelector = tagName + cssId + cssClass;
             } else if (cssClass) {
                 // Matched by class (will be checked for multiples afterwards):
+                if (cssClass.slice(-1) == '.') {
+                    cssClass = cssClass.substring(0, cssClass.length - 1);
+                }
                 tagSelector = tagName + cssClass;
             } else {
                 // Couldn't match by ID or class, so use ":nth-child()" instead:
@@ -95,8 +95,8 @@ $(document).ready(function () {
             }
 
             // Add this full tag selector to the parentSelectors array:
-            parentSelectors.unshift(tagSelector);
-            parentElementSelectors.unshift(tagName);
+            parentSelectors.unshift(tagSelector)
+            parentElementSelectors.unshift(tagName)
 
             // If doing short/optimised CSS paths and this element has an ID, stop here:
             if (cssId && !fullPath)
@@ -107,45 +107,34 @@ $(document).ready(function () {
 
         // Build the CSS path string from the parent tag selectors:
         for (i = 0; i < parentSelectors.length; i++) {
-            if (i == 0)
-                cssPathStr += parentSelectors[i]; // + ' ' + cssPathStr;
-            else
-                cssPathStr += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
 
             // If using ":nth-child()" selectors and this selector has no ID / isn't the html or body tag:
             if (useNthChild && !parentSelectors[i].match(/#/) && !parentSelectors[i].match(/^(html|body)$/)) {
 
+                if (i == 0)
+                    cssPathStr += parentElementSelectors[i]; // + ' ' + cssPathStr;
+                else
+                    cssPathStr += ' ' + parentElementSelectors[i]; // + ' ' + cssPathStr;
+
                 // If there's no CSS class, or if the semi-complete CSS selector path matches multiple elements:
-                console.log($(cssPathStr.split(' ').join(' > ')));
                 if ($(cssPathStr.split(' ').join(' > ')).length > 1) {
-                    if (i == 0)
-                        cssPathStrTMP += parentElementSelectors[i]; // + ' ' + cssPathStr;
-                    else
-                        cssPathStrTMP += ' ' + parentElementSelectors[i]; // + ' ' + cssPathStr;
-                    // Count element's previous siblings for ":nth-child" pseudo-selector.
 
-//                    for (nth = 1,
-//                        c = el;
-//                        c !== null && c.previousElementSibling;
-//                        c = c.previousElementSibling,
-                    //                        nth++);
-
-                    nth = $((cssPathStrTMP).split(' ').join(' > ')).length;
+                    nth = $(cssPathStr.split(' ').join(' > ')).length;
 
                     // Append ":nth-child()" to CSS path:
                     cssPathStr += ":nth-child(" + nth + ")";
-
                 }
             } else {
                 if (i == 0)
-                    cssPathStrTMP += parentSelectors[i]; // + ' ' + cssPathStr;
+                    cssPathStr += parentSelectors[i]; // + ' ' + cssPathStr;
                 else
-                    cssPathStrTMP += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
+                    cssPathStr += ' ' + parentSelectors[i]; // + ' ' + cssPathStr;
             }
 
         }
-        alert(cssPathStr);
-        // Return trimmed full CSS path:         return cssPathStr.replace(/^[ \t]+|[ \t]+$/, '');
+
+        // Return trimmed full CSS path:
+        return cssPathStr.replace(/^[ \t]+|[ \t]+$/, '');
     }
 
 

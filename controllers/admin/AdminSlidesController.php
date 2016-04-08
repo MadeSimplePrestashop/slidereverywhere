@@ -99,7 +99,7 @@ class AdminSlidesController extends ModuleAdminController
             'tabs' => array(
                 'settings' => $this->l('Settings'),
                 'imagetab' => $this->l('Image'),
-                'video' => $this->l('Video')
+                'video' => $this->l('Video'),
             ),
             'input' => array(
                 array(
@@ -121,14 +121,6 @@ class AdminSlidesController extends ModuleAdminController
                     'label' => $this->l('Embeded video'),
                     'desc' => $this->l('Instead of image, you can add embeded video supported YouTube and Vimeo.'),
                     'name' => 'video',
-                ),
-                array(
-                    'tab' => 'imagetab',
-                    'type' => 'text',
-                    'label' => $this->l('Caption'),
-                    'hint' => $this->l('Short description for slide'),
-                    'lang' => true,
-                    'name' => 'caption'
                 ),
                 array(
                     'tab' => 'imagetab',
@@ -189,6 +181,14 @@ class AdminSlidesController extends ModuleAdminController
                         )
                     ),
                     'default_value' => 1
+                ),
+                array(
+                    'tab' => 'imagetab',
+                    'type' => 'text',
+                    'label' => $this->l('Caption'),
+                    'hint' => $this->l('Short description for slide'),
+                    'lang' => true,
+                    'name' => 'caption'
                 ),
             ),
             'submit' => array(
@@ -309,13 +309,13 @@ $(\'.panel-footer a\').click(function(e){e.preventDefault(); window.history.back
             'desc' => $this->l('Add slide')
         );
 
-        $this->_content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(self::$parent_definition['primary']))) . '</div>';
-        $this->_content.= '<script>
-         $(document).ready(function(){
-         if(location.hash == "#preview")
-            $("#previewslider").show(); slidereverywhere.reloadSlider();
-        })
-                </script>';
+        //$this->_content .= '<div id="previewslider" style="display:none">' . Sliders::get_slider(array('id' => Tools::getValue(self::$parent_definition['primary']))) . '</div>';
+//        $this->_content.= '<script>
+//         $(document).ready(function(){
+//         if(location.hash == "#preview")
+//            $("#previewslider").show(); slidereverywhere.reloadSlider();
+//        })
+//                </script>';
 // set new title
         $slider = new Sliders(Tools::getValue(self::$parent_definition['primary']));
         $this->tpl_list_vars['title'] = $this->l('Slides of ') . $slider->alias;

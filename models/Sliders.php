@@ -71,9 +71,10 @@ class Sliders extends ObjectModel
             $this->options = $options;
         parent::update($null_values);
 
-//reload images
+        //reload images
         $parms = array();
         $parms[self::$definition['primary']] = $this->id;
+        $parms['c.active'] = 1;
         $slides = Slides::getAll($parms);
         $source_path = Slides::get_image_path($this->id);
         if ($slides) {
@@ -253,7 +254,9 @@ class Sliders extends ObjectModel
             'adaptiveHeight', 'slideWidth', 'minSlides', 'maxSlides', 'slideMargin', 'pager', 'pagerType',
             'pagerCustom', 'thumbnailWidth', 'ticker', 'tickerHover', 'speed', 'startSlide', 'randomStart',
             'useCSS', 'easing_jquery', 'easing_css', 'categories', 'cms', 'hooks', 'pause', 'autoHover', 'autoStart', 'controls',
-            'element', 'controllers', 'products', 'position', 'insert');
+            'element', 'controllers', 'products', 'position', 'insert',
+            'captionWidth', 'captionMargin', 'captionPadding', 'captionSize', 'captionPosition', 'captionBackgroundColor', 'captionFontColor', 'captionFontSize', 'captionOpacity', 'css',
+            'sliderBorderColor', 'sliderBorderWidth', 'sliderBorderStyle', 'sliderBackgroundColor', 'sliderCSS');
     }
     /* Get all CMS blocks */
 
