@@ -24,7 +24,7 @@ class sliderseverywhere extends Module
     {
         $this->name = 'sliderseverywhere';
         $this->tab = 'front_office_features';
-        $this->version = '1.3.0';
+        $this->version = '1.4.0';
         $this->author = 'kuzmany.biz/prestashop';
         $this->need_instance = 0;
         $this->module_key = '120f5f4af81ccec25515a5eb91a8d263';
