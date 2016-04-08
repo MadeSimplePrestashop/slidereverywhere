@@ -615,7 +615,7 @@ class AdminSlidersController extends ModuleAdminController
                     'type' => 'select',
                     'label' => $this->l('Width'),
                     'name' => 'captionWidth',
-                    'default_value' => isset($options->captionWidth) ? $options->captionWidth : 'width:auto;',
+                    'default_value' => isset($options->captionWidth) ? $options->captionWidth : 'width:100%;',
                     'options' => array(
                         'query' => array(
                             array(
@@ -651,7 +651,7 @@ class AdminSlidersController extends ModuleAdminController
                     'class' => 'fixed-width-sm',
                     'label' => $this->l('Font size'),
                     'name' => 'captionFontSize',
-                    'default_value' => isset($options->captionFontSize) ? $options->captionFontSize : '14px',
+                    'default_value' => isset($options->captionFontSize) ? $options->captionFontSize : '12px',
                 ),
                 array(
                     'tab' => 'captions',
@@ -698,7 +698,7 @@ class AdminSlidersController extends ModuleAdminController
                     'name' => 'captionPadding',
                     'class' => 'fixed-width-lg',
                     'desc' => $this->l('top right bottom left'),
-                    'default_value' => isset($options->captionPadding) ? $options->captionPadding : '0px 0px 0px 0px',
+                    'default_value' => isset($options->captionPadding) ? $options->captionPadding : '10px 10px 10px 10px',
                 ),
                 array(
                     'tab' => 'captions',
